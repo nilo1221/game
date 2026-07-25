@@ -330,5 +330,149 @@ dbg.state.inventory.open = false;
 sandbox.__tick(20);
 check('20 more frames after stats-panel tests, no throw', true);
 
+console.log('\n=== Enemy cannot stand on the player ===');
+const KNOCKBACK_SPEED_REF = pull('KNOCKBACK_SPEED');
+const KNOCKBACK_DURATION_REF = pull('KNOCKBACK_DURATION');
+const KNOCKBACK_EVERY_NTH_REF = pull('KNOCKBACK_EVERY_NTH_ATTACK');
+
+// Place a fresh grunt right next to the player and aggro it, then run many
+// update ticks — its center should never get closer than its own
+// personal-space radius (see Enemy._personalSpaceRadius), however many
+// frames pass.
+const EnemyRef = pull('Enemy');
+const centerDist = (e) => Math.hypot(
+  (e.x + e.w / 2) - (dbg.state.player.x + dbg.state.player.w / 2),
+  (e.y + e.h / 2) - (dbg.state.player.y + dbg.state.player.h / 2)
+);
+
+// Invariant 1: an enemy chasing in from a SAFE starting distance should
+// never get closer than its personal-space radius via its own movement.
+const chaseEnemy = new EnemyRef(dbg.state.player.x + 200, dbg.state.player.y, 'slimeGreen', { aggroRange: 999 });
+let chaseTooClose = false;
+for (let i = 0; i < 300; i++) {
+  chaseEnemy.update(dbg.state.player, map, dbg.state.particles);
+  if (centerDist(chaseEnemy) < chaseEnemy._personalSpaceRadius() - 0.5) { chaseTooClose = true; break; }
+}
+check('enemy chasing in from a safe distance never breaches its personal-space radius', !chaseTooClose);
+
+// Invariant 2: if an enemy STARTS closer than its personal-space radius
+// (the realistic case is the player walking onto a stationary/wandering
+// enemy), it should separate back out within a bounded number of frames
+// and then stay clear.
+const stuckEnemy = new EnemyRef(dbg.state.player.x + 8, dbg.state.player.y, 'slimeGreen', { aggroRange: 999 });
+stuckEnemy.x = dbg.state.player.x + 3;
+stuckEnemy.y = dbg.state.player.y;
+check('deliberately-too-close enemy starts inside its personal-space radius (sanity check on the test setup)', centerDist(stuckEnemy) < stuckEnemy._personalSpaceRadius());
+let clearedAtTick = -1;
+for (let i = 0; i < 60 && clearedAtTick === -1; i++) {
+  stuckEnemy.update(dbg.state.player, map, dbg.state.particles);
+  if (centerDist(stuckEnemy) >= stuckEnemy._personalSpaceRadius()) clearedAtTick = i;
+}
+check('too-close enemy separates back out within 30 frames', clearedAtTick !== -1 && clearedAtTick <= 30);
+let staysClear = true;
+for (let i = 0; i < 60; i++) {
+  stuckEnemy.update(dbg.state.player, map, dbg.state.particles);
+  if (centerDist(stuckEnemy) < stuckEnemy._personalSpaceRadius() - 0.5) { staysClear = false; break; }
+}
+check('once separated, stays clear for 60 more frames', staysClear);
+
+console.log('\n=== THE ACTUAL BUG: every enemy type must still be able to reach attack range and land a hit ===');
+// This is what regressed: atkRange is smaller than the two entities' combined
+// half-widths for nearly every type (especially at diagonal angles), so a
+// naive full-overlap block stopped enemies just outside atkRange forever.
+// Test every type from both an axis-aligned AND a 45-degree diagonal
+// approach, since the diagonal case is the one that was actually broken.
+// Pinned to the guaranteed-open spawn point so terrain can't confound this.
+const PLAYER_SPAWN_FOR_TEST = pull('PLAYER_SPAWN');
+const typesToTest = ['slimeGreen', 'slimeRed', 'sandScorpion', 'skeleton', 'troll', 'goblinBoss', 'skeletonKing', 'pitDevil'];
+typesToTest.forEach((type) => {
+  // Diagonal approaches FROM the north-west — verified clear terrain around
+  // PLAYER_SPAWN (row 34-46 is open; row 47 is the jungle's real north
+  // wall, so a south-east diagonal would cross real terrain and confound
+  // this test with a wall-collision instead of the thing being tested).
+  [{ label: 'axis-aligned', ax: 1, ay: 0 }, { label: 'diagonal', ax: -0.707, ay: -0.707 }].forEach(({ label, ax, ay }) => {
+    dbg.state.player.x = PLAYER_SPAWN_FOR_TEST.x;
+    dbg.state.player.y = PLAYER_SPAWN_FOR_TEST.y;
+    dbg.state.player.hp = dbg.state.player.maxHp;
+    dbg.state.player.invuln = 0;
+    dbg.state.player.defense = 0;
+    const startDist = 220;
+    const e = new EnemyRef(
+      dbg.state.player.x + ax * startDist,
+      dbg.state.player.y + ay * startDist,
+      type,
+      { aggroRange: 999 }
+    );
+    let landedHit = false;
+    const hpBefore = dbg.state.player.hp;
+    for (let i = 0; i < 400; i++) {
+      e.update(dbg.state.player, map, dbg.state.particles);
+      if (dbg.state.player.hp < hpBefore) { landedHit = true; break; }
+    }
+    check(`${type} (${label} approach) reaches attack range and lands a hit`, landedHit);
+  });
+});
+
+// Directly attempt to force an overlapping move and confirm it's rejected.
+const testEnemy2 = new EnemyRef(dbg.state.player.x, dbg.state.player.y, 'slimeGreen', {});
+testEnemy2.x = dbg.state.player.x - testEnemy2.w - 1;
+testEnemy2.y = dbg.state.player.y;
+testEnemy2.speed = 50; // huge speed to try to force a jump straight onto the player
+testEnemy2.aggroRange = 999;
+testEnemy2.update(dbg.state.player, map, dbg.state.particles);
+const stillClear = !(testEnemy2.x < dbg.state.player.x + dbg.state.player.w &&
+  testEnemy2.x + testEnemy2.w > dbg.state.player.x &&
+  testEnemy2.y < dbg.state.player.y + dbg.state.player.h &&
+  testEnemy2.y + testEnemy2.h > dbg.state.player.y);
+check('even a very fast lunge cannot land the enemy on the player', stillClear);
+
+console.log('\n=== Every 3rd attack knocks back ===');
+dbg.state.gameState = 'playing';
+dbg.state.player.attackCount = 0;
+dbg.state.player.attackCooldown = 0;
+const knockTestEnemy = dbg.state.enemies.find(e => e.type === 'slimeGreen' && e.alive);
+knockTestEnemy.x = dbg.state.player.x + 10;
+knockTestEnemy.y = dbg.state.player.y;
+knockTestEnemy.hp = 999999; knockTestEnemy.maxHp = 999999; // don't let it die mid-test
+knockTestEnemy.dir = 'right';
+
+function swing() {
+  dbg.state.player.attackCooldown = 0;
+  dbg.state.player.x = knockTestEnemy.x - 20;
+  dbg.state.player.y = knockTestEnemy.y;
+  dbg.state.player.dir = 'right';
+  CombatRef.handleAttack(dbg.state);
+}
+
+swing(); // attack #1
+check('attack 1: no knockback applied', knockTestEnemy.knockbackTimer === 0);
+swing(); // attack #2
+check('attack 2: no knockback applied', knockTestEnemy.knockbackTimer === 0);
+const posBefore3rd = { x: knockTestEnemy.x, y: knockTestEnemy.y };
+swing(); // attack #3
+check('attack 3: knockback timer set', knockTestEnemy.knockbackTimer === KNOCKBACK_DURATION_REF);
+check('attack 3: knockback velocity points away from player', knockTestEnemy.knockbackVX > 0);
+
+// Run a few update ticks and confirm the enemy actually moved away.
+for (let i = 0; i < 5; i++) knockTestEnemy.update(dbg.state.player, map, dbg.state.particles);
+check('enemy physically moved during knockback', knockTestEnemy.x > posBefore3rd.x);
+
+swing(); // attack #4 — back to no knockback
+check('attack 4: no knockback (cadence resumed)', knockTestEnemy.knockbackTimer === 0 || knockTestEnemy.knockbackTimer < KNOCKBACK_DURATION_REF);
+
+console.log('\n=== Bosses are immune to knockback ===');
+const bossForKnockback = dbg.state.enemies.find(e => e.isBoss && e.alive);
+bossForKnockback.knockbackTimer = 0;
+bossForKnockback.applyKnockback(bossForKnockback.centerX - 50, bossForKnockback.centerY);
+check('applyKnockback on a boss is a no-op', bossForKnockback.knockbackTimer === 0);
+
+console.log('\n=== restartGame resets attackCount ===');
+dbg.state.player.attackCount = 7;
+dbg.restartGame();
+check('restart resets attackCount to 0', dbg.state.player.attackCount === 0);
+
+sandbox.__tick(30);
+check('30 more frames after knockback/collision tests, no throw', true);
+
 console.log(`\n=== FINAL RESULTS: ${pass} passed, ${fail} failed ===`);
 process.exit(fail > 0 ? 1 : 0);

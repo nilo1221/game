@@ -12,13 +12,39 @@ function makeFakeCtx() {
   const ctx = {
     save: noop, restore: noop, translate: noop, rotate: noop, scale: noop,
     beginPath: noop, closePath: noop, moveTo: noop, lineTo: noop,
-    quadraticCurveTo: noop, bezierCurveTo: noop, arc: noop, arcTo: noop,
+    quadraticCurveTo: noop, bezierCurveTo: noop, arc: noop,
+    // arcTo: real browsers throw IndexSizeError for a negative radius —
+    // roundRect() in utils.js calls this with a caller-supplied radius, and
+    // a fake ctx that silently accepts anything would hide that class of bug.
+    arcTo: (x1, y1, x2, y2, radius) => {
+      if (typeof radius === 'number' && radius < 0) {
+        throw new Error(`IndexSizeError: The radius provided (${radius}) is negative.`);
+      }
+    },
     ellipse: noop, rect: noop, fill: noop, stroke: noop, clip: noop,
     fillRect: noop, strokeRect: noop, clearRect: noop,
-    drawImage: noop, putImageData: noop,
+    // drawImage: real browsers throw TypeError for a null/undefined image,
+    // and InvalidStateError for a 0x0-dimension canvas/image source.
+    drawImage: (image, ...rest) => {
+      if (image === undefined || image === null) {
+        throw new TypeError("Failed to execute 'drawImage': parameter 1 is not of type 'CanvasImageSource'.");
+      }
+      if (typeof image === 'object' && 'width' in image && 'height' in image) {
+        if (image.width === 0 || image.height === 0) {
+          throw new Error('InvalidStateError: source image width or height is 0.');
+        }
+      }
+    },
+    putImageData: noop,
     setTransform: noop, resetTransform: noop,
-    fillText: noop, strokeText: noop,
-    measureText: (text) => ({ width: (text ? String(text).length : 0) * 7 }),
+    // fillText/strokeText: real browsers coerce most things to string via
+    // ToString(), but throw for a missing/undefined required argument used
+    // as-if-absent — most realistic risk in this codebase is NaN slipping
+    // into x/y, which browsers just silently skip (no throw), so no
+    // special-casing needed here beyond making sure text is present.
+    fillText: (text) => { if (text === undefined) throw new TypeError("Failed to execute 'fillText': 2 arguments required, but only 1 present."); },
+    strokeText: (text) => { if (text === undefined) throw new TypeError("Failed to execute 'strokeText': 2 arguments required, but only 1 present."); },
+    measureText: (text) => ({ width: (text !== undefined ? String(text).length : 0) * 7 }),
     createRadialGradient: () => ({ addColorStop: noop }),
     createLinearGradient: () => ({ addColorStop: noop }),
     getImageData: () => ({ data: new Uint8ClampedArray(4) }),
