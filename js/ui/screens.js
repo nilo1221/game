@@ -4,7 +4,7 @@
 // rects it produced directly onto `state` (e.g. state.startButtons), which
 // game.js's click handler then hit-tests with Screens.pointInBtn.
 
-const AUTHOR_URL = 'https://mgodlewskidev.pl/';
+const AUTHOR_URL = 'https://github.com/Nilo1221';
 
 const Screens = {
   drawButton(ctx, bx, by, bw, bh, label, fill, textColor) {
@@ -74,13 +74,13 @@ const Screens = {
 
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.font = 'bold 40px sans-serif';
-    ctx.fillText('Shattered Vale RPG Game', viewW / 2 + 2, viewH / 2 - 88 + 2);
+    ctx.fillText('Shattered Vale: Survival RPG', viewW / 2 + 2, viewH / 2 - 88 + 2);
     ctx.fillStyle = '#e8c93c';
-    ctx.fillText('Shattered Vale RPG Game', viewW / 2, viewH / 2 - 88);
+    ctx.fillText('Shattered Vale: Survival RPG', viewW / 2, viewH / 2 - 88);
 
     ctx.fillStyle = '#c9c5b8';
     ctx.font = '14px sans-serif';
-    ctx.fillText('A tiny village-defense adventure', viewW / 2, viewH / 2 - 58);
+    ctx.fillText('Survive the wilds. Craft gear. Defend the village.', viewW / 2, viewH / 2 - 58);
 
     const bw = 190, bh = 42, gap = 14;
     const bx = viewW / 2 - bw / 2;
@@ -96,7 +96,7 @@ const Screens = {
       restartBtn = this.drawButton(ctx, bx, by, bw, bh, 'Restart Game', '#7a3a3a');
       by += bh + gap;
     }
-    const authorBtn = this.drawButton(ctx, bx, by, bw, bh, 'Author', '#5a4a3a');
+    const authorBtn = this.drawButton(ctx, bx, by, bw, bh, 'Nilo1221', '#5a4a3a');
 
     ctx.restore();
 

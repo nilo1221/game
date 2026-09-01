@@ -6,6 +6,21 @@ A top-down action RPG built with vanilla JavaScript and HTML5 Canvas — no engi
 
 No installation or server required — just open `index.html` in a browser.
 
+## Deploy on Vercel
+
+The game is ready for static hosting on Vercel:
+
+```bash
+# Install Vercel CLI (if not already installed)
+npm i -g vercel
+
+# Login and deploy
+vercel login
+vercel --prod
+```
+
+Or connect this Git repository to [Vercel](https://vercel.com) and it will auto-deploy on every push.
+
 ## Architecture
 
 ```

@@ -43,8 +43,19 @@ class Player {
     this.mana = PLAYER_BASE_STATS.mana;
     this.maxMana = PLAYER_BASE_STATS.maxMana;
     this.manaRegen = PLAYER_BASE_STATS.manaRegen;
+    this.hunger = PLAYER_BASE_STATS.hunger;
+    this.maxHunger = PLAYER_BASE_STATS.maxHunger;
+    this.thirst = PLAYER_BASE_STATS.thirst;
+    this.maxThirst = PLAYER_BASE_STATS.maxThirst;
     this.fireballCooldown = 0;
     this.fireballs = [];
+  }
+
+  tickSurvival() {
+    this.hunger = Math.max(0, this.hunger - PLAYER_BASE_STATS.hungerDecay);
+    this.thirst = Math.max(0, this.thirst - PLAYER_BASE_STATS.thirstDecay);
+    if (this.hunger <= 0) this.hp = Math.max(1, this.hp - PLAYER_BASE_STATS.hungerDamage);
+    if (this.thirst <= 0) this.hp = Math.max(1, this.hp - PLAYER_BASE_STATS.thirstDamage);
   }
 
   get centerX() { return this.x + this.w / 2; }

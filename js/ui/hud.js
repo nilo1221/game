@@ -33,6 +33,8 @@ const Hud = {
       ...(dom.goldText && dom.goldText.parentElement && dom.goldText.parentElement !== document.body
         ? [dom.goldText.parentElement]
         : [dom.goldText]),
+      ...group(dom.hungerBar, dom.hungerText),
+      ...group(dom.thirstBar, dom.thirstText),
     ].filter(Boolean);
     const uniqueTargets = [...new Set(targets)];
     const originalDisplay = new Map();
@@ -53,6 +55,10 @@ const Hud = {
         dom.goldText.textContent = player.gold;
         dom.manaBar.style.width = (player.mana / player.maxMana * 100) + '%';
         dom.manaText.textContent = `${Math.floor(player.mana)}/${player.maxMana}`;
+        dom.hungerBar.style.width = (player.hunger / player.maxHunger * 100) + '%';
+        dom.hungerText.textContent = `${Math.floor(player.hunger)}/${player.maxHunger}`;
+        dom.thirstBar.style.width = (player.thirst / player.maxThirst * 100) + '%';
+        dom.thirstText.textContent = `${Math.floor(player.thirst)}/${player.maxThirst}`;
       },
     };
   },

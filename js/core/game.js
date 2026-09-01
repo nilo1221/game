@@ -23,6 +23,10 @@
     goldText: document.getElementById('goldText'),
     manaBar: document.getElementById('manaBarInner'),
     manaText: document.getElementById('manaText'),
+    hungerBar: document.getElementById('hungerBarInner'),
+    hungerText: document.getElementById('hungerText'),
+    thirstBar: document.getElementById('thirstBarInner'),
+    thirstText: document.getElementById('thirstText'),
   };
   const hud = Hud.bindDom(dom);
   hud.setVisible(false); // hidden until Play is pressed
@@ -48,6 +52,7 @@
   const dialogue = new DialogueSystem();
   const inventory = new Inventory();
   const player = new Player(PLAYER_SPAWN.x, PLAYER_SPAWN.y);
+  const multiplayer = new Multiplayer();
 
   const { npcs, elder, merchant } = WorldFactory.createNpcs();
   const worldItems = WorldFactory.createWorldItems();
@@ -93,6 +98,8 @@
     player.attackCooldown = 0;
     player.attackCount = 0;
     player.invuln = 0;
+    player.hunger = PLAYER_BASE_STATS.hunger;
+    player.thirst = PLAYER_BASE_STATS.thirst;
     // (mana/fireball cooldown intentionally carry over — matches the
     // original restart behavior, which never reset them either.)
 
@@ -146,6 +153,10 @@
         }
       }
       if (justPressed['i']) inventory.toggle();
+      if (justPressed['c']) {
+        const mode = camera.cycle();
+        Combat.toast(state, `Camera: ${mode} person`);
+      }
 
       npcs.forEach((n) => n.update());
       state.enemies.forEach((en) => en.update(player, map, particles));
@@ -153,12 +164,15 @@
       Combat.checkGateConditions(state);
       Combat.checkHazards(state);
       Combat.processWorldItemPickups(state);
+      player.tickSurvival();
+      multiplayer.send(player);
+      multiplayer.tick();
 
       if (player.hp <= 0) state.gameState = 'gameover';
     }
 
     particles.update();
-    camera.follow(player.centerX, player.centerY, map.cols * TILE, map.rows * TILE);
+    camera.follow(player.centerX, player.centerY, player.dir, map.cols * TILE, map.rows * TILE);
 
     if (state.screenFlash) {
       state.screenFlash.alpha -= 0.02;
@@ -202,12 +216,26 @@
     });
     npcs.forEach((n) => drawables.push({ y: n.y + n.h, draw: () => n.draw(ctx, camX, camY) }));
     state.enemies.forEach((en) => drawables.push({ y: en.y + en.h, draw: () => en.draw(ctx, camX, camY) }));
-    drawables.push({ y: player.y + player.h, draw: () => player.draw(ctx, camX, camY) });
+    if (camera.mode !== 'first') {
+      drawables.push({ y: player.y + player.h, draw: () => player.draw(ctx, camX, camY) });
+    }
     player.fireballs.forEach((f) => drawables.push({ y: f.y + f.h, draw: () => f.draw(ctx, camX, camY) }));
     drawables.sort((a, b) => a.y - b.y);
     drawables.forEach((d) => d.draw());
+    multiplayer.draw(ctx, camX, camY);
 
     particles.draw(ctx, camX, camY);
+
+    if (camera.mode === 'first') {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(241,239,232,0.6)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(VIEW_W / 2, VIEW_H / 2, 6, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     Hud.drawVignette(ctx, VIEW_W, VIEW_H);
 
     if (state.screenFlash) {
@@ -282,6 +310,7 @@
         state.gameState = 'playing';
         state.hasStarted = true;
         hud.setVisible(true);
+        multiplayer.connect('Nilo1221');
       } else if (Screens.pointInBtn(mx, my, state.startButtons.howto)) {
         state.gameState = 'howtoplay';
       } else if (Screens.pointInBtn(mx, my, state.startButtons.restart)) {
@@ -309,6 +338,7 @@
       state.gameState = 'playing';
       state.continueButton = null;
       state.restartButton = null;
+      multiplayer.connect('Nilo1221');
       return;
     }
     if (Screens.pointInBtn(mx, my, state.restartButton)) restartGame();

@@ -169,6 +169,16 @@ body {
   animation-duration: 4s;
 }
 
+.hunger-fill {
+  background: linear-gradient(180deg, #f7c67a 0%, #c98a3a 45%, #8a5a1f 100%);
+  box-shadow: 0 0 8px 1px rgba(201, 138, 58, 0.5);
+}
+
+.thirst-fill {
+  background: linear-gradient(180deg, #7ad4ff 0%, #3a8fc9 45%, #1f5a8a 100%);
+  box-shadow: 0 0 8px 1px rgba(58, 143, 201, 0.5);
+}
+
 #xpGroup .bar-track {
   width: 90px;
 }

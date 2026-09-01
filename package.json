@@ -1,0 +1,22 @@
+{
+  "name": "shattered-vale-survival-rpg",
+  "version": "1.0.0",
+  "description": "A top-down browser survival RPG built with vanilla JavaScript and HTML5 Canvas.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs"
+  },
+  "keywords": [
+    "game",
+    "rpg",
+    "survival",
+    "html5",
+    "canvas"
+  ],
+  "author": "Nilo1221 (lorenzo rocchi)",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.21.3"
+  }
+}

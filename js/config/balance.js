@@ -20,6 +20,14 @@ const PLAYER_BASE_STATS = {
   xpNext: 10,
   lvl: 1,
   gold: 0,
+  hunger: 100,
+  maxHunger: 100,
+  thirst: 100,
+  maxThirst: 100,
+  hungerDecay: 0.02,
+  thirstDecay: 0.03,
+  hungerDamage: 0,
+  thirstDamage: 0,
 };
 
 // Applied every time the player crosses an XP threshold (gainXP loop).

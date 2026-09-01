@@ -3,7 +3,18 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Shattered Vale RPG Game</title>
+<meta name="description" content="Shattered Vale is a free browser survival RPG. Explore a forgotten village, battle monsters, craft gear, and survive the wilds." />
+<meta name="keywords" content="RPG, survival, browser game, HTML5, canvas, indie game" />
+<meta property="og:title" content="Shattered Vale: Survival RPG" />
+<meta property="og:description" content="A free browser survival RPG. Explore, fight, craft, and survive." />
+<meta property="og:image" content="screenshots/screenshot01.jpg" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Shattered Vale: Survival RPG" />
+<meta name="twitter:description" content="A free browser survival RPG. Explore, fight, craft, and survive." />
+<meta name="twitter:image" content="screenshots/screenshot01.jpg" />
+<link rel="canonical" href="https://shattered-vale.vercel.app/" />
+<title>Shattered Vale: Survival RPG</title>
 <link rel="stylesheet" href="css/style.css" />
 <link rel="shortcut icon" href="icons/favicon.ico" type="image/x-icon">
 </head>
@@ -29,6 +40,16 @@
     <div class="stat-group" id="goldGroup">
       <span class="gold-icon">🪙</span>
       <span class="stat-text" id="goldText">0</span>
+    </div>
+    <div class="stat-group" id="hungerGroup">
+      <div class="stat-icon">🍞</div>
+      <div class="bar-track"><div class="bar-fill hunger-fill" id="hungerBarInner"></div></div>
+      <span class="stat-text" id="hungerText">100/100</span>
+    </div>
+    <div class="stat-group" id="thirstGroup">
+      <div class="stat-icon">💧</div>
+      <div class="bar-track"><div class="bar-fill thirst-fill" id="thirstBarInner"></div></div>
+      <span class="stat-text" id="thirstText">100/100</span>
     </div>
   </div>
 
@@ -60,6 +81,7 @@
   <!-- entities -->
   <script src="js/entities/animated-sprite.js"></script>
   <script src="js/entities/player.js"></script>
+  <script src="js/multiplayer.js"></script>
   <script src="js/entities/npc.js"></script>
   <script src="js/entities/enemy.js"></script>
   <script src="js/entities/fireball.js"></script>
