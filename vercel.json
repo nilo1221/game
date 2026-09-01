@@ -1,7 +1,6 @@
 {
   "version": 2,
   "name": "shattered-vale-survival-rpg",
-  "public": true,
   "framework": null,
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
