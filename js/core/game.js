@@ -147,15 +147,15 @@
       if (keys[' ']) Combat.handleAttack(state);
       if (justPressed['f']) {
         if (player.castFireball()) {
-          Combat.toast(state, `Fireball cast! -${FIREBALL_STATS.manaCost} Mana`);
+          Combat.toast(state, `Palla di fuoco! -${FIREBALL_STATS.manaCost} Mana`);
         } else {
-          Combat.toast(state, 'Not enough mana!');
+          Combat.toast(state, 'Mana insufficiente!');
         }
       }
       if (justPressed['i']) inventory.toggle();
       if (justPressed['c']) {
         const mode = camera.cycle();
-        Combat.toast(state, `Camera: ${mode} person`);
+        Combat.toast(state, `Telecamera: ${mode} persona`);
       }
 
       npcs.forEach((n) => n.update());

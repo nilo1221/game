@@ -31,7 +31,7 @@ const Combat = {
         if (npc === state.merchant && !state.merchantGaveGift) {
           state.merchantGaveGift = true;
           state.inventory.add('potionRed', 1);
-          this.toast(state, 'Received: Health Potion');
+          this.toast(state, 'Ricevuto: Pozione di Cura');
         }
       });
       return;
@@ -67,7 +67,7 @@ const Combat = {
 
     const leveled = player.gainXP(reward.xp, particles);
     if (leveled) {
-      this.toast(state, 'Level up! Now level ' + player.lvl);
+      this.toast(state, 'Salito di livello! Ora livello ' + player.lvl);
       state.screenFlash = { color: '255,255,255', alpha: 0.3 };
     }
 

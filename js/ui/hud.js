@@ -50,7 +50,7 @@ const Hud = {
         dom.hpBar.style.width = (player.hp / player.maxHp * 100) + '%';
         dom.hpText.textContent = `${player.hp}/${player.maxHp}`;
         dom.xpBar.style.width = (player.xp / player.xpNext * 100) + '%';
-        dom.xpText.textContent = `${player.xp} / ${player.xpNext} Exp`;
+        dom.xpText.textContent = `${player.xp} / ${player.xpNext} Esp`;
         dom.lvlText.textContent = player.lvl;
         dom.goldText.textContent = player.gold;
         dom.manaBar.style.width = (player.mana / player.maxMana * 100) + '%';
@@ -165,8 +165,8 @@ const Hud = {
   drawQuestTracker(ctx, state, viewH) {
     if (!(state.questStage > 0 && state.questStage < 3)) return;
     const label = state.questStage === 1
-      ? 'Quest: Find the iron sword near the pond'
-      : 'Quest: Defeat the goblin chief in the forest clearing';
+      ? 'Missione: trova la spada di ferro vicino allo stagno'
+      : 'Missione: sconfiggi il re goblin nella radura della foresta';
     ctx.save();
     ctx.fillStyle = 'rgba(10,12,8,0.7)';
     const w = ctx.measureText(label).width + 24;

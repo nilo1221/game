@@ -48,11 +48,11 @@ const Screens = {
 
     ctx.fillStyle = '#e8c93c';
     ctx.font = 'bold 36px sans-serif';
-    ctx.fillText('Desktop Only', viewW / 2, viewH / 2 - 50);
+    ctx.fillText('Solo Desktop', viewW / 2, viewH / 2 - 50);
 
     ctx.fillStyle = '#c9c5b8';
     ctx.font = '32px sans-serif';
-    const msg = wrapPlainText(ctx, 'This game requires a keyboard and is not playable on mobile devices. Please open it on a desktop or laptop computer.', viewW - 60);
+    const msg = wrapPlainText(ctx, 'Questo gioco richiede una tastiera e non è giocabile su dispositivi mobili. Aprilo su desktop o laptop.', viewW - 60);
     msg.forEach((line, i) => {
       ctx.fillText(line, viewW / 2, viewH / 2 + 8 + i * 32);
     });
@@ -74,26 +74,27 @@ const Screens = {
 
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.font = 'bold 40px sans-serif';
-    ctx.fillText('Shattered Vale: Survival RPG', viewW / 2 + 2, viewH / 2 - 88 + 2);
+    ctx.fillText('Shattered Vale: GDR di Sopravvivenza', viewW / 2 + 2, viewH / 2 - 88 + 2);
     ctx.fillStyle = '#e8c93c';
-    ctx.fillText('Shattered Vale: Survival RPG', viewW / 2, viewH / 2 - 88);
+    ctx.font = 'bold 40px sans-serif';
+    ctx.fillText('Shattered Vale: GDR di Sopravvivenza', viewW / 2, viewH / 2 - 88);
 
     ctx.fillStyle = '#c9c5b8';
     ctx.font = '14px sans-serif';
-    ctx.fillText('Survive the wilds. Craft gear. Defend the village.', viewW / 2, viewH / 2 - 58);
+    ctx.fillText('Sopravvivi nelle terre selvagge. Forgi equipaggiamento. Difendi il villaggio.', viewW / 2, viewH / 2 - 58);
 
     const bw = 190, bh = 42, gap = 14;
     const bx = viewW / 2 - bw / 2;
     let by = viewH / 2 - 10;
 
-    const playLabel = state.hasStarted ? 'Continue' : 'Play';
+    const playLabel = state.hasStarted ? 'Continua' : 'Gioca';
     const playBtn = this.drawButton(ctx, bx, by, bw, bh, playLabel, '#3a6b3d');
     by += bh + gap;
-    const howToBtn = this.drawButton(ctx, bx, by, bw, bh, 'How to Play', '#3a5a7a');
+    const howToBtn = this.drawButton(ctx, bx, by, bw, bh, 'Come Giocare', '#3a5a7a');
     by += bh + gap;
     let restartBtn = null;
     if (state.hasStarted) {
-      restartBtn = this.drawButton(ctx, bx, by, bw, bh, 'Restart Game', '#7a3a3a');
+      restartBtn = this.drawButton(ctx, bx, by, bw, bh, 'Ricomincia', '#7a3a3a');
       by += bh + gap;
     }
     const authorBtn = this.drawButton(ctx, bx, by, bw, bh, 'Nilo1221', '#5a4a3a');
@@ -127,17 +128,17 @@ const Screens = {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#e8c93c';
     ctx.font = 'bold 20px sans-serif';
-    ctx.fillText('How to Play', viewW / 2, py + 34);
+    ctx.fillText('Come Giocare', viewW / 2, py + 34);
 
     ctx.textAlign = 'left';
     ctx.font = '14px sans-serif';
     const lines = [
-      ['Move', 'WASD or Arrow Keys'],
-      ['Attack', 'Space'],
-      ['Interact / Talk', 'E'],
-      ['Inventory', 'I'],
-      ['Fire ball', 'F'],
-      ['Advance dialogue', 'Space or E'],
+      ['Muoviti', 'WASD o frecce direzionali'],
+      ['Attacca', 'Spazio'],
+      ['Interagisci / Parla', 'E'],
+      ['Inventario', 'I'],
+      ['Palla di fuoco', 'F'],
+      ['Avanza dialogo', 'Spazio o E'],
     ];
     let ly = py + 68;
     lines.forEach(([label, val]) => {
@@ -156,7 +157,7 @@ const Screens = {
     const bw = 140, bh = 36;
     const bx = viewW / 2 - bw / 2;
     const by = py + panelH - bh - 18;
-    state.howToBackButton = this.drawButton(ctx, bx, by, bw, bh, 'Back', '#3a6b3d');
+    state.howToBackButton = this.drawButton(ctx, bx, by, bw, bh, 'Indietro', '#3a6b3d');
 
     ctx.restore();
   },
@@ -175,17 +176,17 @@ const Screens = {
     if (state.gameState === 'gameover') {
       ctx.fillStyle = '#f09595';
       ctx.font = 'bold 30px sans-serif';
-      ctx.fillText('You were defeated', viewW / 2, viewH / 2 - 10);
+      ctx.fillText('Sei stato sconfitto', viewW / 2, viewH / 2 - 10);
       ctx.fillStyle = '#c9c5b8';
       ctx.font = '14px sans-serif';
-      ctx.fillText('Try again and save the village!', viewW / 2, viewH / 2 + 20);
+      ctx.fillText('Riprova e salva il villaggio!', viewW / 2, viewH / 2 + 20);
     } else if (isVictory) {
       ctx.fillStyle = '#ffcf3c';
       ctx.font = 'bold 30px sans-serif';
-      ctx.fillText('Victory!', viewW / 2, viewH / 2 - 10);
+      ctx.fillText('Vittoria!', viewW / 2, viewH / 2 - 10);
       ctx.fillStyle = '#e8e4d8';
       ctx.font = '14px sans-serif';
-      ctx.fillText('You have conquered the Shattered Vale.', viewW / 2, viewH / 2 + 20);
+      ctx.fillText('Hai conquistato la Shattered Vale.', viewW / 2, viewH / 2 + 20);
     }
 
     const bw = 150, bh = 38;
@@ -195,13 +196,13 @@ const Screens = {
       const totalW = bw * 2 + gap;
       const leftX = viewW / 2 - totalW / 2;
       const by = viewH / 2 + 55;
-      state.continueButton = this.drawButton(ctx, leftX, by, bw, bh, 'Continue', '#3a5a7a');
-      state.restartButton = this.drawButton(ctx, leftX + bw + gap, by, bw, bh, 'Play Again', '#3a6b3d');
+      state.continueButton = this.drawButton(ctx, leftX, by, bw, bh, 'Continua', '#3a5a7a');
+      state.restartButton = this.drawButton(ctx, leftX + bw + gap, by, bw, bh, 'Gioca Ancora', '#3a6b3d');
     } else {
       const bx = viewW / 2 - bw / 2;
       const by = viewH / 2 + 55;
       state.continueButton = null;
-      state.restartButton = this.drawButton(ctx, bx, by, bw, bh, 'Play Again', '#3a6b3d');
+      state.restartButton = this.drawButton(ctx, bx, by, bw, bh, 'Gioca Ancora', '#3a6b3d');
     }
 
     ctx.textAlign = 'left';

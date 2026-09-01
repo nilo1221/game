@@ -24,27 +24,27 @@ const ARMOR_DEFENSE = {
 const BOOTS_SPEED_BONUS = Math.round((BOOTS_SPEED - PLAYER_BASE_STATS.speed) * 10) / 10;
 
 const ITEM_STATS = {
-  sword:          { name: 'Iron Sword', atk: WEAPON_ATTACK_BONUS.sword },
-  swordLegendary: { name: 'Legendary Sword', atk: WEAPON_ATTACK_BONUS.swordLegendary },
-  swordMolten:    { name: 'Molten Blade', atk: WEAPON_ATTACK_BONUS.swordMolten },
+  sword:          { name: 'Spada di Ferro', atk: WEAPON_ATTACK_BONUS.sword },
+  swordLegendary: { name: 'Spada Leggendaria', atk: WEAPON_ATTACK_BONUS.swordLegendary },
+  swordMolten:    { name: 'Lama Ignea', atk: WEAPON_ATTACK_BONUS.swordMolten },
 
-  armor:          { name: 'Iron Armor', def: ARMOR_DEFENSE.armor },
-  armorJungle:    { name: 'Jungle Armor', def: ARMOR_DEFENSE.armorJungle },
-  armorObsidian:  { name: 'Obsidian Armor', def: ARMOR_DEFENSE.armorObsidian },
-  helmet:         { name: "Devil's Helmet", def: ARMOR_DEFENSE.helmet },
-  crownSkeleton:  { name: 'Skeleton Crown', def: ARMOR_DEFENSE.crownSkeleton },
-  shield:         { name: 'Shield', def: ARMOR_DEFENSE.shield },
-  shieldBone:     { name: 'Bone Shield', def: ARMOR_DEFENSE.shieldBone },
+  armor:          { name: 'Armatura di Ferro', def: ARMOR_DEFENSE.armor },
+  armorJungle:    { name: 'Armatura della Giungla', def: ARMOR_DEFENSE.armorJungle },
+  armorObsidian:  { name: 'Armatura di Ossidiana', def: ARMOR_DEFENSE.armorObsidian },
+  helmet:         { name: "Elmo del Diavolo", def: ARMOR_DEFENSE.helmet },
+  crownSkeleton:  { name: 'Corona dello Scheletro', def: ARMOR_DEFENSE.crownSkeleton },
+  shield:         { name: 'Scudo', def: ARMOR_DEFENSE.shield },
+  shieldBone:     { name: 'Scudo d'Osso', def: ARMOR_DEFENSE.shieldBone },
 
-  boots:          { name: 'Swift Boots', spd: BOOTS_SPEED_BONUS },
-  bootsFireproof: { name: 'Fireproof Boots', spd: BOOTS_SPEED_BONUS, extra: 'Immune to lava' },
+  boots:          { name: 'Stivali da Corsa', spd: BOOTS_SPEED_BONUS },
+  bootsFireproof: { name: 'Stivali Antifuoco', spd: BOOTS_SPEED_BONUS, extra: 'Immuni alla lava' },
 
-  potionRed:      { name: 'Health Potion', extra: 'Restores HP fully' },
-  potionBlue:     { name: 'Mana Potion', extra: 'Restores Mana fully' },
-  coin:           { name: 'Gold Coin' },
-  key:            { name: 'Key' },
+  potionRed:      { name: 'Pozione di Cura', extra: 'Ripristina i PS completamente' },
+  potionBlue:     { name: 'Pozione di Mana', extra: 'Ripristina il Mana completamente' },
+  coin:           { name: 'Moneta d'Oro' },
+  key:            { name: 'Chiave' },
 };
-const DEFAULT_ITEM_STATS = { name: 'Item' };
+const DEFAULT_ITEM_STATS = { name: 'Oggetto' };
 
 function getItemStats(kind) {
   return ITEM_STATS[kind] || DEFAULT_ITEM_STATS;

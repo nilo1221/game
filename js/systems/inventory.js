@@ -34,11 +34,11 @@ class WorldItem {
 // Equipment slot definitions: slotId -> { label, accepts(kind) }
 // accepts() decides which backpack item kinds are droppable into that slot.
 const EQUIP_SLOTS = [
-  { id: 'helmet', label: 'Helmet', accepts: k => k === 'helmet' || k === 'crownSkeleton' },
-  { id: 'weapon', label: 'Weapon', accepts: k => k === 'sword' || k === 'weapon' || k === 'swordLegendary' || k === 'swordMolten' },
-  { id: 'armor',  label: 'Armor',  accepts: k => k === 'armor' || k === 'armorJungle' || k === 'armorObsidian' },
-  { id: 'shield', label: 'Shield', accepts: k => k === 'shield' || k === 'shieldBone' },
-  { id: 'boots',  label: 'Boots',  accepts: k => k === 'boots' || k === 'bootsFireproof' },
+  { id: 'helmet', label: 'Elmo', accepts: k => k === 'helmet' || k === 'crownSkeleton' },
+  { id: 'weapon', label: 'Arma', accepts: k => k === 'sword' || k === 'weapon' || k === 'swordLegendary' || k === 'swordMolten' },
+  { id: 'armor',  label: 'Armatura',  accepts: k => k === 'armor' || k === 'armorJungle' || k === 'armorObsidian' },
+  { id: 'shield', label: 'Scudo', accepts: k => k === 'shield' || k === 'shieldBone' },
+  { id: 'boots',  label: 'Stivali',  accepts: k => k === 'boots' || k === 'bootsFireproof' },
 ];
 
 class Inventory {
@@ -221,14 +221,14 @@ class Inventory {
 
     ctx.fillStyle = '#e8e4d8';
     ctx.font = 'bold 15px sans-serif';
-    ctx.fillText('Inventory', x + 18, y + 28);
+    ctx.fillText('Inventario', x + 18, y + 28);
     ctx.strokeStyle = 'rgba(232,228,216,0.2)';
     ctx.beginPath(); ctx.moveTo(x + 18, y + 38); ctx.lineTo(x + w - 18, y + 38); ctx.stroke();
 
     // --- Left column: equipped gear (character slots) ---
     ctx.fillStyle = 'rgba(232,228,216,0.6)';
     ctx.font = 'bold 11px sans-serif';
-    ctx.fillText('EQUIPPED', equipX, equipY - 16);
+    ctx.fillText('EQUIPPIATO', equipX, equipY - 16);
 
     equipSlots.forEach(slot => {
       const kind = this.equipped[slot.id];
@@ -258,7 +258,7 @@ class Inventory {
     // --- Middle: backpack grid (found items) ---
     ctx.fillStyle = 'rgba(232,228,216,0.6)';
     ctx.font = 'bold 11px sans-serif';
-    ctx.fillText('BACKPACK', bpX, bpY - 16);
+    ctx.fillText('ZAINO', bpX, bpY - 16);
 
     backpackItems.forEach(item => {
       const isHovered = item.kind && this.hoveredKind === item.kind;
@@ -312,7 +312,7 @@ class Inventory {
 
     ctx.fillStyle = 'rgba(232,228,216,0.4)';
     ctx.font = '11px sans-serif';
-    ctx.fillText('[Esc to close] · click a backpack item to use/equip it', x + 18, y + h - 14);
+    ctx.fillText('[Esc per chiudere] · clicca un oggetto dello zaino per usarlo/equipaggiarlo', x + 18, y + h - 14);
     ctx.restore();
   }
 
@@ -322,7 +322,7 @@ class Inventory {
   _drawStatsColumn(ctx, sx, sy, player) {
     ctx.fillStyle = 'rgba(232,228,216,0.6)';
     ctx.font = 'bold 11px sans-serif';
-    ctx.fillText('CHARACTER', sx, sy - 16);
+    ctx.fillText('PERSONAGGIO', sx, sy - 16);
 
     const rowH = 20;
     let ry = sy + 4;
@@ -338,12 +338,12 @@ class Inventory {
       ry += rowH;
     };
 
-    statRow('HP', `${player.hp}/${player.maxHp}`, '#e88a8a');
+    statRow('PS', `${player.hp}/${player.maxHp}`, '#e88a8a');
     const weaponKind = this.equipped.weapon;
     const weaponStats = weaponKind && getItemStats(weaponKind);
-    statRow('ATK', String(player.attackDamage), '#e8c93c');
-    statRow('DEF', String(player.defense), '#85b7eb');
-    statRow('SPD', player.speed.toFixed(1), '#78e0a8');
+    statRow('ATT', String(player.attackDamage), '#e8c93c');
+    statRow('DIF', String(player.defense), '#85b7eb');
+    statRow('VEL', player.speed.toFixed(1), '#78e0a8');
     statRow('MANA', `${Math.floor(player.mana)}/${player.maxMana}`, '#a878e0');
 
     // --- Hovered item tooltip ---
@@ -353,14 +353,14 @@ class Inventory {
 
     ctx.fillStyle = 'rgba(232,228,216,0.6)';
     ctx.font = 'bold 11px sans-serif';
-    ctx.fillText('ITEM', sx, ty);
+    ctx.fillText('OGGETTO', sx, ty);
 
     const hoveredKind = this._hoveredItemKind();
     let iy = ty + 20;
     if (!hoveredKind) {
       ctx.fillStyle = 'rgba(232,228,216,0.4)';
       ctx.font = '11px sans-serif';
-      const lines = wrapPlainText(ctx, 'Hover an item to see what it does.', 180);
+      const lines = wrapPlainText(ctx, 'Passa il mouse su un oggetto per vedere cosa fa.', 180);
       lines.forEach(line => { ctx.fillText(line, sx, iy); iy += 15; });
       return;
     }
@@ -374,19 +374,19 @@ class Inventory {
     if (stats.atk) {
       ctx.fillStyle = '#e8c93c';
       ctx.font = '12px sans-serif';
-      ctx.fillText(`Attack  +${stats.atk}`, sx, iy);
+      ctx.fillText(`Attacco +${stats.atk}`, sx, iy);
       iy += 17;
     }
     if (stats.def) {
       ctx.fillStyle = '#85b7eb';
       ctx.font = '12px sans-serif';
-      ctx.fillText(`Defense  +${stats.def}`, sx, iy);
+      ctx.fillText(`Difesa +${stats.def}`, sx, iy);
       iy += 17;
     }
     if (stats.spd) {
       ctx.fillStyle = '#78e0a8';
       ctx.font = '12px sans-serif';
-      ctx.fillText(`Speed  +${stats.spd}`, sx, iy);
+      ctx.fillText(`Velocità +${stats.spd}`, sx, iy);
       iy += 17;
     }
     if (stats.extra) {
@@ -398,7 +398,7 @@ class Inventory {
     if (!stats.atk && !stats.def && !stats.spd && !stats.extra) {
       ctx.fillStyle = 'rgba(232,228,216,0.4)';
       ctx.font = '11px sans-serif';
-      ctx.fillText('No combat effect.', sx, iy);
+      ctx.fillText('Nessun effetto in combattimento.', sx, iy);
     }
   }
 }

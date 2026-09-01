@@ -18,7 +18,7 @@ const ITEM_PICKUP_EFFECTS = {
       ctx.player.hasSword = true;
       ctx.advanceQuestTo(2);
     },
-    toast: 'Found the Iron Sword! Attack increased.',
+    toast: 'Hai trovato la Spada di Ferro! Attacco aumentato.',
     flash: { color: '232,201,60', alpha: 0.35 },
   },
   // Coins are gold directly — they never enter the backpack.
@@ -30,19 +30,19 @@ const ITEM_PICKUP_EFFECTS = {
   },
   armor: {
     apply: (ctx) => ctx.inventory.add('armor', 1),
-    toast: 'Picked up Iron Armor!',
+    toast: 'Raccolta Armatura di Ferro!',
   },
   helmet: {
     apply: (ctx) => ctx.inventory.add('helmet', 1),
-    toast: "Picked up the Devil's Helmet!",
+    toast: "Raccolto l'Elmo del Diavolo!",
   },
   armorJungle: {
     apply: (ctx) => ctx.inventory.add('armorJungle', 1),
-    toast: 'Picked up Jungle Armor!',
+    toast: 'Raccolta Armatura della Giungla!',
   },
   boots: {
     apply: (ctx) => { ctx.inventory.add('boots', 1); ctx.player.speed = BOOTS_SPEED; },
-    toast: 'Picked up Swift Boots! Movement speed increased.',
+    toast: 'Raccolti Stivali da Corsa! Velocità di movimento aumentata.',
   },
   swordLegendary: {
     apply: (ctx) => {
@@ -51,24 +51,24 @@ const ITEM_PICKUP_EFFECTS = {
       ctx.player.hasLegendarySword = true;
       ctx.player.hasMoltenSword = false;
     },
-    toast: 'Equipped the Legendary Sword! Attack greatly increased.',
+    toast: 'Equipaggiata la Spada Leggendaria! Attacco enormemente aumentato.',
     flash: { color: '63,212,168', alpha: 0.4 },
   },
   shieldBone: {
     apply: (ctx) => ctx.inventory.add('shieldBone', 1),
-    toast: 'Picked up the Bone Shield!',
+    toast: 'Raccolto Scudo d\'Osso!',
   },
   crownSkeleton: {
     apply: (ctx) => ctx.inventory.add('crownSkeleton', 1),
-    toast: 'Picked up the Skeleton Crown!',
+    toast: 'Raccolta Corona dello Scheletro!',
   },
   potionBlue: {
     apply: (ctx) => ctx.inventory.add('potionBlue', 1),
-    toast: 'Picked up a Blue Potion! (drink to restore mana)',
+    toast: 'Raccolta una Pozione Blu! (bevi per ripristinare il mana)',
   },
   armorObsidian: {
     apply: (ctx) => ctx.inventory.add('armorObsidian', 1),
-    toast: 'Picked up Obsidian Armor!',
+    toast: 'Raccolta Armatura di Ossidiana!',
   },
   swordMolten: {
     apply: (ctx) => {
@@ -77,12 +77,12 @@ const ITEM_PICKUP_EFFECTS = {
       ctx.player.hasLegendarySword = false;
       ctx.player.hasMoltenSword = true;
     },
-    toast: 'Found the Molten Blade! Attack massively increased.',
+    toast: 'Hai trovato la Lama Ignea! Attacco massivamente aumentato.',
     flash: { color: '255,110,40', alpha: 0.45 },
   },
   bootsFireproof: {
     apply: (ctx) => { ctx.inventory.add('bootsFireproof', 1); ctx.player.speed = BOOTS_SPEED; ctx.player.fireproof = true; },
-    toast: 'Picked up Fireproof Boots! Lava no longer burns you.',
+    toast: 'Raccolti Stivali Antifuoco! La lava non ti brucia più.',
     flash: { color: '255,140,40', alpha: 0.35 },
   },
 };
@@ -91,7 +91,7 @@ const ITEM_PICKUP_EFFECTS = {
 // potionRed pickup, which never had its own toast in the original either).
 const DEFAULT_PICKUP_EFFECT = {
   apply: (ctx) => ctx.inventory.add(ctx.item.kind, 1),
-  toast: 'Picked up an item',
+  toast: 'Raccolto un oggetto',
 };
 
 // Backpack potions are "used" (consumed for an effect), not equipped.
@@ -99,15 +99,15 @@ const USABLE_POTIONS = {
   potionRed: {
     use: (ctx) => ctx.inventory.usePotionRed(ctx.player),
     onUsed: (ctx) => {
-      ctx.particles.floatText(ctx.player.centerX, ctx.player.y - 10, 'Healed!', '#f09595');
-      ctx.toast('Drank a Health Potion — HP restored!');
+      ctx.particles.floatText(ctx.player.centerX, ctx.player.y - 10, 'Curato!', '#f09595');
+      ctx.toast('Bevuta una Pozione di Cura — PS ripristinati!');
     },
   },
   potionBlue: {
     use: (ctx) => ctx.inventory.usePotionBlue(ctx.player),
     onUsed: (ctx) => {
-      ctx.particles.floatText(ctx.player.centerX, ctx.player.y - 10, 'Mana restored!', '#a878e0');
-      ctx.toast('Consumed a Blue Potion — Mana fully restored!');
+      ctx.particles.floatText(ctx.player.centerX, ctx.player.y - 10, 'Mana ripristinato!', '#a878e0');
+      ctx.toast('Bevuta una Pozione Blu — Mana completamente ripristinato!');
     },
   },
 };
@@ -120,7 +120,7 @@ const ITEM_EQUIP_EFFECTS = {
       ctx.player.hasLegendarySword = false;
       ctx.player.hasMoltenSword = false;
     },
-    toast: 'Equipped Iron Sword!',
+    toast: 'Spada di Ferro equipaggiata!',
   },
   swordLegendary: {
     apply: (ctx) => {
@@ -129,7 +129,7 @@ const ITEM_EQUIP_EFFECTS = {
       ctx.player.hasLegendarySword = true;
       ctx.player.hasMoltenSword = false;
     },
-    toast: 'Equipped the Legendary Sword!',
+    toast: 'Spada Leggendaria equipaggiata!',
   },
   swordMolten: {
     apply: (ctx) => {
@@ -138,22 +138,22 @@ const ITEM_EQUIP_EFFECTS = {
       ctx.player.hasLegendarySword = false;
       ctx.player.hasMoltenSword = true;
     },
-    toast: 'Equipped the Molten Blade!',
+    toast: 'Lama Ignea equipaggiata!',
   },
-  armor: { apply: (ctx) => ctx.inventory.equip('armor'), toast: 'Equipped Iron Armor!' },
-  helmet: { apply: (ctx) => ctx.inventory.equip('helmet'), toast: "Equipped the Devil's Helmet!" },
-  armorJungle: { apply: (ctx) => ctx.inventory.equip('armorJungle'), toast: 'Equipped Jungle Armor!' },
-  armorObsidian: { apply: (ctx) => ctx.inventory.equip('armorObsidian'), toast: 'Equipped Obsidian Armor!' },
+  armor: { apply: (ctx) => ctx.inventory.equip('armor'), toast: 'Armatura di Ferro equipaggiata!' },
+  helmet: { apply: (ctx) => ctx.inventory.equip('helmet'), toast: "Elmo del Diavolo equipaggiato!" },
+  armorJungle: { apply: (ctx) => ctx.inventory.equip('armorJungle'), toast: 'Armatura della Giungla equipaggiata!' },
+  armorObsidian: { apply: (ctx) => ctx.inventory.equip('armorObsidian'), toast: 'Armatura di Ossidiana equipaggiata!' },
   boots: {
     apply: (ctx) => { ctx.inventory.equip('boots'); ctx.player.speed = BOOTS_SPEED; ctx.player.fireproof = false; },
-    toast: 'Equipped Swift Boots!',
+    toast: 'Stivali da Corsa equipaggiati!',
   },
   bootsFireproof: {
     apply: (ctx) => { ctx.inventory.equip('bootsFireproof'); ctx.player.speed = BOOTS_SPEED; ctx.player.fireproof = true; },
-    toast: 'Equipped Fireproof Boots!',
+    toast: 'Stivali Antifuoco equipaggiati!',
   },
-  shieldBone: { apply: (ctx) => ctx.inventory.equip('shieldBone'), toast: 'Equipped the Bone Shield!' },
-  crownSkeleton: { apply: (ctx) => ctx.inventory.equip('crownSkeleton'), toast: 'Equipped the Skeleton Crown!' },
+  shieldBone: { apply: (ctx) => ctx.inventory.equip('shieldBone'), toast: 'Scudo d\'Osso equipaggiato!' },
+  crownSkeleton: { apply: (ctx) => ctx.inventory.equip('crownSkeleton'), toast: 'Corona dello Scheletro equipaggiata!' },
 };
 
 const ITEM_UNEQUIP_EFFECTS = {
@@ -181,14 +181,14 @@ const GATE_UNLOCK_CONDITIONS = [
     isOpenFlag: 'isGateOpen',
     stillGuarded: (enemies) => enemies.some((e) => (e.type === 'slimeGreen' || e.type === 'slimeBlue') && e.alive),
     open: (map) => map.openGate(),
-    toast: 'The gate to the goblin boss has opened!',
+    toast: 'Il cancello del re goblin si è aperto!',
     flash: { color: '200,200,200', alpha: 0.3 },
   },
   {
     isOpenFlag: 'isSkeletonGateOpen',
     stillGuarded: (enemies) => enemies.some((e) => (e.type === 'orcBoss' || e.type === 'witchBoss') && e.alive),
     open: (map) => map.openSkeletonGate(),
-    toast: 'The two Jungle bosses have fallen — the Skeleton Gate creaks open to the south!',
+    toast: 'I due boss della Giungla sono caduti — il Cancello degli Scheletri si spalanca a sud!',
     flash: { color: '232,151,90', alpha: 0.4 },
   },
 ];
@@ -201,68 +201,68 @@ const BOSS_DEFEAT_EVENTS = {
     ctx.dropItem(10, 6, 'armor');
     ctx.advanceQuestTo(3);
     ctx.map.openWorldTwoGate();
-    ctx.toast('The Goblin King dropped Iron Armor!');
+    ctx.toast('Il Re Goblin ha lasciato Armatura di Ferro!');
     ctx.setScreenFlash({ color: '232,201,60', alpha: 0.5 });
     ctx.openSystemDialogue([
-      'The Goblin Boss has been vanquished!',
-      'The Gate to the East has opened. Welcome to the Sand Oasis!',
+      'Il Boss Goblin è stato sconfitto!',
+      'Il cancello a Est si è aperto. Benvenuto nell\'Oasi di Sabbia!',
     ]);
   },
   orcBoss: (ctx) => {
     ctx.dropItem(10, 6, 'armorJungle');
-    ctx.toast('The Orc Warlord dropped Jungle Armor!');
+    ctx.toast('Il Signore della Guerra Orco ha lasciato Armatura della Giungla!');
     ctx.setScreenFlash({ color: '72,140,74', alpha: 0.5 });
   },
   witchBoss: (ctx) => {
     ctx.dropItem(10, 6, 'boots');
-    ctx.toast('The Jungle Witch dropped Swift Boots!');
+    ctx.toast('La Strega della Giungla ha lasciato Stivali da Corsa!');
     ctx.setScreenFlash({ color: '63,212,168', alpha: 0.5 });
   },
   skeletonKing: (ctx) => {
     ctx.dropItem(14, 10, 'shieldBone');
     ctx.dropItem(-10, 10, 'crownSkeleton');
     ctx.dropItem(2, -8, 'potionBlue');
-    ctx.toast('The Skeleton King has fallen! Dropped a Bone Shield, Skeleton Crown, and Blue Potion!');
+    ctx.toast('Il Re degli Scheletri è caduto! Ha lasciato uno Scudo d\'Osso, una Corona dello Scheletro e una Pozione Blu!');
     ctx.setScreenFlash({ color: '232,226,208', alpha: 0.6 });
     ctx.map.openLavaGate();
     ctx.openSystemDialogue([
-      "The Skeleton King's throne crumbles to dust!",
-      'The Skeleton Dungeon falls silent at last.',
-      'But the floor cracks beneath it — a Lava Gate has opened to the south, into the Molten Depths.',
+      "Il trono del Re degli Scheletri si riduce in polvere!",
+      'Il Dungeon degli Scheletri tace finalmente.',
+      'Ma il pavimento sotto di esso si spacca — un Cancello di Lava si è aperto a sud, nelle Profondità Ignee.',
     ]);
   },
   devilBoss: (ctx) => {
     ctx.dropItem(10, 6, 'helmet');
     ctx.dropItem(-6, 6, 'swordLegendary');
     ctx.map.openJungleGate();
-    ctx.toast('The Devil dropped a Helmet and a legendary blade!');
+    ctx.toast('Il Diavolo ha lasciato un Elmo e una lama leggendaria!');
     ctx.setScreenFlash({ color: '244,212,60', alpha: 0.55 });
     ctx.openSystemDialogue([
-      'The Devil of the Sand Oasis has been vanquished!',
-      'Its dark hold over the dunes is broken at last.',
-      'A Jungle Gate has creaked open to the south — but something ancient stirs within.',
+      'Il Diavolo dell\'Oasi di Sabbia è stato sconfitto!',
+      'Il suo oscuro dominio sulle dune è finalmente spezzato.',
+      'Un Cancello della Giungla si è spalancato a sud — ma qualcosa di antico si muove al suo interno.',
     ]);
   },
   trollChieftain: (ctx) => {
     ctx.dropItem(10, 8, 'armorObsidian');
     ctx.map.openPitGate();
-    ctx.toast('The Troll Chieftain dropped Obsidian Armor!');
+    ctx.toast('Il Capitano Troll ha lasciato Armatura di Ossidiana!');
     ctx.setScreenFlash({ color: '143,174,90', alpha: 0.5 });
     ctx.openSystemDialogue([
-      'The Troll Chieftain crashes to the molten rock!',
-      'Deeper in the pit, the Pit Gate grinds open — something far worse waits below.',
+      'Il Capitano Troll si schianta sulla roccia ignea!',
+      'Più in fondo nel baratro, il Cancello del Pozzo si apre con uno stridore — qualcosa di molto peggio attende sotto.',
     ]);
   },
   pitDevil: (ctx) => {
     ctx.dropItem(10, 8, 'swordMolten');
     ctx.dropItem(-10, 8, 'bootsFireproof');
-    ctx.toast('The Pit Devil has fallen! Dropped the Molten Blade and Fireproof Boots!');
+    ctx.toast('Il Diavolo del Pozzo è caduto! Ha lasciato la Lama Ignea e gli Stivali Antifuoco!');
     ctx.setScreenFlash({ color: '255,106,30', alpha: 0.65 });
     ctx.setVictory();
     ctx.openSystemDialogue([
-      'The Pit Devil lets out a final, earth-shaking roar before collapsing into ash.',
-      'The Molten Depths fall still. Every corner of the Shattered Vale is finally at peace.',
-      'You have conquered the Shattered Vale.',
+      'Il Diavolo del Pozzo emette un ultimo ruggito che scuote la terra prima di crollare in cenere.',
+      'Le Profondità Ignee si acquietano. Ogni angolo della Shattered Vale è finalmente in pace.',
+      'Hai conquistato la Shattered Vale.',
     ]);
   },
 };

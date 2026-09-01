@@ -35,7 +35,7 @@ class NPC {
   _drawTalkBubble(ctx, camX, camY) {
     ctx.save();
 
-    const text = 'Talk with me';
+    const text = 'Parla con me';
     const floatY = Math.sin(Date.now() / 350) * 4;
 
     ctx.font = 'bold 12px sans-serif';

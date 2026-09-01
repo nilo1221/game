@@ -160,7 +160,7 @@ class DialogueSystem {
             const bounce = Math.sin(Date.now() / 200) * 2;
 
             ctx.fillText(
-                '▼ space / E to continue',
+                '▼ Spazio / E per continuare',
                 margin + boxW - 150,
                 boxY + boxH - 12 + bounce
             );

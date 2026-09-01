@@ -10,25 +10,25 @@ const NPC_DEFS = [
   {
     id: 'elder',
     x: 10 * TILE, y: 37 * TILE,
-    name: 'Elder Rowan',
+    name: 'Anziano Rowan',
     spriteKey: 'elder',
     dialogue: [
-      "Traveler, thank the stars you've come.",
-      "The Goblin King Grimtooth has claimed a castle in the northern lands as his stronghold, sending his forces to terrorize our village.",
-      "Legend says an iron sword is hidden in the forest west of the castle — you'll need it to stand a chance.",
-      "Find the sword, then seek out the Goblin King Grimtooth. May fortune guide your blade.",
-      "The castle gate will open only after you've defeated all the Blue and Green Slimes.",
+      "Viaggiatore, ringrazia le stelle che sei arrivato.",
+      "Il Re Goblin Grimtooth ha conquistato un castello nelle terre del nord come sua roccaforte, inviando le sue forze a terrorizzare il nostro villaggio.",
+      "La leggenda dice che una spada di ferro è nascosta nella foresta a ovest del castello — ne avrai bisogno per avere una possibilità.",
+      "Trova la spada, poi cerca il Re Goblin Grimtooth. Che la fortuna guidi la tua lama.",
+      "Il cancello del castello si aprirà solo dopo che avrai sconfitto tutti gli Slime Blu e Verdi.",
     ],
     opts: { questGiver: true, hasQuest: true, dir: 'down' },
   },
   {
     id: 'merchant',
     x: 16 * TILE, y: 33 * TILE,
-    name: 'Wandering Merchant',
+    name: 'Mercante Vagabondo',
     spriteKey: 'merchant',
     dialogue: [
-      "Ah, a new face! I don't have much to sell today, I'm afraid.",
-      "But take this health potion, on the house. Safe travels out there.",
+      "Ah, una faccia nuova! Temo di non avere molto da vendere oggi.",
+      "Ma prendi questa pozione di cura, offerta da me. Buon viaggio là fuori.",
     ],
     opts: { dir: 'down' },
   },
@@ -207,11 +207,11 @@ const ENEMY_PLACEMENTS = [
 ];
 
 const BOSS_NAMES = {
-  goblinBoss: 'Goblin King Grimtooth',
-  devilBoss: 'Devil of the Oasis',
-  orcBoss: 'Orc Warlord Skarn',
-  witchBoss: 'Jungle Witch Maera',
-  skeletonKing: 'The Skeleton King',
+  goblinBoss: 'Re Goblin Grimtooth',
+  devilBoss: 'Diavolo dell\'Oasi',
+  orcBoss: 'Signore della Guerra Orco Skarn',
+  witchBoss: 'Strega della Giungla Maera',
+  skeletonKing: 'Il Re degli Scheletri',
 };
 
 // Player spawn point, referenced both at game start and on restart.
