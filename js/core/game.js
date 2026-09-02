@@ -29,6 +29,7 @@
     thirstBar: document.getElementById('thirstBarInner'),
     thirstText: document.getElementById('thirstText'),
     chatLog: document.getElementById('chat-log'),
+    chatInput: document.getElementById('chat-input'),
   };
   const hud = Hud.bindDom(dom);
   hud.setVisible(false); // hidden until Play is pressed
@@ -131,6 +132,11 @@
     if (isMobileBlocked) return;
 
     if (state.gameState === 'start' || state.gameState === 'howtoplay') {
+      input.clearJustPressed();
+      return;
+    }
+
+    if (dom.chatInput && document.activeElement === dom.chatInput) {
       input.clearJustPressed();
       return;
     }
