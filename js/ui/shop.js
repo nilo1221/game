@@ -243,6 +243,49 @@ class Shop {
       }
     }
 
+    // item detail preview on hover
+    const hoveredBtn = this.hovered
+      ? this.itemButtons.find((b) => b.kind === this.hovered)
+      : null;
+    if (hoveredBtn) {
+      const detail = getItemStats(hoveredBtn.item.kind);
+      const dx = px + panelW - 230;
+      const dy = py + panelH - 120;
+      const dw = 210;
+      const dh = 100;
+
+      ctx.fillStyle = 'rgba(30, 26, 20, 0.98)';
+      roundRect(ctx, dx, dy, dw, dh, 8);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(232,228,216,0.3)';
+      ctx.lineWidth = 1;
+      roundRect(ctx, dx, dy, dw, dh, 8);
+      ctx.stroke();
+
+      const icon = Sprites.icons[hoveredBtn.item.kind];
+      if (icon) {
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(icon, dx + 12, dy + 14, 48, 48);
+        ctx.imageSmoothingEnabled = true;
+      }
+
+      ctx.fillStyle = '#f1efe8';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(detail.name, dx + 70, dy + 28);
+
+      const desc = formatItemStats(hoveredBtn.item.kind);
+      if (desc) {
+        ctx.fillStyle = '#b0b0b0';
+        ctx.font = '11px sans-serif';
+        ctx.fillText(desc, dx + 70, dy + 46, dw - 80);
+      }
+
+      ctx.fillStyle = '#e8c93c';
+      ctx.font = '12px sans-serif';
+      ctx.fillText(`${hoveredBtn.item.price} ${cName}`, dx + 70, dy + 76);
+    }
+
     // hint comandi
     ctx.fillStyle = 'rgba(232,228,216,0.5)';
     ctx.font = '11px sans-serif';
