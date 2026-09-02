@@ -88,6 +88,11 @@ class Multiplayer {
       const msg = JSON.parse(data);
       if (msg.type === 'id') this.id = msg.id;
       if (msg.type === 'players') this.updatePlayers(msg.players);
+      if (msg.type === 'chat') {
+        const rp = this.players.get(msg.from);
+        const fromName = rp ? rp.name : 'Player';
+        if (this.onChat) this.onChat(fromName, msg.payload.text);
+      }
       if (msg.type === 'event') this.handleEvent(msg);
     } catch (e) {
       console.error('[mp] invalid message', e);
@@ -127,6 +132,13 @@ class Multiplayer {
         color: this.color,
       },
     }));
+  }
+
+  sendChat(text) {
+    if (!this.connected || !this.ws || this.ws.readyState !== 1) return;
+    text = String(text).trim().slice(0, 120);
+    if (!text) return;
+    this.ws.send(JSON.stringify({ type: 'broadcast', payload: { type: 'chat', text } }));
   }
 
   sendEvent(type, payload) {

@@ -2,6 +2,16 @@
 // Similar to the inventory panel: it is an object owned by game.js, toggled
 // when the player talks to a merchant, and consumes mouse/keyboard input.
 
+function formatItemStats(kind) {
+  const s = getItemStats(kind);
+  const parts = [];
+  if (s.atk != null) parts.push(`ATT +${s.atk}`);
+  if (s.def != null) parts.push(`DEF +${s.def}`);
+  if (s.spd != null) parts.push(`VEL +${s.spd}`);
+  if (s.extra) parts.push(s.extra);
+  return parts.join(' • ');
+}
+
 class Shop {
   constructor() {
     this.open = false;
@@ -34,19 +44,19 @@ class Shop {
   }
 
   _layout(viewW, viewH) {
-    const panelW = 480;
-    const panelH = 380 + (this.merchant ? AFFILIATES.length * 60 + 40 : 0);
+    const panelW = 560;
+    const panelH = 460 + (this.merchant ? AFFILIATES.length * 60 + 40 : 0);
     const px = (viewW - panelW) / 2;
     const py = (viewH - panelH) / 2;
     this.itemButtons = [];
     this.affiliateButtons = [];
 
     const startY = py + 70;
-    const rowH = 42;
+    const rowH = 52;
     const listX = px + 20;
     const listW = panelW - 40;
-    const buyW = 70;
-    const buyH = 28;
+    const buyW = 80;
+    const buyH = 32;
 
     if (this.merchant) {
       this.merchant.getStock().forEach((item, i) => {
@@ -171,21 +181,36 @@ class Shop {
       const stats = getItemStats(item.kind);
       const y = btn.itemY;
 
-      // icon
       const icon = Sprites.icons[item.kind];
-      if (icon) {
-        ctx.shadowColor = 'rgba(232,201,60,0.3)';
-        ctx.shadowBlur = 4;
-        ctx.drawImage(icon, btn.itemX, y - 2, 28, 28);
-        ctx.shadowBlur = 0;
+
+      // name
+      ctx.fillStyle = '#f1efe8';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillText(stats.name, btn.itemX + 40, y + 16);
+
+      // stats/description
+      const extra = formatItemStats(item.kind);
+      if (extra) {
+        ctx.fillStyle = '#b0b0b0';
+        ctx.font = '11px sans-serif';
+        ctx.fillText(extra, btn.itemX + 40, y + 32);
       }
 
-      // name + price/qty
-      ctx.fillStyle = '#e8e4d8';
-      const text = `${stats.name}  —  ${item.price} ${cName}  (x${item.qty})`;
-      ctx.fillText(text, btn.itemX + 36, y + 17);
+      // price / qty
+      ctx.fillStyle = '#e8c93c';
+      ctx.font = '12px sans-serif';
+      const priceText = `${item.price} ${cName} (x${item.qty})`;
+      const priceW = ctx.measureText(priceText).width;
+      ctx.fillText(priceText, btn.x - priceW - 12, y + 18);
 
-      this._drawBtn(ctx, { x: btn.x, y: y, w: btn.w, h: btn.h }, 'Compra', this.hovered === btn.kind);
+      // icon 32x32 with crisp scaling
+      if (icon) {
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(icon, btn.itemX, y - 2, 32, 32);
+        ctx.imageSmoothingEnabled = true;
+      }
+
+      this._drawBtn(ctx, { x: btn.x, y: y + 8, w: btn.w, h: btn.h }, 'Compra', this.hovered === btn.kind);
     }
 
     // affiliate offers

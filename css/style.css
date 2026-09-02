@@ -180,6 +180,54 @@ img.gold-icon {
   color: #a8a08c;
 }
 
+#chat-ui {
+  position: fixed;
+  bottom: 60px;
+  right: 12px;
+  width: min(320px, 40vw);
+  max-height: 220px;
+  display: flex;
+  flex-direction: column;
+  background: rgba(20, 18, 16, 0.92);
+  border: 1px solid #4a3d2c;
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 900;
+  pointer-events: auto;
+}
+
+#chat-log {
+  flex: 1;
+  padding: 8px;
+  overflow-y: auto;
+  font: 12px sans-serif;
+  color: #f1efe8;
+  max-height: 170px;
+}
+
+#chat-log div {
+  margin-bottom: 3px;
+  word-break: break-word;
+}
+
+#chat-log .chat-self {
+  color: #e8c93c;
+}
+
+#chat-input {
+  border: none;
+  border-top: 1px solid #4a3d2c;
+  padding: 8px;
+  background: #1a1510;
+  color: #f1efe8;
+  font: 13px sans-serif;
+  outline: none;
+}
+
+#chat-input:focus {
+  border-top-color: #e8c93c;
+}
+
 .stat-label {
   font-family: "Cinzel", "Segoe UI", serif;
   font-weight: 700;

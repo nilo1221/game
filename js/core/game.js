@@ -28,6 +28,7 @@
     hungerText: document.getElementById('hungerText'),
     thirstBar: document.getElementById('thirstBarInner'),
     thirstText: document.getElementById('thirstText'),
+    chatLog: document.getElementById('chat-log'),
   };
   const hud = Hud.bindDom(dom);
   hud.setVisible(false); // hidden until Play is pressed
@@ -406,6 +407,26 @@
     AudioManager.play('ui');
     const overlay = document.getElementById('start-overlay');
     if (overlay) overlay.style.display = 'none';
+  };
+
+  multiplayer.onChat = (from, text) => {
+    if (!dom.chatLog) return;
+    const line = document.createElement('div');
+    line.textContent = `${from}: ${text}`;
+    dom.chatLog.appendChild(line);
+    dom.chatLog.scrollTop = dom.chatLog.scrollHeight;
+  };
+
+  window.sendChat = (text) => {
+    if (!multiplayer.connected) return;
+    multiplayer.sendChat(text);
+    if (dom.chatLog) {
+      const line = document.createElement('div');
+      line.textContent = `${multiplayer.name}: ${text}`;
+      line.className = 'chat-self';
+      dom.chatLog.appendChild(line);
+      dom.chatLog.scrollTop = dom.chatLog.scrollHeight;
+    }
   };
 
   window.__gameDebug = { state, restartGame };

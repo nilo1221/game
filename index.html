@@ -106,6 +106,11 @@
     </div>
   </div>
 
+  <div id="chat-ui">
+    <div id="chat-log"></div>
+    <input id="chat-input" type="text" maxlength="120" placeholder="Scrivi e premi Invio..." autocomplete="off" />
+  </div>
+
   <!-- utils first: shared math/canvas helpers nearly everything depends on -->
   <script src="js/utils.js"></script>
 
@@ -184,6 +189,19 @@
       onlineBtn.addEventListener('click', () => {
         window.startGame(getName(), true);
       });
+
+      const chatInput = document.getElementById('chat-input');
+      if (chatInput) {
+        chatInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            const text = chatInput.value.trim();
+            if (text && typeof window.sendChat === 'function') {
+              window.sendChat(text);
+            }
+            chatInput.value = '';
+          }
+        });
+      }
     })();
   </script>
 </body>
