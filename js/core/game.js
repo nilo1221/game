@@ -276,8 +276,8 @@
   canvas.addEventListener('mousemove', (e) => {
     if (isMobileBlocked) return;
     const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
+    const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const my = (e.clientY - rect.top) * (canvas.height / rect.height);
 
     if (state.gameState === 'playing' && inventory.open) {
       inventory.updateHover(mx, my, VIEW_W, VIEW_H);
@@ -314,8 +314,8 @@
     if (isMobileBlocked) return;
 
     const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
+    const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const my = (e.clientY - rect.top) * (canvas.height / rect.height);
 
     if (state.gameState === 'playing' && inventory.open) {
       const hit = inventory.clickAt(mx, my, VIEW_W, VIEW_H);
@@ -342,6 +342,12 @@
             AudioManager.play('buy');
           } else {
             Combat.toast(state, result.reason === 'insufficiente' ? `${shop.merchant.currencyName} insufficienti` : 'Oggetto esaurito');
+          }
+        } else if (hit.action === 'affiliate') {
+          const aff = AFFILIATES.find((a) => a.id === hit.id);
+          if (aff) {
+            window.open(aff.url, '_blank', 'noopener,noreferrer');
+            AudioManager.play('ui');
           }
         }
       }

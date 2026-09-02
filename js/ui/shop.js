@@ -10,6 +10,7 @@ class Shop {
     this.exitBtn = null;
     this.buyCurrencyBtn = null;
     this.itemButtons = [];
+    this.affiliateButtons = [];
   }
 
   openFor(merchant) {
@@ -17,6 +18,7 @@ class Shop {
     this.merchant = merchant;
     this.hovered = null;
     this.itemButtons = [];
+    this.affiliateButtons = [];
     this.exitBtn = null;
     this.buyCurrencyBtn = null;
   }
@@ -26,16 +28,18 @@ class Shop {
     this.merchant = null;
     this.hovered = null;
     this.itemButtons = [];
+    this.affiliateButtons = [];
     this.exitBtn = null;
     this.buyCurrencyBtn = null;
   }
 
   _layout(viewW, viewH) {
     const panelW = 480;
-    const panelH = 380;
+    const panelH = 380 + (this.merchant ? AFFILIATES.length * 60 + 40 : 0);
     const px = (viewW - panelW) / 2;
     const py = (viewH - panelH) / 2;
     this.itemButtons = [];
+    this.affiliateButtons = [];
 
     const startY = py + 70;
     const rowH = 42;
@@ -61,8 +65,27 @@ class Shop {
       });
     }
 
-    this.exitBtn = { x: px + panelW - 80, y: py + 14, w: 60, h: 26 };
-    this.buyCurrencyBtn = { x: px + panelW - 170, y: py + 14, w: 100, h: 26 };
+    this.exitBtn = { x: px + panelW - 90, y: py + 12, w: 70, h: 28 };
+    this.buyCurrencyBtn = { x: px + panelW - 180, y: py + 12, w: 100, h: 28 };
+
+    if (this.merchant && this.merchant.currency === 'premium' && AFFILIATES.length) {
+      const affStartY = startY + this.merchant.getStock().length * rowH + 30;
+      AFFILIATES.forEach((aff, i) => {
+        const y = affStartY + i * (rowH + 8);
+        const visitX = listX + listW - buyW;
+        this.affiliateButtons.push({
+          id: aff.id,
+          x: visitX,
+          y,
+          w: buyW,
+          h: buyH,
+          aff,
+          affX: listX,
+          affY: y,
+        });
+      });
+    }
+
     return { px, py, panelW, panelH };
   }
 
@@ -74,6 +97,9 @@ class Shop {
     for (const btn of this.itemButtons) {
       if (this._pointIn(mx, my, btn)) { this.hovered = btn.kind; break; }
     }
+    for (const btn of this.affiliateButtons) {
+      if (this._pointIn(mx, my, btn)) { this.hovered = `aff:${btn.id}`; break; }
+    }
   }
 
   clickAt(mx, my, viewW, viewH) {
@@ -82,6 +108,9 @@ class Shop {
     if (this.merchant && this.merchant.currency === 'premium' && this._pointIn(mx, my, this.buyCurrencyBtn)) return { action: 'buyCurrency' };
     for (const btn of this.itemButtons) {
       if (this._pointIn(mx, my, btn)) return { action: 'buy', kind: btn.kind };
+    }
+    for (const btn of this.affiliateButtons) {
+      if (this._pointIn(mx, my, btn)) return { action: 'affiliate', id: btn.id };
     }
     return null;
   }
@@ -158,6 +187,43 @@ class Shop {
 
       this._drawBtn(ctx, { x: btn.x, y: y, w: btn.w, h: btn.h }, 'Compra', this.hovered === btn.kind);
     }
+
+    // affiliate offers
+    if (this.affiliateButtons.length) {
+      const first = this.affiliateButtons[0];
+      const sepY = first.affY - 24;
+      ctx.fillStyle = 'rgba(232,228,216,0.2)';
+      ctx.fillRect(listX, sepY, listW, 1);
+
+      ctx.fillStyle = '#e8c93c';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.fillText('Offerte sponsorizzate', listX, sepY + 14);
+
+      for (const btn of this.affiliateButtons) {
+        const aff = btn.aff;
+        const y = btn.affY;
+
+        ctx.fillStyle = aff.color;
+        roundRect(ctx, listX, y - 2, 6, 28, 3);
+        ctx.fill();
+
+        ctx.fillStyle = '#f1efe8';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText(aff.name, listX + 14, y + 10);
+        ctx.fillStyle = '#b0b0b0';
+        ctx.font = '11px sans-serif';
+        ctx.fillText(aff.description, listX + 14, y + 26);
+
+        this._drawBtn(ctx, { x: btn.x, y: y, w: btn.w, h: btn.h }, 'Visita', this.hovered === `aff:${btn.id}`);
+      }
+    }
+
+    // hint comandi
+    ctx.fillStyle = 'rgba(232,228,216,0.5)';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('ESC per chiudere', viewW / 2, py + panelH - 14);
+    ctx.textAlign = 'left';
 
     ctx.restore();
   }
