@@ -359,7 +359,6 @@
         state.gameState = 'playing';
         state.hasStarted = true;
         hud.setVisible(true);
-        multiplayer.connect('Nilo1221');
         AudioManager.resume();
         AudioManager.play('ui');
       } else if (Screens.pointInBtn(mx, my, state.startButtons.howto)) {
@@ -389,7 +388,6 @@
       state.gameState = 'playing';
       state.continueButton = null;
       state.restartButton = null;
-      multiplayer.connect('Nilo1221');
       return;
     }
     if (Screens.pointInBtn(mx, my, state.restartButton)) restartGame();
@@ -398,6 +396,18 @@
   // Small debug hook (harmless in normal play) — lets you inspect live state
   // from the browser console with `__gameDebug.state`, or force a restart
   // with `__gameDebug.restartGame()`.
+  window.startGame = (name, online) => {
+    multiplayer.name = name;
+    if (online) multiplayer.connect(name);
+    state.gameState = 'playing';
+    state.hasStarted = true;
+    hud.setVisible(true);
+    AudioManager.resume();
+    AudioManager.play('ui');
+    const overlay = document.getElementById('start-overlay');
+    if (overlay) overlay.style.display = 'none';
+  };
+
   window.__gameDebug = { state, restartGame };
 
   canvas.focus();

@@ -94,6 +94,18 @@
     <canvas id="game" width="960" height="600"></canvas>
   </div>
 
+  <div id="start-overlay">
+    <div class="start-card">
+      <h1>Shattered Vale</h1>
+      <input id="player-name" type="text" placeholder="Nome giocatore" value="Nilo1221" maxlength="16" />
+      <div class="start-actions">
+        <button id="play-offline" class="start-btn offline">Gioca offline</button>
+        <button id="play-online" class="start-btn online">Entra nel mondo aperto</button>
+      </div>
+      <p class="start-hint">I giocatori online sono nel tuo stesso server.</p>
+    </div>
+  </div>
+
   <!-- utils first: shared math/canvas helpers nearly everything depends on -->
   <script src="js/utils.js"></script>
 
@@ -156,6 +168,22 @@
       const c = localStorage.getItem('cookieConsent');
       if (c === 'true') acceptCookies();
       else if (c === 'false') hideCookieBanner();
+    })();
+  </script>
+  <script>
+    (function() {
+      const nameInput = document.getElementById('player-name');
+      const offlineBtn = document.getElementById('play-offline');
+      const onlineBtn = document.getElementById('play-online');
+      function getName() {
+        return (nameInput.value || 'Nilo1221').trim().slice(0, 16);
+      }
+      offlineBtn.addEventListener('click', () => {
+        window.startGame(getName(), false);
+      });
+      onlineBtn.addEventListener('click', () => {
+        window.startGame(getName(), true);
+      });
     })();
   </script>
 </body>
