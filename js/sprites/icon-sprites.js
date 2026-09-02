@@ -1,6 +1,16 @@
 // sprites/icon-sprites.js — small 24x24 procedural item icons, used both
 // for the bobbing world pickup and the inventory backpack/equip grid.
 
+function loadIcon(path, w = 24, h = 24) {
+  const c = makeCanvas(w, h);
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  const img = new Image();
+  img.onload = () => ctx.drawImage(img, 0, 0, w, h);
+  img.src = path;
+  return c;
+}
+
 function buildSwordIcon() {
   const c = makeCanvas(24, 24);
   const ctx = c.getContext('2d');
