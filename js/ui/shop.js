@@ -131,6 +131,8 @@ class Shop {
 
   draw(ctx, state, viewW, viewH) {
     const { px, py, panelW, panelH } = this._layout(viewW, viewH);
+    const listX = px + 20;
+    const listW = panelW - 40;
 
     // backdrop
     ctx.save();
