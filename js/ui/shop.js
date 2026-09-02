@@ -207,7 +207,7 @@ class Shop {
       ctx.fillText(priceText, btn.x - priceW - 12, y + 18);
 
       // icon 32x32 with crisp scaling
-      if (icon) {
+      if (icon && icon.width && icon.height) {
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(icon, btn.itemX, y - 2, 32, 32);
         ctx.imageSmoothingEnabled = true;
@@ -266,7 +266,7 @@ class Shop {
       ctx.stroke();
 
       const icon = Sprites.icons[hoveredBtn.item.kind];
-      if (icon) {
+      if (icon && icon.width && icon.height) {
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(icon, dx + 12, dy + 14, 48, 48);
         ctx.imageSmoothingEnabled = true;
@@ -297,13 +297,15 @@ class Shop {
     ctx.textAlign = 'left';
 
     } catch (err) {
-      console.error('[shop] draw error', err);
+      const errMsg = (err && err.message) ? err.message : String(err);
+      console.error('[shop] draw error:', errMsg);
+      if (err && err.stack) console.error(err.stack);
       ctx.fillStyle = 'rgba(0,0,0,0.85)';
       ctx.fillRect(0, 0, viewW, viewH);
       ctx.fillStyle = '#ff5555';
       ctx.font = 'bold 14px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('Errore negozio: ' + String(err.message || err), viewW / 2, viewH / 2);
+      ctx.fillText('Errore negozio: ' + errMsg, viewW / 2, viewH / 2);
       ctx.textAlign = 'left';
     } finally {
       ctx.restore();
