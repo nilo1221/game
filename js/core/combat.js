@@ -21,6 +21,12 @@ const Combat = {
     for (const npc of npcs) {
       if (!rectsOverlap(reach, npc)) continue;
 
+      if (npc.shop) {
+        state.shop.openFor(npc.shop);
+        AudioManager.play('openShop');
+        return;
+      }
+
       dialogue.open(npc, () => {
         npc.talked = true; // hide the "Talk with me" bubble after first completed talk
 
@@ -32,10 +38,6 @@ const Combat = {
           state.merchantGaveGift = true;
           state.inventory.add('potionRed', 1);
           this.toast(state, 'Ricevuto: Pozione di Cura');
-        }
-        if (npc.shop) {
-          state.shop.openFor(npc.shop);
-          AudioManager.play('openShop');
         }
       });
       return;
