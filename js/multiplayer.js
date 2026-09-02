@@ -11,8 +11,10 @@ class RemotePlayer {
   }
 
   update(data) {
-    this.x = data.x;
-    this.y = data.y;
+    this.tX = data.x;
+    this.tY = data.y;
+    if (this.x == null) this.x = data.x;
+    if (this.y == null) this.y = data.y;
     this.dir = data.dir || 'down';
     this.moving = data.moving || false;
     this.attacking = data.attacking || 0;
@@ -24,6 +26,8 @@ class RemotePlayer {
 
   tick() {
     if (this.attacking > 0) this.attacking--;
+    this.x += (this.tX - this.x) * 0.3;
+    this.y += (this.tY - this.y) * 0.3;
     this.anim.update(this.moving);
     if (this.attacking > 0) this.animSword.update(true);
     else this.animSword.frame = 0;
@@ -55,6 +59,12 @@ class Multiplayer {
     this.connected = false;
     this.sendTimer = 0;
     this.name = 'Player';
+    this.color = this._pickColor();
+  }
+
+  _pickColor() {
+    const colors = ['#6f9', '#f96', '#69f', '#f6f', '#ff9', '#9ff', '#f99'];
+    return colors[Math.floor(Math.random() * colors.length)];
   }
 
   connect(name = 'Player') {
@@ -101,7 +111,7 @@ class Multiplayer {
   send(player) {
     if (!this.connected || !this.ws || this.ws.readyState !== 1) return;
     this.sendTimer++;
-    if (this.sendTimer < 3) return; // 20 fps state updates
+    if (this.sendTimer < 2) return; // ~30 fps state updates
     this.sendTimer = 0;
     this.ws.send(JSON.stringify({
       type: 'state',
@@ -114,7 +124,7 @@ class Multiplayer {
         hp: player.hp,
         maxHp: player.maxHp,
         name: this.name,
-        color: '#6f9',
+        color: this.color,
       },
     }));
   }
