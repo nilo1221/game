@@ -17,6 +17,15 @@
 <title>Shattered Vale: GDR di Sopravvivenza</title>
 <link rel="stylesheet" href="css/style.css" />
 <link rel="shortcut icon" href="icons/favicon.ico" type="image/x-icon">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2BWEBX4Y4K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2BWEBX4Y4K');
+</script>
 </head>
 <body>
 
@@ -40,6 +49,10 @@
     <div class="stat-group" id="goldGroup">
       <span class="gold-icon">🪙</span>
       <span class="stat-text" id="goldText">0</span>
+    </div>
+    <div class="stat-group" id="premiumGroup">
+      <span class="gold-icon">💎</span>
+      <span class="stat-text" id="premiumText">0</span>
     </div>
     <div class="stat-group" id="hungerGroup">
       <div class="stat-icon">🍞</div>
@@ -65,6 +78,7 @@
   <script src="js/config/level-layout.js"></script>
   <script src="js/config/item-effects.js"></script>
   <script src="js/config/item-stats.js"></script>
+  <script src="js/config/shop-pool.js"></script>
 
   <!-- sprites: builder functions, then the registry that calls them -->
   <script src="js/sprites/humanoid-sprites.js"></script>
@@ -91,10 +105,15 @@
   <script src="js/systems/particles.js"></script>
   <script src="js/systems/dialogue.js"></script>
   <script src="js/systems/inventory.js"></script>
+  <script src="js/systems/merchant.js"></script>
+  <script src="js/systems/save.js"></script>
+  <script src="js/systems/payments.js"></script>
+  <script src="js/systems/audio.js"></script>
 
   <!-- ui -->
   <script src="js/ui/hud.js"></script>
   <script src="js/ui/screens.js"></script>
+  <script src="js/ui/shop.js"></script>
 
   <!-- core: input, world assembly, combat resolution, then the orchestrator -->
   <script src="js/core/input.js"></script>

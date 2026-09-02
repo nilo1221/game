@@ -212,6 +212,8 @@ const BOSS_NAMES = {
   orcBoss: 'Signore della Guerra Orco Skarn',
   witchBoss: 'Strega della Giungla Maera',
   skeletonKing: 'Il Re degli Scheletri',
+  trollChieftain: 'Throk il Tiranno',
+  pitDevil: 'Moloch il Divoratore',
 };
 
 // Player spawn point, referenced both at game start and on restart.

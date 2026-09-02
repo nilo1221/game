@@ -21,6 +21,7 @@
     xpText: document.getElementById('xpText'),
     lvlText: document.getElementById('lvlText'),
     goldText: document.getElementById('goldText'),
+    premiumText: document.getElementById('premiumText'),
     manaBar: document.getElementById('manaBarInner'),
     manaText: document.getElementById('manaText'),
     hungerBar: document.getElementById('hungerBarInner'),
@@ -51,17 +52,20 @@
   const particles = new ParticleSystem();
   const dialogue = new DialogueSystem();
   const inventory = new Inventory();
+  const shop = new Shop();
   const player = new Player(PLAYER_SPAWN.x, PLAYER_SPAWN.y);
+  SaveGame.load(player);
   const multiplayer = new Multiplayer();
 
   const { npcs, elder, merchant } = WorldFactory.createNpcs();
+  if (merchant) merchant.shop = new Merchant('Mercante Vagabondo', WANDERING_MERCHANT_STOCK, WANDERING_MERCHANT_CURRENCY);
   const worldItems = WorldFactory.createWorldItems();
 
   // Shared game state, passed explicitly into Combat/Hud/Screens so none of
   // those modules need to close over this file's local variables (they
   // can't anyway — each lives in its own <script> file).
   const state = {
-    map, camera, particles, dialogue, inventory, player,
+    map, camera, particles, dialogue, inventory, shop, player,
     npcs, elder, merchant, worldItems,
     enemies: WorldFactory.createEnemies(),
     merchantGaveGift: false,
@@ -87,6 +91,7 @@
     player.xpNext = PLAYER_BASE_STATS.xpNext;
     player.lvl = PLAYER_BASE_STATS.lvl;
     player.gold = PLAYER_BASE_STATS.gold;
+    player.premium = PLAYER_BASE_STATS.premium;
     player.atk = PLAYER_BASE_STATS.atk;
     player.hasSword = false;
     player.hasLegendarySword = false;
@@ -104,6 +109,7 @@
     // original restart behavior, which never reset them either.)
 
     inventory.reset();
+    if (shop) shop.close();
 
     state.questStage = 0;
     state.gameState = 'playing';
@@ -117,6 +123,7 @@
     state.toastTimer = 0;
     state.restartButton = null;
     state.continueButton = null;
+    SaveGame.save(player);
   }
 
   function update() {
@@ -127,12 +134,15 @@
       return;
     }
 
+    input.pollGamepad();
     dialogue.update();
 
     if (state.gameState !== 'playing') return;
 
     if (dialogue.isOpen()) {
       if (justPressed[' '] || justPressed['e']) dialogue.advance();
+    } else if (shop.open) {
+      if (justPressed['escape']) shop.close();
     } else if (inventory.open) {
       if (justPressed['i'] || justPressed['escape']) inventory.toggle();
     } else if (justPressed['escape']) {
@@ -246,6 +256,7 @@
     Hud.draw(ctx, state, VIEW_W, VIEW_H);
     dialogue.draw(ctx, VIEW_W, VIEW_H);
     inventory.draw(ctx, VIEW_W, VIEW_H, player);
+    if (shop.open) shop.draw(ctx, state, VIEW_W, VIEW_H);
 
     if (state.gameState === 'gameover' || state.gameState === 'victory') Screens.drawEnd(ctx, state, VIEW_W, VIEW_H);
   }
@@ -256,6 +267,7 @@
     draw();
     domTick++;
     if (domTick % 4 === 0 && !isMobileBlocked) hud.sync(player);
+    if (domTick % 120 === 0 && !isMobileBlocked) SaveGame.save(player);
     requestAnimationFrame(loop);
   }
 
@@ -270,6 +282,12 @@
     if (state.gameState === 'playing' && inventory.open) {
       inventory.updateHover(mx, my, VIEW_W, VIEW_H);
       canvas.style.cursor = 'default';
+      return;
+    }
+
+    if (state.gameState === 'playing' && shop.open) {
+      shop.updateHover(mx, my, VIEW_W, VIEW_H);
+      canvas.style.cursor = shop.hovered ? 'pointer' : 'default';
       return;
     }
 
@@ -305,12 +323,39 @@
       return;
     }
 
+    if (state.gameState === 'playing' && shop.open) {
+      const hit = shop.clickAt(mx, my, VIEW_W, VIEW_H);
+      if (hit) {
+        if (hit.action === 'close') {
+          shop.close();
+        } else if (hit.action === 'buyCurrency') {
+          Payments.purchase('small', () => {
+            const gems = Payments.PACKS.small.gems;
+            player.premium += gems;
+            Combat.toast(state, `+${gems} Gemme acquistate`);
+            AudioManager.play('buy');
+          });
+        } else if (hit.action === 'buy') {
+          const result = shop.merchant.buy(hit.kind, player, inventory);
+          if (result.ok) {
+            Combat.toast(state, `Acquistato: ${getItemStats(hit.kind).name}`);
+            AudioManager.play('buy');
+          } else {
+            Combat.toast(state, result.reason === 'insufficiente' ? `${shop.merchant.currencyName} insufficienti` : 'Oggetto esaurito');
+          }
+        }
+      }
+      return;
+    }
+
     if (state.gameState === 'start') {
       if (Screens.pointInBtn(mx, my, state.startButtons.play)) {
         state.gameState = 'playing';
         state.hasStarted = true;
         hud.setVisible(true);
         multiplayer.connect('Nilo1221');
+        AudioManager.resume();
+        AudioManager.play('ui');
       } else if (Screens.pointInBtn(mx, my, state.startButtons.howto)) {
         state.gameState = 'howtoplay';
       } else if (Screens.pointInBtn(mx, my, state.startButtons.restart)) {

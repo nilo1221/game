@@ -23,6 +23,7 @@ class Player {
     this.xp = PLAYER_BASE_STATS.xp;
     this.xpNext = PLAYER_BASE_STATS.xpNext;
     this.gold = PLAYER_BASE_STATS.gold;
+    this.premium = PLAYER_BASE_STATS.premium;
 
     this.hasSword = false;
     this.hasLegendarySword = false;

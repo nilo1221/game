@@ -33,6 +33,10 @@ const Combat = {
           state.inventory.add('potionRed', 1);
           this.toast(state, 'Ricevuto: Pozione di Cura');
         }
+        if (npc.shop) {
+          state.shop.openFor(npc.shop);
+          AudioManager.play('openShop');
+        }
       });
       return;
     }
@@ -45,6 +49,7 @@ const Combat = {
   handleAttack(state) {
     const { player, enemies, particles, camera } = state;
     if (!player.startAttack()) return;
+    AudioManager.play('attack');
 
     const isKnockbackSwing = player.attackCount % KNOCKBACK_EVERY_NTH_ATTACK === 0;
     const hb = player.attackHitbox();
@@ -64,9 +69,11 @@ const Combat = {
     const { player, particles } = state;
     const reward = getCombatReward(en.type);
     player.gold += reward.gold;
+    AudioManager.play('coin');
 
     const leveled = player.gainXP(reward.xp, particles);
     if (leveled) {
+      AudioManager.play('levelup');
       this.toast(state, 'Salito di livello! Ora livello ' + player.lvl);
       state.screenFlash = { color: '255,255,255', alpha: 0.3 };
     }
@@ -127,6 +134,7 @@ const Combat = {
       item.update();
       if (item.taken || !rectsOverlap(player, item)) return;
       item.taken = true;
+      AudioManager.play('pickup');
 
       const effect = ITEM_PICKUP_EFFECTS[item.kind] || DEFAULT_PICKUP_EFFECT;
       effect.apply({

@@ -33,6 +33,9 @@ const Hud = {
       ...(dom.goldText && dom.goldText.parentElement && dom.goldText.parentElement !== document.body
         ? [dom.goldText.parentElement]
         : [dom.goldText]),
+      ...(dom.premiumText && dom.premiumText.parentElement && dom.premiumText.parentElement !== document.body
+        ? [dom.premiumText.parentElement]
+        : [dom.premiumText]),
       ...group(dom.hungerBar, dom.hungerText),
       ...group(dom.thirstBar, dom.thirstText),
     ].filter(Boolean);
@@ -53,6 +56,7 @@ const Hud = {
         dom.xpText.textContent = `${player.xp} / ${player.xpNext} Esp`;
         dom.lvlText.textContent = player.lvl;
         dom.goldText.textContent = player.gold;
+        dom.premiumText.textContent = player.premium;
         dom.manaBar.style.width = (player.mana / player.maxMana * 100) + '%';
         dom.manaText.textContent = `${Math.floor(player.mana)}/${player.maxMana}`;
         dom.hungerBar.style.width = (player.hunger / player.maxHunger * 100) + '%';
@@ -84,6 +88,91 @@ const Hud = {
     if (engaged) return engaged;
     if (nearest && nearestDist < Math.max(viewW, viewH) * 0.2) return nearest;
     return null;
+  },
+
+  _drawBossBannerOrnament(ctx, x, y, w, h, color, type) {
+    ctx.save();
+    ctx.fillStyle = color;
+    switch (type) {
+      case 'devilBoss':
+      case 'pitDevil':
+        // Upward horns on both ends of the bar.
+        ctx.beginPath();
+        ctx.moveTo(x - 2, y);
+        ctx.lineTo(x - 2, y - 10);
+        ctx.lineTo(x + 6, y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(x + w + 2, y);
+        ctx.lineTo(x + w + 2, y - 10);
+        ctx.lineTo(x + w - 6, y);
+        ctx.closePath();
+        ctx.fill();
+        break;
+      case 'trollChieftain':
+        // Upward tusks on both ends of the bar (kept clear of the HP text).
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - 4, y - 8);
+        ctx.lineTo(x + 8, y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(x + w, y);
+        ctx.lineTo(x + w + 4, y - 8);
+        ctx.lineTo(x + w - 8, y);
+        ctx.closePath();
+        ctx.fill();
+        break;
+      case 'skeletonKing':
+        // Bone caps on the left and right sides.
+        ctx.fillStyle = '#e8e2d0';
+        roundRect(ctx, x - 8, y, 8, h, 3);
+        ctx.fill();
+        roundRect(ctx, x + w, y, 8, h, 3);
+        ctx.fill();
+        break;
+      case 'witchBoss':
+        // Pointed hat top, centered above the bar.
+        ctx.beginPath();
+        ctx.moveTo(x + w / 2, y - 10);
+        ctx.lineTo(x + w / 2 - 8, y);
+        ctx.lineTo(x + w / 2 + 8, y);
+        ctx.closePath();
+        ctx.fill();
+        break;
+      case 'goblinBoss':
+        // Jagged crown with three spikes across the top.
+        for (let i = 0; i < 3; i++) {
+          const px = x + 4 + i * ((w - 12) / 2);
+          ctx.beginPath();
+          ctx.moveTo(px, y);
+          ctx.lineTo(px + 4, y - 8);
+          ctx.lineTo(px + 8, y);
+          ctx.closePath();
+          ctx.fill();
+        }
+        break;
+      case 'orcBoss':
+        // Side spikes pointing outward from the bar.
+        ctx.beginPath();
+        ctx.moveTo(x - 4, y);
+        ctx.lineTo(x - 10, y + h / 2);
+        ctx.lineTo(x, y + h);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(x + w + 4, y);
+        ctx.lineTo(x + w + 10, y + h / 2);
+        ctx.lineTo(x + w, y + h);
+        ctx.closePath();
+        ctx.fill();
+        break;
+      default:
+        break;
+    }
+    ctx.restore();
   },
 
   drawBossBanner(ctx, state, viewW, viewH) {
@@ -132,6 +221,8 @@ const Hud = {
     ctx.fillStyle = fillColor;
     roundRect(ctx, x, barY, Math.max(0, barW * pct), barH, 4);
     ctx.fill();
+
+    this._drawBossBannerOrnament(ctx, x, barY, barW, barH, bannerColor, boss.type);
 
     ctx.font = 'bold 11px sans-serif';
     ctx.fillStyle = '#f1efe8';

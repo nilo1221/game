@@ -20,6 +20,7 @@ const PLAYER_BASE_STATS = {
   xpNext: 10,
   lvl: 1,
   gold: 0,
+  premium: 0,
   hunger: 100,
   maxHunger: 100,
   thirst: 100,

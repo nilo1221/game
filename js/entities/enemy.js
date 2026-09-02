@@ -40,6 +40,91 @@ function getEnemyHpBarColor(enemy) {
   return '#97c459';
 }
 
+// Decorative boss cap/horns/tusks drawn over the health bar to give each
+// boss a readable visual identity.
+function drawHpBarOrnament(ctx, x, y, w, h, color, type) {
+  ctx.fillStyle = color;
+  switch (type) {
+    case 'devilBoss':
+    case 'pitDevil':
+      // Devil horns: two small upward triangles at the ends.
+      ctx.beginPath();
+      ctx.moveTo(x + 2, y);
+      ctx.lineTo(x + 2, y - 4);
+      ctx.lineTo(x + 6, y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x + w - 2, y);
+      ctx.lineTo(x + w - 2, y - 4);
+      ctx.lineTo(x + w - 6, y);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    case 'trollChieftain':
+      // Troll tusks: small inward tusks on top of the bar ends.
+      ctx.beginPath();
+      ctx.moveTo(x + 3, y);
+      ctx.lineTo(x + 1, y - 5);
+      ctx.lineTo(x + 7, y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x + w - 3, y);
+      ctx.lineTo(x + w - 1, y - 5);
+      ctx.lineTo(x + w - 7, y);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    case 'skeletonKing':
+      // Bone caps: ivory rounded caps on the left and right sides.
+      ctx.fillStyle = '#e8e2d0';
+      roundRect(ctx, x - 3, y, 5, h, 2);
+      ctx.fill();
+      roundRect(ctx, x + w - 2, y, 5, h, 2);
+      ctx.fill();
+      break;
+    case 'witchBoss':
+      // Witch hat point: a small centered triangle above the bar.
+      ctx.beginPath();
+      ctx.moveTo(x + w / 2, y - 5);
+      ctx.lineTo(x + w / 2 - 3, y);
+      ctx.lineTo(x + w / 2 + 3, y);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    case 'goblinBoss':
+      // Goblin crown: three tiny spikes across the top.
+      for (let i = 0; i < 3; i++) {
+        const px = x + 2 + i * ((w - 8) / 2);
+        ctx.beginPath();
+        ctx.moveTo(px, y);
+        ctx.lineTo(px + 3, y - 3);
+        ctx.lineTo(px + 6, y);
+        ctx.closePath();
+        ctx.fill();
+      }
+      break;
+    case 'orcBoss':
+      // Orc spikes: small triangles on the left and right sides.
+      ctx.beginPath();
+      ctx.moveTo(x - 2, y + 1);
+      ctx.lineTo(x - 5, y + h / 2);
+      ctx.lineTo(x, y + h - 1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x + w + 2, y + 1);
+      ctx.lineTo(x + w + 5, y + h / 2);
+      ctx.lineTo(x + w, y + h - 1);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    default:
+      break;
+  }
+}
+
 class Enemy {
   constructor(x, y, type, opts = {}) {
     this.x = x;
@@ -56,6 +141,7 @@ class Enemy {
     this.drawH = def.drawH;
     this.hp = opts.hp || def.hp;
     this.maxHp = this.hp;
+    this.displayedHp = this.hp;
     this.speed = def.speed;
     this.contactDmg = def.contactDmg;
     this.atkRange = def.atkRange;
@@ -146,6 +232,10 @@ class Enemy {
   }
 
   update(player, map, particles) {
+    if (this.displayedHp !== this.hp) {
+      this.displayedHp += (this.hp - this.displayedHp) * 0.15;
+      if (Math.abs(this.hp - this.displayedHp) < 0.5) this.displayedHp = this.hp;
+    }
     if (!this.alive) {
       this.deathTimer++;
       return;
@@ -282,13 +372,38 @@ class Enemy {
     this.anim.draw(ctx, drawX, drawY, this.dir, flash);
 
     // HP bar
-    if (this.hp < this.maxHp) {
-      const barW = this.w + 4;
-      const bx = this.centerX - camX - barW / 2, by = drawY - 7;
-      ctx.fillStyle = 'rgba(0,0,0,0.5)';
-      ctx.fillRect(bx, by, barW, 4);
-      ctx.fillStyle = getEnemyHpBarColor(this);
-      ctx.fillRect(bx, by, barW * (this.hp / this.maxHp), 4);
+    if (this.alive && this.hp < this.maxHp) {
+      const barW = this.w + 10;
+      const barH = 6;
+      const bx = this.centerX - camX - barW / 2;
+      const by = drawY - 11;
+      const pct = Math.max(0, this.displayedHp / this.maxHp);
+      let hpColor = getEnemyHpBarColor(this);
+      if (pct <= 0.25) hpColor = '#ff4b4b';
+      else if (pct <= 0.5) hpColor = '#f4c430';
+
+      ctx.save();
+      roundRect(ctx, bx, by, barW, barH, 3);
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      ctx.fill();
+      roundRect(ctx, bx, by, barW, barH, 3);
+      ctx.strokeStyle = '#1a1510';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      const fillW = (barW - 2) * pct;
+      if (fillW > 0) {
+        ctx.save();
+        roundRect(ctx, bx + 1, by + 1, barW - 2, barH - 2, 2);
+        ctx.clip();
+        ctx.fillStyle = hpColor;
+        ctx.fillRect(bx + 1, by + 1, fillW, barH - 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        ctx.fillRect(bx + 1, by + 1, fillW, 2);
+        ctx.restore();
+      }
+      if (this.isBoss) drawHpBarOrnament(ctx, bx, by, barW, barH, hpColor, this.type);
+      ctx.restore();
     }
   }
 }
