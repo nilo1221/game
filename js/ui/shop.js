@@ -136,6 +136,7 @@ class Shop {
 
     // backdrop
     ctx.save();
+    try {
     ctx.fillStyle = 'rgba(6,8,5,0.92)';
     ctx.fillRect(0, 0, viewW, viewH);
 
@@ -295,7 +296,18 @@ class Shop {
     ctx.fillText('ESC per chiudere', viewW / 2, py + panelH - 14);
     ctx.textAlign = 'left';
 
-    ctx.restore();
+    } catch (err) {
+      console.error('[shop] draw error', err);
+      ctx.fillStyle = 'rgba(0,0,0,0.85)';
+      ctx.fillRect(0, 0, viewW, viewH);
+      ctx.fillStyle = '#ff5555';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Errore negozio: ' + String(err.message || err), viewW / 2, viewH / 2);
+      ctx.textAlign = 'left';
+    } finally {
+      ctx.restore();
+    }
   }
 
   _drawBtn(ctx, rect, label, active) {
