@@ -34,14 +34,14 @@ const ITEM_STATS = {
   helmet:         { name: "Elmo del Diavolo", def: ARMOR_DEFENSE.helmet },
   crownSkeleton:  { name: 'Corona dello Scheletro', def: ARMOR_DEFENSE.crownSkeleton },
   shield:         { name: 'Scudo', def: ARMOR_DEFENSE.shield },
-  shieldBone:     { name: 'Scudo d'Osso', def: ARMOR_DEFENSE.shieldBone },
+  shieldBone:     { name: "Scudo d'Osso", def: ARMOR_DEFENSE.shieldBone },
 
   boots:          { name: 'Stivali da Corsa', spd: BOOTS_SPEED_BONUS },
   bootsFireproof: { name: 'Stivali Antifuoco', spd: BOOTS_SPEED_BONUS, extra: 'Immuni alla lava' },
 
   potionRed:      { name: 'Pozione di Cura', extra: 'Ripristina i PS completamente' },
   potionBlue:     { name: 'Pozione di Mana', extra: 'Ripristina il Mana completamente' },
-  coin:           { name: 'Moneta d'Oro' },
+  coin:           { name: "Moneta d'Oro" },
   key:            { name: 'Chiave' },
 };
 const DEFAULT_ITEM_STATS = { name: 'Oggetto' };
