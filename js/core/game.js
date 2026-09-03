@@ -31,6 +31,7 @@
     thirstText: document.getElementById('thirstText'),
     chatLog: document.getElementById('chat-log'),
     chatInput: document.getElementById('chat-input'),
+    nameInput: document.getElementById('player-name'),
   };
   const hud = Hud.bindDom(dom);
   hud.setVisible(false); // hidden until Play is pressed
@@ -74,7 +75,8 @@
     enemies: WorldFactory.createEnemies(),
     merchantGaveGift: false,
     questStage: 0, // 0 = not talked, 1 = quest given, 2 = sword found, 3 = boss defeated
-    gameState: 'start', // 'start' | 'howtoplay' | 'playing' | 'gameover'
+    gameState: 'lobby', // 'lobby' | 'start' | 'howtoplay' | 'playing' | 'gameover'
+    lobbyTriedConnect: false,
     hasStarted: false, // true once Play has been pressed at least once — flips the start-menu button to "Continue"
     screenFlash: null, // {color, alpha}
     toastMsg: null,
@@ -118,6 +120,7 @@
     state.questStage = 0;
     state.gameState = 'playing';
     state.hasStarted = true;
+    state.lobbyTriedConnect = false;
     state.merchantGaveGift = false;
 
     WorldFactory.resetNpcsAndItems(npcs, worldItems);
@@ -127,6 +130,10 @@
     state.toastTimer = 0;
     state.restartButton = null;
     state.continueButton = null;
+
+    const overlay = document.getElementById('start-overlay');
+    if (overlay) overlay.style.display = 'none';
+    hud.setVisible(true);
     SaveGame.save(player);
   }
 
@@ -146,6 +153,27 @@
     input.pollGamepad();
     dialogue.update();
 
+    if (state.gameState === 'lobby') {
+      if (!multiplayer.ws && !state.lobbyTriedConnect) {
+        state.lobbyTriedConnect = true;
+        const lobbyName = (dom.nameInput?.value || SaveGame.getName() || 'Nilo1221').trim().slice(0, 16);
+        multiplayer.name = lobbyName;
+        multiplayer.connect(lobbyName);
+      }
+      particles.update();
+      camera.follow(player.centerX, player.centerY, player.dir, map.cols * TILE, map.rows * TILE);
+      multiplayer.send(player);
+      multiplayer.tick();
+      if (state.screenFlash) {
+        state.screenFlash.alpha -= 0.02;
+        if (state.screenFlash.alpha <= 0) state.screenFlash = null;
+      }
+      if (state.toastTimer > 0) state.toastTimer--;
+      else state.toastMsg = null;
+      input.clearJustPressed();
+      return;
+    }
+
     if (state.gameState !== 'playing') return;
 
     if (dialogue.isOpen()) {
@@ -155,8 +183,11 @@
     } else if (inventory.open) {
       if (justPressed['i'] || justPressed['escape']) inventory.toggle();
     } else if (justPressed['escape']) {
-      state.gameState = 'start';
+      state.gameState = 'lobby';
+      state.lobbyTriedConnect = false;
       hud.setVisible(false);
+      const overlay = document.getElementById('start-overlay');
+      if (overlay) overlay.style.display = 'flex';
     } else {
       player.update(keys, map, particles);
       player.fireballs.forEach((f) => f.update(state.enemies, particles));
@@ -262,7 +293,7 @@
       ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     }
 
-    Hud.draw(ctx, state, VIEW_W, VIEW_H);
+    if (state.gameState !== 'lobby') Hud.draw(ctx, state, VIEW_W, VIEW_H);
     dialogue.draw(ctx, VIEW_W, VIEW_H);
     inventory.draw(ctx, VIEW_W, VIEW_H, player);
     if (shop.open) shop.draw(ctx, state, VIEW_W, VIEW_H);
@@ -416,15 +447,21 @@
         Combat.toast(state, `Nome cambiato per ${RENAME_COST} oro`);
       } else {
         Combat.toast(state, `Cambio nome: ${RENAME_COST} oro richiesti`);
+        if (dom.nameInput) dom.nameInput.value = savedName;
         name = savedName;
       }
     } else if (!savedName) {
       SaveGame.setName(name);
     }
-    multiplayer.name = name;
+
+    // If already connected with a different mode/name, reset.
+    if (multiplayer.ws) multiplayer.disconnect();
     if (online) multiplayer.connect(name);
+
+    multiplayer.name = name;
     state.gameState = 'playing';
     state.hasStarted = true;
+    state.lobbyTriedConnect = false;
     hud.setVisible(true);
     AudioManager.resume();
     AudioManager.play('ui');
@@ -442,6 +479,7 @@
   };
 
   multiplayer.onError = () => {
+    if (state.gameState === 'lobby') return;
     Combat.toast(state, 'Server multiplayer non raggiungibile');
   };
 

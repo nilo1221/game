@@ -102,19 +102,21 @@ img.gold-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(12, 10, 8, 0.92);
+  background: rgba(12, 10, 8, 0.45);
   z-index: 1000;
   pointer-events: auto;
 }
 
 .start-card {
   width: min(420px, 90vw);
-  background: linear-gradient(180deg, #26201a 0%, #1c1712 100%);
+  background: rgba(38, 32, 26, 0.88);
   border: 2px solid #4a3d2c;
   border-radius: 10px;
   padding: 28px;
   text-align: center;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
 }
 
 .start-card h1 {
