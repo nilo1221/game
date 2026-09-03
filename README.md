@@ -6,9 +6,11 @@ A top-down action RPG built with vanilla JavaScript and HTML5 Canvas — no engi
 
 No installation or server required — just open `index.html` in a browser.
 
-## Deploy on Vercel
+## Deploy
 
-The game is ready for static hosting on Vercel:
+### 1. Static game (Vercel)
+
+The front-end is pure static files and is ready for Vercel:
 
 ```bash
 # Install Vercel CLI (if not already installed)
@@ -19,11 +21,38 @@ vercel login
 vercel --prod
 ```
 
-Or connect this Git repository to [Vercel](https://vercel.com) and it will auto-deploy on every push.
+Or connect this Git repository to [Vercel](https://vercel.com) and it will auto-deploy on every push to `main`.
+
+### 2. Multiplayer WebSocket server (separate host)
+
+The Vercel deployment is **static** and cannot accept WebSocket connections. To enable multiplayer, deploy the included `server.mjs` on a Node host such as [Render](https://render.com), [Railway](https://railway.app) or [Fly.io](https://fly.io):
+
+```bash
+# From the project root
+git push origin main   # push server.mjs and package.json
+```
+
+On your Node host, set the start command to:
+
+```bash
+npm start
+```
+
+(`package.json` already defines `"start": "node server.mjs"` and depends on the `ws` package.)
+
+Then set the WebSocket URL in `js/config/balance.js`:
+
+```js
+const WS_SERVER = 'wss://your-backend-name.onrender.com';
+```
+
+Leave `WS_SERVER = ''` to connect to the same host for local development (`npm start` or `node server.mjs`).
+
+> **Note:** If `WS_SERVER` is empty and the game is opened on `*.vercel.app`, the client will automatically stay offline with a console warning instead of spamming connection errors.
 
 ## Architecture
 
-```
+```text
 ├── index.html                      entry page: game canvas + DOM HUD (hp/xp/mana bars, level, gold), loads all 27 JS files in dependency order
 ├── css/
 │   └── style.css                   canvas and HUD panel styling

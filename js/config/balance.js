@@ -66,6 +66,12 @@ const BOOTS_SPEED = 1.6;
 // Honor gained when defeating another player in PvP.
 const HONOR_PER_KILL = 15;
 
+// WebSocket server endpoint used by the multiplayer client.
+// Leave empty to connect to the same host (for local dev with server.mjs).
+// For production, set this to your deployed backend, e.g.:
+// const WS_SERVER = 'wss://shattered-vale-ws.onrender.com';
+const WS_SERVER = '';
+
 // Molten Depths lava hazard: damage dealt when standing on a LAVA tile
 // without Fireproof Boots equipped. Reuses player.invuln as its cooldown
 // (see Combat.checkHazards), same as taking a hit from an enemy.

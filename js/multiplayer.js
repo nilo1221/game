@@ -88,10 +88,28 @@ class Multiplayer {
   connect(name = 'Player') {
     if (this.ws) return;
     this.name = name;
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+
+    const hasExplicitServer = typeof WS_SERVER !== 'undefined' && WS_SERVER;
     const host = window.location.host;
+
+    // Vercel static hosting cannot run a WebSocket server. If no explicit
+    // WS_SERVER is configured and the page is hosted on Vercel, skip.
+    if (!hasExplicitServer && /\.vercel\.app$/.test(host)) {
+      console.warn('[mp] multiplayer disabled: set WS_SERVER in balance.js for production');
+      if (this.onError) this.onError(new Error('Multiplayer non configurato per Vercel'));
+      return;
+    }
+
+    let serverUrl;
+    if (hasExplicitServer) {
+      serverUrl = WS_SERVER;
+    } else {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      serverUrl = `${protocol}//${host}`;
+    }
+
     try {
-      this.ws = new WebSocket(`${protocol}//${host}`);
+      this.ws = new WebSocket(serverUrl);
       this.ws.onopen = () => { this.connected = true; };
       this.ws.onmessage = (e) => this._onMessage(e.data);
       this.ws.onclose = () => { this.connected = false; this.ws = null; };
