@@ -13,6 +13,7 @@ const SaveGame = {
       const data = JSON.parse(raw);
       if (typeof data.gold === 'number') player.gold = data.gold;
       if (typeof data.premium === 'number') player.premium = data.premium;
+      if (typeof data.honor === 'number') player.honor = data.honor;
     } catch (e) {
       console.warn('SaveGame load failed:', e);
     }
@@ -23,6 +24,7 @@ const SaveGame = {
       const data = {
         gold: player.gold,
         premium: player.premium,
+        honor: player.honor,
         savedAt: Date.now(),
       };
       localStorage.setItem(this.KEY, JSON.stringify(data));

@@ -22,6 +22,7 @@
     lvlText: document.getElementById('lvlText'),
     goldText: document.getElementById('goldText'),
     premiumText: document.getElementById('premiumText'),
+    honorText: document.getElementById('honorText'),
     manaBar: document.getElementById('manaBarInner'),
     manaText: document.getElementById('manaText'),
     hungerBar: document.getElementById('hungerBarInner'),
@@ -59,8 +60,9 @@
   SaveGame.load(player);
   const multiplayer = new Multiplayer();
 
-  const { npcs, elder, merchant } = WorldFactory.createNpcs();
+  const { npcs, elder, merchant, weaponMaster } = WorldFactory.createNpcs();
   if (merchant) merchant.shop = new Merchant('Mercante Vagabondo', WANDERING_MERCHANT_STOCK, WANDERING_MERCHANT_CURRENCY);
+  if (weaponMaster) weaponMaster.shop = new Merchant('Maestro d\'Armi', WEAPON_MASTER_STOCK, WEAPON_MASTER_CURRENCY);
   const worldItems = WorldFactory.createWorldItems();
 
   // Shared game state, passed explicitly into Combat/Hud/Screens so none of
@@ -68,7 +70,7 @@
   // can't anyway — each lives in its own <script> file).
   const state = {
     map, camera, particles, dialogue, inventory, shop, player,
-    npcs, elder, merchant, worldItems,
+    npcs, elder, merchant, weaponMaster, worldItems, multiplayer,
     enemies: WorldFactory.createEnemies(),
     merchantGaveGift: false,
     questStage: 0, // 0 = not talked, 1 = quest given, 2 = sword found, 3 = boss defeated
@@ -413,6 +415,15 @@
     AudioManager.play('ui');
     const overlay = document.getElementById('start-overlay');
     if (overlay) overlay.style.display = 'none';
+  };
+
+  multiplayer.onPvpHit = (from, damage) => {
+    player.takeDamage(damage, state.particles, true);
+  };
+
+  multiplayer.onPvpKill = () => {
+    player.honor += HONOR_PER_KILL;
+    Combat.toast(state, `+${HONOR_PER_KILL} onore`);
   };
 
   multiplayer.onChat = (from, text) => {

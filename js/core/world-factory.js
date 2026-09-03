@@ -16,7 +16,11 @@ const WorldFactory = {
       return npc;
     });
     const byId = (id) => npcs.find((n) => n.id === id);
-    return { npcs, elder: byId('elder'), merchant: byId('merchant') };
+    const weaponMaster = byId('weaponMaster');
+    if (weaponMaster) {
+      weaponMaster.shop = new Merchant('Maestro d\'Armi', WEAPON_MASTER_STOCK, WEAPON_MASTER_CURRENCY);
+    }
+    return { npcs, elder: byId('elder'), merchant: byId('merchant'), weaponMaster };
   },
 
   createWorldItems() {

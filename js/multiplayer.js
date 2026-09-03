@@ -3,14 +3,20 @@
 // other as remote sprites drawn on top of the world.
 
 class RemotePlayer {
-  constructor(data) {
+  constructor(data, mp) {
     this.id = data.id;
+    this.mp = mp;
+    this.w = 22;
+    this.h = 26;
+    this.dead = false;
+    this.lastAttackerId = null;
     this.update(data);
     this.anim = new AnimatedSprite(Sprites.player, 32, 34, true);
     this.animSword = new AnimatedSprite(Sprites.playerSword, 32, 34, true);
   }
 
   update(data) {
+    const wasAlive = this.hp == null || this.hp > 0;
     this.tX = data.x;
     this.tY = data.y;
     if (this.x == null) this.x = data.x;
@@ -20,8 +26,17 @@ class RemotePlayer {
     this.attacking = data.attacking || 0;
     this.hp = data.hp || 100;
     this.maxHp = data.maxHp || 100;
+    this.pvp = data.pvp || false;
+    this.honor = data.honor || 0;
     this.name = data.name || 'Player';
     this.color = data.color || '#6f9';
+
+    if (this.mp && wasAlive && this.hp <= 0 && this.lastAttackerId === this.mp.id && !this.dead) {
+      this.dead = true;
+      this.mp._onPvpKill(this.id);
+    } else if (this.hp > 0) {
+      this.dead = false;
+    }
   }
 
   tick() {
@@ -60,6 +75,8 @@ class Multiplayer {
     this.sendTimer = 0;
     this.name = 'Player';
     this.color = this._pickColor();
+    this.onPvpHit = null;
+    this.onPvpKill = null;
   }
 
   _pickColor() {
@@ -103,7 +120,7 @@ class Multiplayer {
     for (const p of list) {
       if (p.id === this.id) continue;
       const rp = this.players.get(p.id);
-      if (!rp) this.players.set(p.id, new RemotePlayer(p));
+      if (!rp) this.players.set(p.id, new RemotePlayer(p, this));
       else rp.update(p);
     }
     // remove disconnected
@@ -128,6 +145,8 @@ class Multiplayer {
         attacking: player.attacking,
         hp: player.hp,
         maxHp: player.maxHp,
+        pvp: player.pvp,
+        honor: player.honor,
         name: this.name,
         color: this.color,
       },
@@ -144,6 +163,31 @@ class Multiplayer {
   sendEvent(type, payload) {
     if (!this.connected || !this.ws || this.ws.readyState !== 1) return;
     this.ws.send(JSON.stringify({ type: 'broadcast', payload: { type, ...payload } }));
+  }
+
+  sendPvpHit(targetId, damage) {
+    const rp = this.players.get(targetId);
+    if (rp) rp.lastAttackerId = this.id;
+    this.sendEvent('pvpHit', { from: this.name, targetId, damage });
+  }
+
+  handleEvent(msg) {
+    const payload = msg.payload;
+    if (!payload) return;
+    if (payload.type === 'pvpHit') {
+      if (payload.targetId === this.id && this.onPvpHit) {
+        this.onPvpHit(payload.from, payload.damage);
+      }
+      return;
+    }
+    if (payload.type === 'pvpKill') {
+      if (this.onPvpKill) this.onPvpKill(payload.killerName);
+      return;
+    }
+  }
+
+  _onPvpKill(targetId) {
+    if (this.onPvpKill) this.onPvpKill(this.name);
   }
 
   tick() {

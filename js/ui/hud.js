@@ -57,6 +57,7 @@ const Hud = {
         dom.lvlText.textContent = player.lvl;
         dom.goldText.textContent = player.gold;
         dom.premiumText.textContent = player.premium;
+        dom.honorText.textContent = player.honor;
         dom.manaBar.style.width = (player.mana / player.maxMana * 100) + '%';
         dom.manaText.textContent = `${Math.floor(player.mana)}/${player.maxMana}`;
         dom.hungerBar.style.width = (player.hunger / player.maxHunger * 100) + '%';

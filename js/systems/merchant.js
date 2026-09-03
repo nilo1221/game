@@ -6,7 +6,7 @@ class Merchant {
   constructor(name, stock, currency = 'gold') {
     this.name = name;
     this.currency = currency;
-    this.currencyName = currency === 'premium' ? 'Gemme' : 'Oro';
+    this.currencyName = currency === 'premium' ? 'Gemme' : currency === 'honor' ? 'Onore' : 'Oro';
     this.stock = stock.map(entry => ({ ...entry })); // shallow copy so each merchant is independent
   }
 

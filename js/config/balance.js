@@ -21,6 +21,7 @@ const PLAYER_BASE_STATS = {
   lvl: 1,
   gold: 0,
   premium: 0,
+  honor: 0,
   hunger: 100,
   maxHunger: 100,
   thirst: 100,
@@ -58,6 +59,9 @@ const FIREBALL_STATS = {
 // Swift Boots (see config/item-effects.js) set the player's speed directly
 // rather than adding a bonus, so both values live here for symmetry.
 const BOOTS_SPEED = 1.6;
+
+// Honor gained when defeating another player in PvP.
+const HONOR_PER_KILL = 15;
 
 // Molten Depths lava hazard: damage dealt when standing on a LAVA tile
 // without Fireproof Boots equipped. Reuses player.invuln as its cooldown

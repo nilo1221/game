@@ -32,6 +32,17 @@ const NPC_DEFS = [
     ],
     opts: { dir: 'down' },
   },
+  {
+    id: 'weaponMaster',
+    x: 18 * TILE, y: 41 * TILE,
+    name: 'Maestro d\'Armi Tormund',
+    spriteKey: 'player',
+    dialogue: [
+      "La gloria si conquista contro i propri pari, non contro gli slimer del bosco.",
+      "Combatti in PvP, accumula onore, e qui troverai ricompense degne di un campione.",
+    ],
+    opts: { dir: 'down' },
+  },
 ];
 
 const WORLD_ITEM_PLACEMENTS = [

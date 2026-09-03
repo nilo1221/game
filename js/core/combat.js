@@ -21,6 +21,17 @@ const Combat = {
     for (const npc of npcs) {
       if (!rectsOverlap(reach, npc)) continue;
 
+      // Weapon master: talks once, toggles PvP, then opens his honor shop.
+      if (npc.id === 'weaponMaster' && npc.shop) {
+        dialogue.open(npc, () => {
+          player.pvp = !player.pvp;
+          this.toast(state, player.pvp ? 'PvP attivato' : 'PvP disattivato');
+          state.shop.openFor(npc.shop);
+          AudioManager.play('openShop');
+        });
+        return;
+      }
+
       if (npc.shop) {
         state.shop.openFor(npc.shop);
         AudioManager.play('openShop');
@@ -49,22 +60,38 @@ const Combat = {
   // KNOCKBACK_EVERY_NTH_ATTACK-th swing also knocks back anything it hits
   // and doesn't kill.
   handleAttack(state) {
-    const { player, enemies, particles, camera } = state;
+    const { player, enemies, particles, camera, multiplayer } = state;
     if (!player.startAttack()) return;
     AudioManager.play('attack');
 
     const isKnockbackSwing = player.attackCount % KNOCKBACK_EVERY_NTH_ATTACK === 0;
     const hb = player.attackHitbox();
+    let didShake = false;
     enemies.forEach((en) => {
       if (!en.alive || !rectsOverlap(hb, en)) return;
       en.takeDamage(player.attackDamage, particles);
-      camera.shake(isKnockbackSwing ? 4 : 2, isKnockbackSwing ? 6 : 4);
+      if (!didShake) {
+        camera.shake(isKnockbackSwing ? 4 : 2, isKnockbackSwing ? 6 : 4);
+        didShake = true;
+      }
       if (!en.alive) {
         this._onEnemyDefeated(state, en);
         return;
       }
       if (isKnockbackSwing) en.applyKnockback(player.centerX, player.centerY);
     });
+
+    // PvP hits against online players with PvP enabled.
+    if (multiplayer && player.pvp) {
+      multiplayer.players.forEach((rp) => {
+        if (!rp.pvp || rp.dead || !rectsOverlap(hb, rp)) return;
+        multiplayer.sendPvpHit(rp.id, player.attackDamage);
+        if (!didShake) {
+          camera.shake(2, 4);
+          didShake = true;
+        }
+      });
+    }
   },
 
   _onEnemyDefeated(state, en) {

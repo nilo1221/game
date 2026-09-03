@@ -24,6 +24,8 @@ class Player {
     this.xpNext = PLAYER_BASE_STATS.xpNext;
     this.gold = PLAYER_BASE_STATS.gold;
     this.premium = PLAYER_BASE_STATS.premium;
+    this.honor = PLAYER_BASE_STATS.honor;
+    this.pvp = false;
 
     this.hasSword = false;
     this.hasLegendarySword = false;
@@ -55,8 +57,8 @@ class Player {
   tickSurvival() {
     this.hunger = Math.max(0, this.hunger - PLAYER_BASE_STATS.hungerDecay);
     this.thirst = Math.max(0, this.thirst - PLAYER_BASE_STATS.thirstDecay);
-    if (this.hunger <= 0) this.hp = Math.max(1, this.hp - PLAYER_BASE_STATS.hungerDamage);
-    if (this.thirst <= 0) this.hp = Math.max(1, this.hp - PLAYER_BASE_STATS.thirstDamage);
+    if (this.hunger <= 0 && this.hp > 0) this.hp = Math.max(1, this.hp - PLAYER_BASE_STATS.hungerDamage);
+    if (this.thirst <= 0 && this.hp > 0) this.hp = Math.max(1, this.hp - PLAYER_BASE_STATS.thirstDamage);
   }
 
   get centerX() { return this.x + this.w / 2; }
@@ -163,11 +165,11 @@ class Player {
     return true;
   }
 
-  takeDamage(amount, particles) {
+  takeDamage(amount, particles, fromPvp = false) {
     if (this.invuln > 0) return;
     const reduced = Math.max(1, Math.round(amount - this.defense));
     this.hp = clamp(this.hp - reduced, 0, this.maxHp);
-    this.invuln = 45;
+    this.invuln = fromPvp ? 25 : 45;
     this.hitFlash = 12;
     particles.burst(this.centerX, this.centerY, '#e24b4a', 8);
     particles.floatText(this.centerX, this.y - 4, '-' + reduced, '#f09595');

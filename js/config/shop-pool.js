@@ -13,6 +13,17 @@ const WANDERING_MERCHANT_STOCK = [
   { kind: 'boots',     price: 35, qty: 1 },
 ];
 
+// Weapon master / PvP shop. These items can only be bought with honor,
+// earned by defeating other players in PvP.
+const WEAPON_MASTER_STOCK = [
+  { kind: 'swordLegendary', price: 80, qty: 1 },
+  { kind: 'armorObsidian', price: 100, qty: 1 },
+  { kind: 'shieldBone', price: 60, qty: 1 },
+  { kind: 'bootsFireproof', price: 50, qty: 1 },
+  { kind: 'potionBlue', price: 15, qty: 3 },
+];
+const WEAPON_MASTER_CURRENCY = 'honor';
+
 // Shared tier colors for future UI expansions.
 const RARITY_COLORS = {
   common:    '#b0b0b0',
