@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="description" content="Shattered Vale è un GDR di sopravvivenza gratuito per browser. Esplora un villaggio dimenticato, combatti mostri, forgi equipaggiamento e sopravvivi nelle terre selvagge." />
 <meta name="keywords" content="RPG, survival, browser game, HTML5, canvas, indie game" />
 <meta property="og:title" content="Shattered Vale: GDR di Sopravvivenza" />
@@ -96,6 +96,19 @@
 
   <div id="gameWrap">
     <canvas id="game" width="960" height="600"></canvas>
+    <div id="touch-controls" aria-label="controlli touch">
+      <div id="dpad" class="dpad">
+        <div class="dpad-btn dpad-up" data-key="w">▲</div>
+        <div class="dpad-btn dpad-left" data-key="a">◀</div>
+        <div class="dpad-btn dpad-right" data-key="d">▶</div>
+        <div class="dpad-btn dpad-down" data-key="s">▼</div>
+      </div>
+      <div id="touch-actions" class="touch-actions">
+        <div class="touch-btn touch-attack" data-key="space" data-hold="true">⚔</div>
+        <div class="touch-btn touch-interact" data-key="e" data-once="true">E</div>
+        <div class="touch-btn touch-fireball" data-key="f" data-once="true">F</div>
+      </div>
+    </div>
   </div>
 
   <div id="start-overlay">

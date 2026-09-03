@@ -6,6 +6,8 @@ function createInputState() {
   const keyboardJust = {};
   const gamepadKeys = {};
   const gamepadJust = {};
+  const touchKeys = {};
+  const touchJust = {};
   const prevGamepad = {};
   const allKnown = new Set();
   const keys = {};
@@ -14,9 +16,10 @@ function createInputState() {
   function merge() {
     for (const k in keyboardKeys) allKnown.add(k);
     for (const k in gamepadKeys) allKnown.add(k);
+    for (const k in touchKeys) allKnown.add(k);
     for (const k of allKnown) {
-      keys[k] = !!(keyboardKeys[k] || gamepadKeys[k]);
-      justPressed[k] = !!(keyboardJust[k] || gamepadJust[k]);
+      keys[k] = !!(keyboardKeys[k] || gamepadKeys[k] || touchKeys[k]);
+      justPressed[k] = !!(keyboardJust[k] || gamepadJust[k] || touchJust[k]);
     }
   }
 
@@ -66,6 +69,37 @@ function createInputState() {
     merge();
   }
 
+  // Virtual touch controls mapped onto the same keys.
+  function setupTouch() {
+    const wrap = document.getElementById('touch-controls');
+    if (!wrap) return;
+    wrap.querySelectorAll('[data-key]').forEach((el) => {
+      const code = el.dataset.key === 'space' ? ' ' : el.dataset.key;
+      const start = (e) => {
+        e.preventDefault();
+        if (!touchKeys[code]) touchJust[code] = true;
+        touchKeys[code] = true;
+        el.classList.add('active');
+        merge();
+      };
+      const end = (e) => {
+        e.preventDefault();
+        touchKeys[code] = false;
+        el.classList.remove('active');
+        merge();
+      };
+      el.addEventListener('touchstart', start, { passive: false });
+      el.addEventListener('touchend', end, { passive: false });
+      el.addEventListener('touchcancel', end, { passive: false });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupTouch);
+  } else {
+    setupTouch();
+  }
+
   return {
     keys,
     justPressed,
@@ -73,6 +107,7 @@ function createInputState() {
     clearJustPressed() {
       for (const k in keyboardJust) delete keyboardJust[k];
       for (const k in gamepadJust) delete gamepadJust[k];
+      for (const k in touchJust) delete touchJust[k];
       merge();
     },
   };

@@ -36,10 +36,6 @@
   const hud = Hud.bindDom(dom);
   hud.setVisible(false); // hidden until Play is pressed
 
-  // --- Mobile / desktop-only gate ---
-  let isMobileBlocked = isMobileDevice();
-  window.addEventListener('resize', () => { isMobileBlocked = isMobileDevice(); });
-
   // --- Input ---
   const input = createInputState();
   const { keys, justPressed } = input;
@@ -149,8 +145,6 @@
   }
 
   function update() {
-    if (isMobileBlocked) return;
-
     if (state.gameState === 'start' || state.gameState === 'howtoplay') {
       input.clearJustPressed();
       return;
@@ -246,12 +240,7 @@
   }
 
   function draw() {
-    if (isMobileBlocked) {
-      Screens.drawMobileBlock(ctx, VIEW_W, VIEW_H);
-      return;
-    }
-
-    if (state.gameState === 'start') {
+    if (state.gameState !== 'playing' && state.gameState !== 'lobby') {
       Screens.drawStart(ctx, state, VIEW_W, VIEW_H);
       return;
     }
@@ -317,15 +306,14 @@
     update();
     draw();
     domTick++;
-    if (domTick % 4 === 0 && !isMobileBlocked) hud.sync(player);
-    if (domTick % 120 === 0 && !isMobileBlocked) SaveGame.save(player);
+    if (domTick % 4 === 0) hud.sync(player);
+    if (domTick % 120 === 0) SaveGame.save(player);
     requestAnimationFrame(loop);
   }
 
   // --- Mouse input ---
   canvas.tabIndex = 0;
   canvas.addEventListener('mousemove', (e) => {
-    if (isMobileBlocked) return;
     const rect = canvas.getBoundingClientRect();
     const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
     const my = (e.clientY - rect.top) * (canvas.height / rect.height);
@@ -362,7 +350,6 @@
 
   canvas.addEventListener('click', (e) => {
     canvas.focus();
-    if (isMobileBlocked) return;
 
     const rect = canvas.getBoundingClientRect();
     const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
