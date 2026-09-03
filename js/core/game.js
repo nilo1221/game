@@ -441,6 +441,10 @@
     Combat.toast(state, `+${HONOR_PER_KILL} onore`);
   };
 
+  multiplayer.onError = () => {
+    Combat.toast(state, 'Server multiplayer non raggiungibile');
+  };
+
   multiplayer.onChat = (from, text) => {
     if (!dom.chatLog) return;
     const line = document.createElement('div');

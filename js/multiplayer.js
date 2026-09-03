@@ -77,6 +77,7 @@ class Multiplayer {
     this.color = this._pickColor();
     this.onPvpHit = null;
     this.onPvpKill = null;
+    this.onError = null;
   }
 
   _pickColor() {
@@ -93,10 +94,17 @@ class Multiplayer {
       this.ws = new WebSocket(`${protocol}//${host}`);
       this.ws.onopen = () => { this.connected = true; };
       this.ws.onmessage = (e) => this._onMessage(e.data);
-      this.ws.onclose = () => { this.connected = false; };
-      this.ws.onerror = (e) => console.error('[mp] error', e);
+      this.ws.onclose = () => { this.connected = false; this.ws = null; };
+      this.ws.onerror = (e) => {
+        console.warn('[mp] connection failed', e);
+        if (this.onError) this.onError(e);
+        this.connected = false;
+        try { this.ws.close(); } catch (_) {}
+        this.ws = null;
+      };
     } catch (e) {
       console.error('[mp] connect failed', e);
+      if (this.onError) this.onError(e);
     }
   }
 
