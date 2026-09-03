@@ -50,6 +50,28 @@ Leave `WS_SERVER = ''` to connect to the same host for local development (`npm s
 
 > **Note:** If `WS_SERVER` is empty and the game is opened on `*.vercel.app`, the client will automatically stay offline with a console warning instead of spamming connection errors.
 
+### 3. Cloud save with Appwrite (free)
+
+The game can persist gold, gems, honor and player name on Appwrite Cloud's free tier. The client is implemented with plain `fetch` calls (`js/services/appwrite-client.js`) so no bundler or SDK is required.
+
+1. Create a free account on [Appwrite Cloud](https://cloud.appwrite.io).
+2. Create a new project and add a **Web platform** with your Vercel domain (`*.vercel.app` or your custom domain).
+3. Inside the project create a database and a collection named `players`.
+4. In that collection create one attribute:
+   - **Key:** `data`
+   - **Type:** `string`
+   - **Size:** `1000000` (1 MB)
+5. Set the collection permissions so authenticated users can create/read/update their own documents, or give broad `users` create/read/update permissions for a prototype.
+6. Copy the project ID, database ID and collection ID into `js/config/appwrite.js`:
+
+```js
+const APPWRITE_PROJECT = 'your-project-id';
+const APPWRITE_DATABASE_ID = 'your-database-id';
+const APPWRITE_COLLECTION_ID = 'your-collection-id';
+```
+
+Leave `APPWRITE_PROJECT` empty to keep cloud save disabled and use `localStorage` only.
+
 ## Architecture
 
 ```text

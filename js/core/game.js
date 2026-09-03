@@ -88,6 +88,15 @@
   };
 
   function restartGame() {
+    // Preserve persistent currencies and name across restarts — this keeps
+    // gold/premium/honor safe when playing in online/cloud mode.
+    const persist = {
+      gold: player.gold,
+      premium: player.premium,
+      honor: player.honor,
+      name: SaveGame.getName(),
+    };
+
     player.x = PLAYER_SPAWN.x;
     player.y = PLAYER_SPAWN.y;
 
@@ -96,8 +105,9 @@
     player.xp = PLAYER_BASE_STATS.xp;
     player.xpNext = PLAYER_BASE_STATS.xpNext;
     player.lvl = PLAYER_BASE_STATS.lvl;
-    player.gold = PLAYER_BASE_STATS.gold;
-    player.premium = PLAYER_BASE_STATS.premium;
+    player.gold = persist.gold;
+    player.premium = persist.premium;
+    player.honor = persist.honor;
     player.atk = PLAYER_BASE_STATS.atk;
     player.hasSword = false;
     player.hasLegendarySword = false;
@@ -116,6 +126,7 @@
 
     inventory.reset();
     if (shop) shop.close();
+    SaveGame.setName(persist.name);
 
     state.questStage = 0;
     state.gameState = 'playing';
@@ -432,6 +443,14 @@
     }
     if (Screens.pointInBtn(mx, my, state.restartButton)) restartGame();
   });
+
+  // Helper used by the start-card login flow to inject Appwrite cloud data
+  // into the local player object before the game begins.
+  window.applyCloudData = (data) => {
+    if (!data) return;
+    SaveGame.applyData(player, data);
+    if (data.name && dom.nameInput) dom.nameInput.value = data.name;
+  };
 
   // Small debug hook (harmless in normal play) — lets you inspect live state
   // from the browser console with `__gameDebug.state`, or force a restart

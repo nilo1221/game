@@ -102,10 +102,14 @@
     <div class="start-card">
       <h1>Shattered Vale</h1>
       <input id="player-name" type="text" placeholder="Nome giocatore" value="Nilo1221" maxlength="16" />
+      <input id="player-email" type="email" placeholder="Email" />
+      <input id="player-password" type="password" placeholder="Password" />
       <div class="start-actions">
         <button id="play-offline" class="start-btn offline">Gioca offline</button>
-        <button id="play-online" class="start-btn online">Entra nel mondo aperto</button>
+        <button id="play-online" class="start-btn online">Entra online</button>
+        <button id="register-btn" class="start-btn register">Registrati</button>
       </div>
+      <p id="auth-message" class="auth-message"></p>
       <p class="start-hint">I giocatori online sono nel tuo stesso server.</p>
     </div>
   </div>
@@ -125,6 +129,7 @@
   <script src="js/config/item-stats.js"></script>
   <script src="js/config/shop-pool.js"></script>
   <script src="js/config/affiliates.js"></script>
+  <script src="js/config/appwrite.js"></script>
 
   <!-- sprites: builder functions, then the registry that calls them -->
   <script src="js/sprites/humanoid-sprites.js"></script>
@@ -153,6 +158,7 @@
   <script src="js/systems/inventory.js"></script>
   <script src="js/systems/merchant.js"></script>
   <script src="js/systems/save.js"></script>
+  <script src="js/services/appwrite-client.js"></script>
   <script src="js/systems/payments.js"></script>
   <script src="js/systems/audio.js"></script>
 
@@ -182,19 +188,70 @@
   <script>
     (function() {
       const nameInput = document.getElementById('player-name');
+      const emailInput = document.getElementById('player-email');
+      const passwordInput = document.getElementById('player-password');
       const saved = (typeof SaveGame !== 'undefined' && SaveGame.getName) ? SaveGame.getName() : '';
       if (saved) nameInput.value = saved;
       const offlineBtn = document.getElementById('play-offline');
       const onlineBtn = document.getElementById('play-online');
+      const registerBtn = document.getElementById('register-btn');
+      const authMessage = document.getElementById('auth-message');
+
       function getName() {
         return (nameInput.value || 'Nilo1221').trim().slice(0, 16);
       }
+      function getEmail() { return (emailInput.value || '').trim(); }
+      function getPassword() { return passwordInput.value || ''; }
+      function showAuthMessage(msg) { if (authMessage) authMessage.textContent = msg; }
+
+      async function tryOnline() {
+        const name = getName();
+        const email = getEmail();
+        const password = getPassword();
+        if (typeof CloudSave !== 'undefined' && CloudSave.enabled) {
+          if (CloudSave.loggedIn) {
+            window.startGame(name, true);
+            return;
+          }
+          if (!email || !password) { showAuthMessage('Inserisci email e password'); return; }
+          try {
+            showAuthMessage('Accesso in corso...');
+            await CloudSave.login(email, password);
+            const data = await CloudSave.load();
+            if (typeof window.applyCloudData === 'function') window.applyCloudData(data);
+            showAuthMessage('');
+            window.startGame(getName(), true);
+          } catch (e) {
+            showAuthMessage(e.message || 'Errore di accesso');
+          }
+        } else {
+          showAuthMessage('Cloud non configurato: gioca offline o compila js/config/appwrite.js');
+        }
+      }
+
+      async function tryRegister() {
+        const name = getName();
+        const email = getEmail();
+        const password = getPassword();
+        if (typeof CloudSave === 'undefined' || !CloudSave.enabled) { showAuthMessage('Cloud non configurato'); return; }
+        if (!email || !password) { showAuthMessage('Inserisci email e password'); return; }
+        try {
+          showAuthMessage('Registrazione in corso...');
+          await CloudSave.register(name, email, password);
+          const data = await CloudSave.load();
+          if (typeof window.applyCloudData === 'function') window.applyCloudData(data);
+          showAuthMessage('');
+          window.startGame(getName(), true);
+        } catch (e) {
+          showAuthMessage(e.message || 'Errore registrazione');
+        }
+      }
+
       offlineBtn.addEventListener('click', () => {
         window.startGame(getName(), false);
       });
-      onlineBtn.addEventListener('click', () => {
-        window.startGame(getName(), true);
-      });
+      onlineBtn.addEventListener('click', tryOnline);
+      registerBtn.addEventListener('click', tryRegister);
 
       const chatInput = document.getElementById('chat-input');
       if (chatInput) {
