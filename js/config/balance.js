@@ -40,6 +40,9 @@ const PLAYER_LEVEL_UP = {
   atkGain: 2,
 };
 
+// Cost to rename the player once a name has already been saved.
+const RENAME_COST = 50;
+
 // Melee damage bonus layered on top of player.atk depending on equipped weapon.
 const WEAPON_ATTACK_BONUS = {
   none: 0,

@@ -21,15 +21,37 @@ const SaveGame = {
 
   save(player) {
     try {
-      const data = {
-        gold: player.gold,
-        premium: player.premium,
-        honor: player.honor,
-        savedAt: Date.now(),
-      };
+      const raw = localStorage.getItem(this.KEY);
+      const data = raw ? JSON.parse(raw) : {};
+      data.gold = player.gold;
+      data.premium = player.premium;
+      data.honor = player.honor;
+      data.savedAt = Date.now();
       localStorage.setItem(this.KEY, JSON.stringify(data));
     } catch (e) {
       console.warn('SaveGame save failed:', e);
+    }
+  },
+
+  getName() {
+    try {
+      const raw = localStorage.getItem(this.KEY);
+      if (!raw) return '';
+      const data = JSON.parse(raw);
+      return typeof data.name === 'string' ? data.name : '';
+    } catch (e) {
+      return '';
+    }
+  },
+
+  setName(name) {
+    try {
+      const raw = localStorage.getItem(this.KEY);
+      const data = raw ? JSON.parse(raw) : {};
+      data.name = String(name).trim().slice(0, 16);
+      localStorage.setItem(this.KEY, JSON.stringify(data));
+    } catch (e) {
+      console.warn('SaveGame setName failed:', e);
     }
   },
 

@@ -406,6 +406,21 @@
   // from the browser console with `__gameDebug.state`, or force a restart
   // with `__gameDebug.restartGame()`.
   window.startGame = (name, online) => {
+    name = String(name).trim().slice(0, 16);
+    const savedName = SaveGame.getName();
+    if (savedName && name !== savedName) {
+      if (player.gold >= RENAME_COST) {
+        player.gold -= RENAME_COST;
+        SaveGame.setName(name);
+        SaveGame.save(player);
+        Combat.toast(state, `Nome cambiato per ${RENAME_COST} oro`);
+      } else {
+        Combat.toast(state, `Cambio nome: ${RENAME_COST} oro richiesti`);
+        name = savedName;
+      }
+    } else if (!savedName) {
+      SaveGame.setName(name);
+    }
     multiplayer.name = name;
     if (online) multiplayer.connect(name);
     state.gameState = 'playing';

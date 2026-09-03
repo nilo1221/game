@@ -182,6 +182,8 @@
   <script>
     (function() {
       const nameInput = document.getElementById('player-name');
+      const saved = (typeof SaveGame !== 'undefined' && SaveGame.getName) ? SaveGame.getName() : '';
+      if (saved) nameInput.value = saved;
       const offlineBtn = document.getElementById('play-offline');
       const onlineBtn = document.getElementById('play-online');
       function getName() {
