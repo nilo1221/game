@@ -50,7 +50,7 @@
   // gioco è full-screen (mobile/touch) il canvas interno si allarga per
   // riempire lo schermo invece di lasciare bande nere. La scala viene
   // arrotondata all'intero quando possibile per pixel nitidi.
-  const VIEWPORT = { baseW: canvas.width, baseH: canvas.height, maxW: 1600, maxH: 1200 };
+  const VIEWPORT = { baseW: canvas.width, baseH: canvas.height, maxW: 1600, maxH: 1800 };
   function resizeView() {
     const wrap = document.getElementById('gameWrap');
     if (!wrap) return;
