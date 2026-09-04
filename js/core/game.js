@@ -46,11 +46,14 @@
   const map = new TileMap(109, 236);
   const camera = new Camera(VIEW_W, VIEW_H);
 
-  // Viewport responsive DPR-aware: mantiene l'aspect 16:10 del gioco,
-  // adatta il canvas al contenitore (letterbox con bande nere se serve)
-  // e usa devicePixelRatio per pixel nitidi.
+  // Viewport responsive DPR-aware in modalità EXPAND: il canvas logico
+  // si allarga per riempire il contenitore senza bande nere. Su schermi
+  // piccoli la telecamera mostra più mappa; su desktop il gioco non
+  // viene ingrandito oltre la risoluzione base.
   const BASE_W = 960;
   const BASE_H = 600;
+  const MAX_W = 2400;
+  const MAX_H = 1800;
   let renderScale = 1;
 
   function resizeView() {
@@ -62,20 +65,20 @@
     const padTop = parseFloat(cs.paddingTop) || 0;
     const padBottom = parseFloat(cs.paddingBottom) || 0;
 
-    const availW = Math.max(320, wrap.clientWidth - padLeft - padRight);
-    const availH = Math.max(240, wrap.clientHeight - padTop - padBottom);
+    const cssW = Math.max(320, wrap.clientWidth - padLeft - padRight);
+    const cssH = Math.max(240, wrap.clientHeight - padTop - padBottom);
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-    const scale = Math.min(availW / BASE_W, availH / BASE_H);
-    const w = Math.max(320, Math.min(Math.floor(BASE_W * scale), 2400));
-    const h = Math.max(240, Math.min(Math.floor(BASE_H * scale), 1800));
+    const scale = Math.min(1, cssW / BASE_W, cssH / BASE_H);
+    const w = Math.max(320, Math.min(Math.floor(cssW / scale), MAX_W));
+    const h = Math.max(240, Math.min(Math.floor(cssH / scale), MAX_H));
 
     VIEW_W = w;
     VIEW_H = h;
     canvas.width = Math.floor(w * dpr);
     canvas.height = Math.floor(h * dpr);
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
     camera.viewW = w;
     camera.viewH = h;
     renderScale = dpr;
