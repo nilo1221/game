@@ -80,36 +80,59 @@ const Screens = {
 
     ctx.textAlign = 'center';
 
+    // responsive card, mobile-first: vertically centered, buttons full-width-ish
+    const isMobile = viewW < 760;
+    const btns = [
+      { id: 'play', label: state.hasStarted ? 'Continua' : 'Gioca', color: '#3a6b3d' },
+      { id: 'howto', label: 'Come Giocare', color: '#3a5a7a' },
+    ];
+    if (state.hasStarted) btns.push({ id: 'restart', label: 'Ricomincia', color: '#7a3a3a' });
+    btns.push({ id: 'author', label: 'Nilo1221', color: '#5a4a3a' });
+
+    const bh = isMobile ? 56 : 52;
+    const gap = isMobile ? 14 : 16;
+    const cardW = Math.min(isMobile ? 360 : 480, viewW - 40);
+    const cardH = 132 + btns.length * (bh + gap) - gap;
+    const cx = (viewW - cardW) / 2;
+    const cy = Math.max(40, (viewH - cardH) / 2);
+
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    roundRect(ctx, cx, cy, cardW, cardH, 16);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(232,201,60,0.33)';
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, cx, cy, cardW, cardH, 16);
+    ctx.stroke();
+
+    const titleSize = Math.min(40, (cardW - 24) / 14);
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.font = 'bold 40px sans-serif';
-    ctx.fillText('Shattered Vale: GDR di Sopravvivenza', viewW / 2 + 2, viewH / 2 - 88 + 2);
+    ctx.font = `bold ${titleSize}px sans-serif`;
+    ctx.fillText('Shattered Vale: GDR di Sopravvivenza', viewW / 2 + 2, cy + 42 + 2);
     ctx.fillStyle = '#e8c93c';
-    ctx.font = 'bold 40px sans-serif';
-    ctx.fillText('Shattered Vale: GDR di Sopravvivenza', viewW / 2, viewH / 2 - 88);
+    ctx.font = `bold ${titleSize}px sans-serif`;
+    ctx.fillText('Shattered Vale: GDR di Sopravvivenza', viewW / 2, cy + 42);
 
     ctx.fillStyle = '#c9c5b8';
-    ctx.font = '14px sans-serif';
-    ctx.fillText('Sopravvivi nelle terre selvagge. Forgi equipaggiamento. Difendi il villaggio.', viewW / 2, viewH / 2 - 58);
+    ctx.font = isMobile ? '13px sans-serif' : '14px sans-serif';
+    ctx.fillText('Sopravvivi. Forgi. Difendi il villaggio.', viewW / 2, cy + 72);
 
-    const bw = 190, bh = 52, gap = 16;
-    const bx = viewW - bw - 36;
-    let by = viewH / 2 + 40;
-
-    const playLabel = state.hasStarted ? 'Continua' : 'Gioca';
-    const playBtn = this.drawButton(ctx, bx, by, bw, bh, playLabel, '#3a6b3d', null, 18);
-    by += bh + gap;
-    const howToBtn = this.drawButton(ctx, bx, by, bw, bh, 'Come Giocare', '#3a5a7a', null, 18);
-    by += bh + gap;
-    let restartBtn = null;
-    if (state.hasStarted) {
-      restartBtn = this.drawButton(ctx, bx, by, bw, bh, 'Ricomincia', '#7a3a3a', null, 18);
+    const bw = cardW - 48;
+    const bx = cx + 24;
+    let by = cy + 100;
+    const buttons = {};
+    for (const b of btns) {
+      buttons[b.id] = this.drawButton(ctx, bx, by, bw, bh, b.label, b.color, null, isMobile ? 18 : 16);
       by += bh + gap;
     }
-    const authorBtn = this.drawButton(ctx, bx, by, bw, bh, 'Nilo1221', '#5a4a3a', null, 18);
 
     ctx.restore();
 
-    state.startButtons = { play: playBtn, howto: howToBtn, restart: restartBtn, author: authorBtn };
+    state.startButtons = {
+      play: buttons.play,
+      howto: buttons.howto,
+      restart: buttons.restart || null,
+      author: buttons.author,
+    };
   },
 
   // Draws the how-to-play panel and stores the back button on
@@ -121,7 +144,7 @@ const Screens = {
     ctx.fillRect(0, 0, viewW, viewH);
 
     const panelW = Math.min(420, viewW - 40);
-    const panelH = 400;
+    const panelH = Math.min(400, viewH - 40);
     const px = (viewW - panelW) / 2;
     const py = (viewH - panelH) / 2;
 
@@ -163,10 +186,12 @@ const Screens = {
       ly += 18 + wrapped.length * 17 + 6;
     });
 
-    const bw = 140, bh = 36;
+    const isMobile = viewW < 760;
+    const bw = Math.min(140, viewW - 80);
+    const bh = isMobile ? 44 : 36;
     const bx = viewW / 2 - bw / 2;
     const by = py + panelH - bh - 18;
-    state.howToBackButton = this.drawButton(ctx, bx, by, bw, bh, 'Indietro', '#3a6b3d');
+    state.howToBackButton = this.drawButton(ctx, bx, by, bw, bh, 'Indietro', '#3a6b3d', null, isMobile ? 16 : 15);
 
     ctx.restore();
   },
@@ -198,17 +223,20 @@ const Screens = {
       ctx.fillText('Hai conquistato la Shattered Vale.', viewW / 2, viewH / 2 + 20);
     }
 
-    const bw = 220, bh = 62, gap = 14;
-    const bx = viewW - bw - 36;
-    let by = viewH / 2 + 70;
+    const isMobile = viewW < 760;
+    const bw = Math.min(isMobile ? 300 : 220, viewW - 80);
+    const bh = isMobile ? 56 : 48;
+    const gap = isMobile ? 16 : 14;
+    const bx = (viewW - bw) / 2;
+    let by = viewH / 2 + 60;
 
     if (isVictory) {
-      state.continueButton = this.drawButton(ctx, bx, by, bw, bh, 'Continua', '#3a5a7a', null, 20);
+      state.continueButton = this.drawButton(ctx, bx, by, bw, bh, 'Continua', '#3a5a7a', null, isMobile ? 18 : 20);
       by += bh + gap;
-      state.restartButton = this.drawButton(ctx, bx, by, bw, bh, 'Gioca Ancora', '#3a6b3d', null, 20);
+      state.restartButton = this.drawButton(ctx, bx, by, bw, bh, 'Gioca Ancora', '#3a6b3d', null, isMobile ? 18 : 20);
     } else {
       state.continueButton = null;
-      state.restartButton = this.drawButton(ctx, bx, by, bw, bh, 'Gioca Ancora', '#3a6b3d', null, 20);
+      state.restartButton = this.drawButton(ctx, bx, by, bw, bh, 'Riprova', '#3a6b3d', null, isMobile ? 18 : 20);
     }
 
     ctx.textAlign = 'left';
