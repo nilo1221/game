@@ -23,7 +23,7 @@ const NPC_DEFS = [
   },
   {
     id: 'merchant',
-    x: 16 * TILE, y: 33 * TILE,
+    x: 12 * TILE, y: 33 * TILE,
     name: 'Mercante Vagabondo',
     spriteKey: 'merchant',
     dialogue: [
@@ -36,7 +36,7 @@ const NPC_DEFS = [
   },
   {
     id: 'premiumVendor',
-    x: 14 * TILE, y: 33 * TILE,
+    x: 16 * TILE, y: 33 * TILE,
     name: 'Mercante di Casse',
     spriteKey: 'merchant',
     dialogue: [
@@ -60,7 +60,7 @@ const NPC_DEFS = [
   },
   {
     id: 'blacksmith',
-    x: 20 * TILE, y: 33 * TILE,
+    x: 18 * TILE, y: 35 * TILE,
     name: 'Grom il Fabbro',
     spriteKey: 'merchant',
     dialogue: [
@@ -72,7 +72,7 @@ const NPC_DEFS = [
   },
   {
     id: 'alchemist',
-    x: 6 * TILE, y: 33 * TILE,
+    x: 8 * TILE, y: 35 * TILE,
     name: 'Lys l\'Alchimista',
     spriteKey: 'merchant',
     dialogue: [

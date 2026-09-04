@@ -79,9 +79,16 @@ function buildWorld(map) {
   for (let y = 9; y <= map.oasisSouthEdge - 2; y++) {
     map.set(13, y, TileType.PATH);
   }
-  for (let x = 6; x < 21; x++) map.set(x, 33, TileType.PATH);
-  for (let y = 33; y < 37; y++) map.set(10, y, TileType.PATH);
-  for (let x = 10; x < 14; x++) map.set(x, 37, TileType.PATH);
+  // Village square (market + quest plaza)
+  for (let y = 33; y < 38; y++) {
+    for (let x = 8; x < 19; x++) {
+      map.set(x, y, TileType.PATH);
+    }
+  }
+  // Path to the weapon master
+  for (let y = 37; y < 42; y++) {
+    map.set(18, y, TileType.PATH);
+  }
 
   // =========================
   // FOREST CLUSTERS
@@ -478,12 +485,12 @@ function buildMoltenDepths(map) {
   });
 
   // Shop scenery for the village merchants
-  map.decor.push({ x: 20, y: 32, type: 'anvil' });
-  map.decor.push({ x: 21, y: 32, type: 'brazier' });
-  map.decor.push({ x: 5, y: 33, type: 'bookshelf' });
-  map.decor.push({ x: 6, y: 32, type: 'cauldron' });
-  map.decor.push({ x: 5, y: 32, type: 'herbs' });
-  map.decor.push({ x: 7, y: 32, type: 'herbs' });
+  map.decor.push({ x: 18, y: 34, type: 'anvil' });
+  map.decor.push({ x: 19, y: 34, type: 'brazier' });
+  map.decor.push({ x: 7, y: 35, type: 'bookshelf' });
+  map.decor.push({ x: 8, y: 34, type: 'cauldron' });
+  map.decor.push({ x: 7, y: 34, type: 'herbs' });
+  map.decor.push({ x: 9, y: 34, type: 'herbs' });
 
   // Lava hazard patches — also kept out of the central band.
   const lavaPatches = [
