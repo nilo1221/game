@@ -674,8 +674,8 @@ img.gold-icon {
 
 #touch-controls .touch-actions {
   position: absolute;
-  bottom: max(16px, env(safe-area-inset-bottom));
-  right: max(16px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  right: max(24px, env(safe-area-inset-right));
   width: 150px;
   height: 180px;
   pointer-events: auto;
@@ -712,11 +712,15 @@ img.gold-icon {
 #touch-controls .touch-eat {
   right: 75px;
   bottom: 95px;
+  background: rgba(60, 100, 50, 0.65);
+  border-color: rgba(120, 220, 100, 0.55);
 }
 
 #touch-controls .touch-talk {
   right: 0;
   bottom: 95px;
+  background: rgba(40, 70, 120, 0.65);
+  border-color: rgba(100, 180, 255, 0.55);
 }
 
 #touch-controls .touch-btn.active,
@@ -752,9 +756,8 @@ img.gold-icon {
   }
 
   #touch-controls .touch-actions {
-    bottom: max(8px, env(safe-area-inset-bottom));
-    right: max(8px, env(safe-area-inset-right));
-    gap: 10px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    right: max(16px, env(safe-area-inset-right));
   }
 
   #touch-controls .touch-attack {

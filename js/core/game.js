@@ -206,7 +206,7 @@
 
     input.pollGamepad();
 
-    if (justPressed['enter'] && dom.chatInput && document.activeElement !== dom.chatInput) {
+    if ((justPressed['enter'] || justPressed['t']) && dom.chatInput && document.activeElement !== dom.chatInput) {
       if (dom.chatUi) dom.chatUi.style.display = 'flex';
       dom.chatInput.focus();
       input.clearJustPressed();
