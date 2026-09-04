@@ -524,12 +524,28 @@ img.gold-icon {
 }
 
 @media (max-width: 760px) {
+  html, body {
+    gap: 0;
+    padding: 0;
+  }
   #hint {
     display: none;
   }
   #hud {
-    padding: 6px 8px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 6px 10px;
     gap: 6px;
+    border: none;
+    border-bottom: 2px solid #4a3d2c;
+    border-radius: 0 0 10px 10px;
+    background: rgba(26, 21, 16, 0.92);
+    z-index: 500;
   }
   .hud-right {
     gap: 8px;
@@ -555,7 +571,25 @@ img.gold-icon {
     width: 60px;
   }
   #gameWrap {
+    position: fixed;
+    inset: 0;
     max-width: none;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: #0a0f0a;
+  }
+  #game {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    image-rendering: pixelated;
   }
 }
 
@@ -575,66 +609,153 @@ img.gold-icon {
   pointer-events: none;
   touch-action: none;
   z-index: 600;
+  overflow: hidden;
+}
+
+#touch-controls .joystick-zone {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 45%;
+  height: 60%;
+  pointer-events: auto;
+  touch-action: none;
+  z-index: 1;
 }
 
 #touch-controls .joystick {
   position: absolute;
-  bottom: max(12px, env(safe-area-inset-bottom));
-  left: max(12px, env(safe-area-inset-left));
+  left: 0;
+  top: 0;
   width: 160px;
   height: 160px;
-  pointer-events: auto;
+  margin-left: -80px;
+  margin-top: -80px;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.08s ease, transform 0.08s ease;
+  pointer-events: none;
+}
+
+#touch-controls .joystick.active {
+  opacity: 1;
+  transform: scale(1);
 }
 
 #touch-controls .joystick-base {
   position: absolute;
+  left: 0;
+  top: 0;
   width: 160px;
   height: 160px;
   border-radius: 50%;
-  background: rgba(40, 35, 30, 0.55);
+  background: rgba(40, 35, 30, 0.65);
   border: 2px solid rgba(232, 201, 60, 0.35);
   box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.7);
 }
 
-#touch-controls .joystick-knob {
-  position: absolute;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: rgba(232, 201, 60, 0.25);
-  border: 2px solid rgba(232, 201, 60, 0.5);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+#touch-controls .joystick.active .joystick-base {
+  background: rgba(40, 35, 30, 0.8);
+  border-color: rgba(232, 201, 60, 0.55);
 }
 
-#touch-controls .joystick.active .joystick-knob,
-#touch-controls .touch-btn.active {
-  background: rgba(232, 201, 60, 0.35);
+#touch-controls .joystick-knob {
+  position: absolute;
+  left: 50px;
+  top: 50px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(232, 201, 60, 0.3);
+  border: 2px solid rgba(232, 201, 60, 0.55);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  transition: transform 0.04s linear;
 }
 
 #touch-controls .touch-actions {
   position: absolute;
-  bottom: max(12px, env(safe-area-inset-bottom));
-  right: max(12px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  right: max(16px, env(safe-area-inset-right));
   display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
   gap: 14px;
   pointer-events: auto;
+  z-index: 2;
 }
 
 #touch-controls .touch-btn {
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  font-size: 26px;
   background: rgba(40, 35, 30, 0.65);
   border: 2px solid rgba(232, 201, 60, 0.4);
   color: #f1efe8;
   -webkit-user-select: none;
   user-select: none;
+  transition: transform 0.05s ease, background 0.05s ease;
+}
+
+#touch-controls .touch-attack {
+  width: 80px;
+  height: 80px;
+  font-size: 32px;
+  background: rgba(120, 40, 30, 0.75);
+  border-color: rgba(255, 120, 80, 0.55);
+}
+
+#touch-controls .touch-btn.active,
+#touch-controls .touch-attack.active {
+  transform: scale(0.92);
+  background: rgba(232, 201, 60, 0.35);
+}
+
+#touch-controls .joystick.active .joystick-knob {
+  background: rgba(232, 201, 60, 0.4);
 }
 
 @media (pointer: coarse), (max-width: 760px) {
   #touch-controls { display: block; }
+  #touch-controls .joystick-base {
+    background: rgba(40, 35, 30, 0.45);
+  }
+  #touch-controls .joystick-knob {
+    background: rgba(232, 201, 60, 0.2);
+  }
+  #touch-controls .touch-btn {
+    background: rgba(40, 35, 30, 0.4);
+  }
+  #touch-controls .touch-attack {
+    background: rgba(120, 40, 30, 0.55);
+  }
+}
+
+@media (max-width: 480px) {
+  #touch-controls .joystick-zone {
+    width: 42%;
+    height: 55%;
+  }
+
+  #touch-controls .touch-actions {
+    bottom: max(8px, env(safe-area-inset-bottom));
+    right: max(8px, env(safe-area-inset-right));
+    gap: 10px;
+  }
+
+  #touch-controls .touch-attack {
+    width: 64px;
+    height: 64px;
+    font-size: 26px;
+  }
+
+  #touch-controls .touch-btn {
+    width: 52px;
+    height: 52px;
+    font-size: 20px;
+  }
 }

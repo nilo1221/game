@@ -101,18 +101,29 @@ function createInputState() {
   }
 
   function setupJoystick() {
+    const zone = document.getElementById('joystick-zone');
+    const joystick = document.getElementById('joystick');
     const base = document.querySelector('.joystick-base');
     const knob = document.querySelector('.joystick-knob');
-    if (!base || !knob) return;
-    const maxR = 42;
+    if (!zone || !joystick || !base || !knob) return;
+    const maxR = 50;
     const dead = 0.1;
     let active = false;
+    let touchId = null;
+
+    function getTouch(e) {
+      return [...e.changedTouches].find((t) => t.identifier === touchId);
+    }
 
     function set(dx, dy) {
       const dist = Math.hypot(dx, dy);
-      if (dist > maxR) { dx = dx / dist * maxR; dy = dy / dist * maxR; }
-      knob.style.left = (42 + dx) + 'px';
-      knob.style.top = (42 + dy) + 'px';
+      if (dist > maxR) {
+        const scale = maxR / dist;
+        dx *= scale;
+        dy *= scale;
+      }
+      knob.style.left = (50 + dx) + 'px';
+      knob.style.top = (50 + dy) + 'px';
       const nx = dx / maxR;
       const ny = dy / maxR;
       axes.x = nx;
@@ -126,9 +137,10 @@ function createInputState() {
 
     function end() {
       active = false;
-      base.classList.remove('active');
-      knob.style.left = '42px';
-      knob.style.top = '42px';
+      touchId = null;
+      joystick.classList.remove('active');
+      knob.style.left = '50px';
+      knob.style.top = '50px';
       axes.x = 0;
       axes.y = 0;
       touchKeys['w'] = false;
@@ -139,27 +151,41 @@ function createInputState() {
     }
 
     function getPoint(e) {
-      const t = e.changedTouches[0];
+      const t = getTouch(e) || e.changedTouches[0];
       const rect = base.getBoundingClientRect();
       return { x: t.clientX - rect.left - rect.width / 2, y: t.clientY - rect.top - rect.height / 2 };
     }
 
-    base.addEventListener('touchstart', (e) => {
+    function start(e) {
       e.preventDefault();
-      if (navigator.vibrate) navigator.vibrate(15);
+      const t = e.changedTouches[0];
+      touchId = t.identifier;
       active = true;
-      base.classList.add('active');
+      joystick.style.left = t.clientX + 'px';
+      joystick.style.top = t.clientY + 'px';
+      joystick.classList.add('active');
+      if (navigator.vibrate) navigator.vibrate(15);
       const p = getPoint(e);
       set(p.x, p.y);
-    }, { passive: false });
-    base.addEventListener('touchmove', (e) => {
+    }
+
+    function move(e) {
       e.preventDefault();
-      if (!active) return;
+      if (!active || !getTouch(e)) return;
       const p = getPoint(e);
       set(p.x, p.y);
-    }, { passive: false });
-    base.addEventListener('touchend', (e) => { e.preventDefault(); end(); });
-    base.addEventListener('touchcancel', (e) => { e.preventDefault(); end(); });
+    }
+
+    function stop(e) {
+      e.preventDefault();
+      if (!active || !getTouch(e)) return;
+      end();
+    }
+
+    zone.addEventListener('touchstart', start, { passive: false });
+    zone.addEventListener('touchmove', move, { passive: false });
+    zone.addEventListener('touchend', stop, { passive: false });
+    zone.addEventListener('touchcancel', stop, { passive: false });
   }
 
   if (document.readyState === 'loading') {
