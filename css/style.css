@@ -303,10 +303,7 @@ img.gold-icon {
   position: fixed;
   bottom: 60px;
   right: 12px;
-  width: min(320px, 40vw);
-  max-height: 220px;
-  display: flex;
-  flex-direction: column;
+  width: min(320px, 60vw);
   background: rgba(20, 18, 16, 0.92);
   border: 1px solid #4a3d2c;
   border-radius: 8px;
@@ -316,12 +313,24 @@ img.gold-icon {
 }
 
 #chat-log {
-  flex: 1;
-  padding: 8px;
-  overflow-y: auto;
+  position: fixed;
+  top: calc(64px + env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  width: min(300px, 55vw);
+  max-height: 132px;
+  padding: 6px 10px;
+  overflow: hidden;
   font: 12px sans-serif;
   color: #f1efe8;
-  max-height: 170px;
+  background: rgba(15, 13, 11, 0.55);
+  border: 1px solid rgba(74, 61, 44, 0.6);
+  border-radius: 8px;
+  z-index: 850;
+  pointer-events: none;
+}
+
+#chat-log:empty {
+  display: none;
 }
 
 #chat-log div {
@@ -334,9 +343,10 @@ img.gold-icon {
 }
 
 #chat-input {
+  width: 100%;
+  box-sizing: border-box;
   border: none;
-  border-top: 1px solid #4a3d2c;
-  padding: 8px;
+  padding: 10px;
   background: #1a1510;
   color: #f1efe8;
   font: 13px sans-serif;
@@ -344,7 +354,7 @@ img.gold-icon {
 }
 
 #chat-input:focus {
-  border-top-color: #e8c93c;
+  background: #221b13;
 }
 
 .stat-label {
@@ -677,7 +687,7 @@ img.gold-icon {
   position: absolute;
   bottom: max(36px, env(safe-area-inset-bottom));
   right: max(20px, env(safe-area-inset-right));
-  width: 150px;
+  width: 160px;
   height: 180px;
   pointer-events: auto;
   z-index: 2;
@@ -710,7 +720,7 @@ img.gold-icon {
   border-color: rgba(255, 120, 80, 0.55);
 }
 
-#touch-controls .touch-eat {
+#touch-controls .touch-interact {
   right: 75px;
   bottom: 95px;
   background: rgba(60, 100, 50, 0.65);
@@ -722,6 +732,13 @@ img.gold-icon {
   bottom: 95px;
   background: rgba(40, 70, 120, 0.65);
   border-color: rgba(100, 180, 255, 0.55);
+}
+
+#touch-controls .touch-dash {
+  right: 88px;
+  bottom: 8px;
+  background: rgba(50, 90, 110, 0.65);
+  border-color: rgba(110, 220, 255, 0.55);
 }
 
 #touch-controls .touch-btn.active,
@@ -759,7 +776,7 @@ img.gold-icon {
   #touch-controls .touch-actions {
     bottom: max(28px, env(safe-area-inset-bottom));
     right: max(14px, env(safe-area-inset-right));
-    width: 120px;
+    width: 130px;
     height: 150px;
   }
 
@@ -775,7 +792,7 @@ img.gold-icon {
     font-size: 19px;
   }
 
-  #touch-controls .touch-eat {
+  #touch-controls .touch-interact {
     right: 62px;
     bottom: 74px;
   }
@@ -783,5 +800,10 @@ img.gold-icon {
   #touch-controls .touch-talk {
     right: 0;
     bottom: 74px;
+  }
+
+  #touch-controls .touch-dash {
+    right: 70px;
+    bottom: 6px;
   }
 }

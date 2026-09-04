@@ -580,12 +580,18 @@
     Combat.toast(state, 'Server multiplayer non raggiungibile');
   };
 
-  multiplayer.onChat = (from, text) => {
+  function appendChatLine(text, self = false) {
     if (!dom.chatLog) return;
     const line = document.createElement('div');
-    line.textContent = `${from}: ${text}`;
+    line.textContent = text;
+    if (self) line.className = 'chat-self';
     dom.chatLog.appendChild(line);
+    while (dom.chatLog.children.length > 8) dom.chatLog.removeChild(dom.chatLog.firstChild);
     dom.chatLog.scrollTop = dom.chatLog.scrollHeight;
+  }
+
+  multiplayer.onChat = (from, text) => {
+    appendChatLine(`${from}: ${text}`);
   };
 
   multiplayer.onReward = (reward) => Combat.applyServerReward(state, reward);
@@ -646,15 +652,12 @@
       return;
     }
 
-    if (!multiplayer.connected) return;
-    multiplayer.sendChat(text);
-    if (dom.chatLog) {
-      const line = document.createElement('div');
-      line.textContent = `${multiplayer.name}: ${text}`;
-      line.className = 'chat-self';
-      dom.chatLog.appendChild(line);
-      dom.chatLog.scrollTop = dom.chatLog.scrollHeight;
+    if (!multiplayer.connected) {
+      appendChatLine('Sistema: non sei connesso, messaggio non inviato', true);
+      return;
     }
+    multiplayer.sendChat(text);
+    appendChatLine(`${multiplayer.name}: ${text}`, true);
   };
 
   window.__gameDebug = { state, restartGame };
