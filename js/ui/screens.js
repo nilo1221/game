@@ -7,7 +7,7 @@
 const AUTHOR_URL = 'https://github.com/Nilo1221';
 
 const Screens = {
-  drawButton(ctx, bx, by, bw, bh, label, fill, textColor) {
+  drawButton(ctx, bx, by, bw, bh, label, fill, textColor, fontSize) {
     ctx.fillStyle = fill;
     roundRect(ctx, bx, by, bw, bh, 8);
     ctx.fill();
@@ -16,7 +16,7 @@ const Screens = {
     roundRect(ctx, bx, by, bw, bh, 8);
     ctx.stroke();
     ctx.fillStyle = textColor || '#f1efe8';
-    ctx.font = 'bold 15px sans-serif';
+    ctx.font = `bold ${fontSize || 15}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.fillText(label, bx + bw / 2, by + bh / 2 + 5);
     ctx.textAlign = 'left';
@@ -83,21 +83,21 @@ const Screens = {
     ctx.font = '14px sans-serif';
     ctx.fillText('Sopravvivi nelle terre selvagge. Forgi equipaggiamento. Difendi il villaggio.', viewW / 2, viewH / 2 - 58);
 
-    const bw = 190, bh = 42, gap = 14;
-    const bx = viewW / 2 - bw / 2;
-    let by = viewH / 2 - 10;
+    const bw = 190, bh = 52, gap = 16;
+    const bx = viewW - bw - 36;
+    let by = viewH / 2 + 40;
 
     const playLabel = state.hasStarted ? 'Continua' : 'Gioca';
-    const playBtn = this.drawButton(ctx, bx, by, bw, bh, playLabel, '#3a6b3d');
+    const playBtn = this.drawButton(ctx, bx, by, bw, bh, playLabel, '#3a6b3d', null, 18);
     by += bh + gap;
-    const howToBtn = this.drawButton(ctx, bx, by, bw, bh, 'Come Giocare', '#3a5a7a');
+    const howToBtn = this.drawButton(ctx, bx, by, bw, bh, 'Come Giocare', '#3a5a7a', null, 18);
     by += bh + gap;
     let restartBtn = null;
     if (state.hasStarted) {
-      restartBtn = this.drawButton(ctx, bx, by, bw, bh, 'Ricomincia', '#7a3a3a');
+      restartBtn = this.drawButton(ctx, bx, by, bw, bh, 'Ricomincia', '#7a3a3a', null, 18);
       by += bh + gap;
     }
-    const authorBtn = this.drawButton(ctx, bx, by, bw, bh, 'Nilo1221', '#5a4a3a');
+    const authorBtn = this.drawButton(ctx, bx, by, bw, bh, 'Nilo1221', '#5a4a3a', null, 18);
 
     ctx.restore();
 
@@ -190,20 +190,17 @@ const Screens = {
       ctx.fillText('Hai conquistato la Shattered Vale.', viewW / 2, viewH / 2 + 20);
     }
 
-    const bw = 150, bh = 38;
+    const bw = 220, bh = 62, gap = 14;
+    const bx = viewW - bw - 36;
+    let by = viewH / 2 + 70;
 
     if (isVictory) {
-      const gap = 16;
-      const totalW = bw * 2 + gap;
-      const leftX = viewW / 2 - totalW / 2;
-      const by = viewH / 2 + 55;
-      state.continueButton = this.drawButton(ctx, leftX, by, bw, bh, 'Continua', '#3a5a7a');
-      state.restartButton = this.drawButton(ctx, leftX + bw + gap, by, bw, bh, 'Gioca Ancora', '#3a6b3d');
+      state.continueButton = this.drawButton(ctx, bx, by, bw, bh, 'Continua', '#3a5a7a', null, 20);
+      by += bh + gap;
+      state.restartButton = this.drawButton(ctx, bx, by, bw, bh, 'Gioca Ancora', '#3a6b3d', null, 20);
     } else {
-      const bx = viewW / 2 - bw / 2;
-      const by = viewH / 2 + 55;
       state.continueButton = null;
-      state.restartButton = this.drawButton(ctx, bx, by, bw, bh, 'Gioca Ancora', '#3a6b3d');
+      state.restartButton = this.drawButton(ctx, bx, by, bw, bh, 'Gioca Ancora', '#3a6b3d', null, 20);
     }
 
     ctx.textAlign = 'left';
