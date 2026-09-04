@@ -33,14 +33,16 @@ body {
 
 #hud {
   display: flex;
-  align-items: stretch;
-  gap: 0;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   width: 100%;
-  max-width: 96vw;
+  max-width: 98vw;
   background: linear-gradient(180deg, #26201a 0%, #1c1712 55%, #171310 100%);
   border: 2px solid #4a3d2c;
   border-radius: 10px;
-  padding: 10px 16px;
+  padding: 8px 12px;
   box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.55),
     inset 0 1px 0 rgba(255, 230, 180, 0.08),
@@ -65,6 +67,53 @@ body {
 }
 #hud::after {
   right: 6px;
+}
+
+.hud-left,
+.hud-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bar-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bar-row .bar-track {
+  width: 110px;
+  height: 10px;
+}
+
+#hud .stat-group {
+  gap: 6px;
+}
+
+#hud .stat-text {
+  font-size: 11px;
+  min-width: 52px;
+}
+
+#hud .stat-icon,
+#hud .gold-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 16px;
+}
+
+#hud .stat-label {
+  font-size: 13px;
+  min-width: 24px;
+  text-align: center;
 }
 
 .stat-group {
@@ -380,7 +429,7 @@ img.gold-icon {
 }
 
 #xpGroup .bar-track {
-  width: 90px;
+  width: 80px;
 }
 
 /* subtle ambient pulse on the HP gem, purely decorative */
@@ -400,7 +449,6 @@ img.gold-icon {
 /* ============ GOLD MEDALLION ============ */
 
 #goldGroup {
-  margin-left: auto;
   padding-right: 4px;
 }
 
@@ -465,12 +513,31 @@ img.gold-icon {
     display: none;
   }
   #hud {
-    flex-wrap: wrap;
-    height: auto;
-    row-gap: 8px;
+    padding: 6px 8px;
+    gap: 6px;
   }
-  .stat-group {
-    padding: 0 8px;
+  .hud-right {
+    gap: 8px;
+  }
+  .bar-row .bar-track {
+    width: 85px;
+    height: 8px;
+  }
+  #hud .stat-text {
+    font-size: 10px;
+    min-width: 44px;
+  }
+  #hud .stat-icon,
+  #hud .gold-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 13px;
+  }
+  #hud .stat-label {
+    font-size: 11px;
+  }
+  #xpGroup .bar-track {
+    width: 60px;
   }
   #gameWrap {
     max-width: none;

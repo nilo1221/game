@@ -26,18 +26,19 @@ const Hud = {
       return [anc];
     }
 
+    const hudEl = dom.hud || document.getElementById('hud');
     const targets = [
+      hudEl,
       ...group(dom.hpBar, dom.hpText),
-      ...group(dom.xpBar, dom.lvlText),
       ...group(dom.manaBar, dom.manaText),
+      ...group(dom.xpBar, dom.lvlText),
       ...(dom.goldText && dom.goldText.parentElement && dom.goldText.parentElement !== document.body
         ? [dom.goldText.parentElement]
         : [dom.goldText]),
       ...(dom.premiumText && dom.premiumText.parentElement && dom.premiumText.parentElement !== document.body
         ? [dom.premiumText.parentElement]
         : [dom.premiumText]),
-      ...group(dom.hungerBar, dom.hungerText),
-      ...group(dom.thirstBar, dom.thirstText),
+      dom.honorText,
     ].filter(Boolean);
     const uniqueTargets = [...new Set(targets)];
     const originalDisplay = new Map();
@@ -53,17 +54,12 @@ const Hud = {
         dom.hpBar.style.width = (player.hp / player.maxHp * 100) + '%';
         dom.hpText.textContent = `${player.hp}/${player.maxHp}`;
         dom.xpBar.style.width = (player.xp / player.xpNext * 100) + '%';
-        dom.xpText.textContent = `${player.xp} / ${player.xpNext} Esp`;
         dom.lvlText.textContent = player.lvl;
         dom.goldText.textContent = player.gold;
         dom.premiumText.textContent = player.premium;
         dom.honorText.textContent = player.honor;
         dom.manaBar.style.width = (player.mana / player.maxMana * 100) + '%';
         dom.manaText.textContent = `${Math.floor(player.mana)}/${player.maxMana}`;
-        dom.hungerBar.style.width = (player.hunger / player.maxHunger * 100) + '%';
-        dom.hungerText.textContent = `${Math.floor(player.hunger)}/${player.maxHunger}`;
-        dom.thirstBar.style.width = (player.thirst / player.maxThirst * 100) + '%';
-        dom.thirstText.textContent = `${Math.floor(player.thirst)}/${player.maxThirst}`;
       },
     };
   },

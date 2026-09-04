@@ -87,6 +87,12 @@
     return getAccount();
   }
 
+  async function anonymous() {
+    if (!enabled) throw new Error('Cloud save non configurato');
+    await api('/v1/account/sessions/anonymous', { method: 'POST' });
+    return getAccount();
+  }
+
   async function logout() {
     if (!enabled || !currentUser) return;
     try {
@@ -175,6 +181,7 @@
     get user() { return currentUser; },
     login,
     register,
+    anonymous,
     logout,
     getAccount,
     load,

@@ -15,7 +15,7 @@
 <meta name="twitter:image" content="screenshots/screenshot01.jpg" />
 <link rel="canonical" href="https://shattered-vale.vercel.app/" />
 <title>Shattered Vale: GDR di Sopravvivenza</title>
-<link rel="stylesheet" href="css/style.css?v=1788476322676" />
+<link rel="stylesheet" href="css/style.css?v=1788490583092" />
 <link rel="shortcut icon" href="icons/favicon.ico" type="image/x-icon">
 <!-- Google tag (gtag.js) — loaded only after cookie consent -->
 <script>
@@ -54,43 +54,39 @@
 <body>
 
   <div id="hud">
-    <div class="stat-group" id="hpGroup">
-      <img class="stat-icon" src="assets/game/hud/heart.png" alt="Vita">
-      <div class="bar-track"><div class="bar-fill hp-fill" id="hpBarInner"></div></div>
-      <span class="stat-text" id="hpText">150/150</span>
+    <div class="hud-left">
+      <div class="stat-group" id="hpGroup">
+        <img class="stat-icon" src="assets/game/hud/heart.png" alt="Vita">
+        <div class="bar-stack">
+          <div class="bar-row">
+            <div class="bar-track"><div class="bar-fill hp-fill" id="hpBarInner"></div></div>
+            <span class="stat-text" id="hpText">150/150</span>
+          </div>
+          <div class="bar-row">
+            <div class="bar-track"><div class="bar-fill mana-fill" id="manaBarInner"></div></div>
+            <span class="stat-text" id="manaText">100/100</span>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="stat-group" id="manaGroup">
-      <div class="stat-icon">🌀</div>
-      <div class="bar-track"><div class="bar-fill mana-fill" id="manaBarInner"></div></div>
-      <span class="stat-text" id="manaText">100/100</span>
-    </div>
-    <div class="stat-group" id="xpGroup">
-      <div class="stat-icon">⭐</div>
-      <span class="stat-label">Liv <span id="lvlText">1</span></span>
-      <div class="bar-track"><div class="bar-fill xp-fill" id="xpBarInner"></div></div>
-      <span class="stat-text" id="xpText">0 / 10 Esp</span>
-    </div>
-    <div class="stat-group" id="goldGroup">
-      <img class="gold-icon" src="assets/game/items/gold.png" alt="Oro">
-      <span class="stat-text" id="goldText">0</span>
-    </div>
-    <div class="stat-group" id="premiumGroup">
-      <img class="gold-icon" src="assets/game/items/gem.png" alt="Gemme">
-      <span class="stat-text" id="premiumText">0</span>
-    </div>
-    <div class="stat-group" id="honorGroup" title="Onore PvP">
-      <span class="stat-icon">⚔️</span>
-      <span class="stat-text" id="honorText">0</span>
-    </div>
-    <div class="stat-group" id="hungerGroup">
-      <div class="stat-icon">🍞</div>
-      <div class="bar-track"><div class="bar-fill hunger-fill" id="hungerBarInner"></div></div>
-      <span class="stat-text" id="hungerText">100/100</span>
-    </div>
-    <div class="stat-group" id="thirstGroup">
-      <div class="stat-icon">💧</div>
-      <div class="bar-track"><div class="bar-fill thirst-fill" id="thirstBarInner"></div></div>
-      <span class="stat-text" id="thirstText">100/100</span>
+    <div class="hud-right">
+      <div class="stat-group" id="xpGroup" title="Livello ed esperienza">
+        <span class="stat-icon">⭐</span>
+        <span class="stat-label" id="lvlText">1</span>
+        <div class="bar-track"><div class="bar-fill xp-fill" id="xpBarInner"></div></div>
+      </div>
+      <div class="stat-group" id="goldGroup">
+        <img class="gold-icon" src="assets/game/items/gold.png" alt="Oro">
+        <span class="stat-text" id="goldText">0</span>
+      </div>
+      <div class="stat-group" id="premiumGroup">
+        <img class="gold-icon" src="assets/game/items/gem.png" alt="Gemme">
+        <span class="stat-text" id="premiumText">0</span>
+      </div>
+      <div class="stat-group" id="honorGroup" title="Onore PvP">
+        <span class="stat-icon">⚔️</span>
+        <span class="stat-text" id="honorText">0</span>
+      </div>
     </div>
   </div>
 
@@ -112,20 +108,11 @@
   <div id="start-overlay">
     <div class="start-card">
       <h1>Shattered Vale</h1>
-      <p id="backstory-intro" class="start-hint" style="font-size: 12px; line-height: 1.4; max-width: 320px;"></p>
       <input id="player-name" type="text" placeholder="Nome giocatore" value="Nilo1221" maxlength="16" />
-      <select id="character-background" aria-label="Background del personaggio" style="width: 100%; padding: 8px; margin: 6px 0; background: #1a1510; color: #f1efe8; border: 1px solid #5a4a3a;"></select>
-      <p id="backstory-detail" class="start-hint" style="font-size: 12px; line-height: 1.4; min-height: 40px;"></p>
-      <input id="player-email" type="email" placeholder="Email" />
-      <input id="player-password" type="password" placeholder="Password" />
       <div class="start-actions">
-        <button id="play-offline" class="start-btn offline">Gioca offline</button>
-        <button id="play-online" class="start-btn online">Entra online</button>
-        <button id="register-btn" class="start-btn register">Registrati</button>
-        <button id="premium-btn" class="start-btn premium">Negozio Premium</button>
+        <button id="play-offline" class="start-btn offline">Gioca</button>
       </div>
       <p id="auth-message" class="auth-message"></p>
-      <p class="start-hint">I giocatori online sono nel tuo stesso server.</p>
     </div>
     <div id="premium-card" class="start-card">
       <h2>Negozio Premium</h2>
@@ -143,63 +130,63 @@
   </div>
 
   <!-- utils first: shared math/canvas helpers nearly everything depends on -->
-  <script src="js/utils.js?v=1788476322676"></script>
+  <script src="js/utils.js?v=1788490583092"></script>
 
   <!-- config: pure data, no dependencies -->
-  <script src="js/config/balance.js?v=1788476322676"></script>
-  <script src="js/config/story.js?v=1788476322676"></script>
-  <script src="js/config/level-layout.js?v=1788476322676"></script>
-  <script src="js/config/item-effects.js?v=1788476322676"></script>
-  <script src="js/config/item-stats.js?v=1788476322676"></script>
-  <script src="js/config/shop-pool.js?v=1788476322676"></script>
-  <script src="js/config/loot-tables.js?v=1788476322676"></script>
-  <script src="js/config/affiliates.js?v=1788476322676"></script>
-  <script src="js/config/ads.js?v=1788476322676"></script>
-  <script src="js/config/appwrite.js?v=1788476322676"></script>
+  <script src="js/config/balance.js?v=1788490583092"></script>
+  <script src="js/config/story.js?v=1788490583092"></script>
+  <script src="js/config/level-layout.js?v=1788490583092"></script>
+  <script src="js/config/item-effects.js?v=1788490583092"></script>
+  <script src="js/config/item-stats.js?v=1788490583092"></script>
+  <script src="js/config/shop-pool.js?v=1788490583092"></script>
+  <script src="js/config/loot-tables.js?v=1788490583092"></script>
+  <script src="js/config/affiliates.js?v=1788490583092"></script>
+  <script src="js/config/ads.js?v=1788490583092"></script>
+  <script src="js/config/appwrite.js?v=1788490583092"></script>
 
   <!-- sprites: builder functions, then the registry that calls them -->
-  <script src="js/sprites/humanoid-sprites.js?v=1788476322676"></script>
-  <script src="js/sprites/monster-sprites.js?v=1788476322676"></script>
-  <script src="js/sprites/molten-sprites.js?v=1788476322676"></script>
-  <script src="js/sprites/icon-sprites.js?v=1788476322676"></script>
-  <script src="js/sprites/sprites.js?v=1788476322676"></script>
+  <script src="js/sprites/humanoid-sprites.js?v=1788490583092"></script>
+  <script src="js/sprites/monster-sprites.js?v=1788490583092"></script>
+  <script src="js/sprites/molten-sprites.js?v=1788490583092"></script>
+  <script src="js/sprites/icon-sprites.js?v=1788490583092"></script>
+  <script src="js/sprites/sprites.js?v=1788490583092"></script>
 
   <!-- world: builder + renderer, then the TileMap class that composes them -->
-  <script src="js/world/tilemap-builder.js?v=1788476322676"></script>
-  <script src="js/world/tilemap-renderer.js?v=1788476322676"></script>
-  <script src="js/world/tilemap.js?v=1788476322676"></script>
+  <script src="js/world/tilemap-builder.js?v=1788490583092"></script>
+  <script src="js/world/tilemap-renderer.js?v=1788490583092"></script>
+  <script src="js/world/tilemap.js?v=1788490583092"></script>
 
   <!-- entities -->
-  <script src="js/entities/animated-sprite.js?v=1788476322676"></script>
-  <script src="js/entities/player.js?v=1788476322676"></script>
-  <script type="module" src="js/multiplayer-party.mjs?v=1788476322676"></script>
-  <script src="js/entities/npc.js?v=1788476322676"></script>
-  <script src="js/entities/enemy.js?v=1788476322676"></script>
-  <script src="js/entities/fireball.js?v=1788476322676"></script>
+  <script src="js/entities/animated-sprite.js?v=1788490583092"></script>
+  <script src="js/entities/player.js?v=1788490583092"></script>
+  <script type="module" src="js/multiplayer-party.mjs?v=1788490583092"></script>
+  <script src="js/entities/npc.js?v=1788490583092"></script>
+  <script src="js/entities/enemy.js?v=1788490583092"></script>
+  <script src="js/entities/fireball.js?v=1788490583092"></script>
 
   <!-- systems -->
-  <script src="js/systems/camera.js?v=1788476322676"></script>
-  <script src="js/systems/particles.js?v=1788476322676"></script>
-  <script src="js/systems/dialogue.js?v=1788476322676"></script>
-  <script src="js/systems/inventory.js?v=1788476322676"></script>
-  <script src="js/systems/merchant.js?v=1788476322676"></script>
-  <script src="js/systems/save.js?v=1788476322676"></script>
-  <script src="js/services/appwrite-client.js?v=1788476322676"></script>
-  <script src="js/systems/payments.js?v=1788476322676"></script>
-  <script src="js/systems/ad-manager.js?v=1788476322676"></script>
-  <script src="js/systems/loot.js?v=1788476322676"></script>
-  <script src="js/systems/audio.js?v=1788476322676"></script>
+  <script src="js/systems/camera.js?v=1788490583092"></script>
+  <script src="js/systems/particles.js?v=1788490583092"></script>
+  <script src="js/systems/dialogue.js?v=1788490583092"></script>
+  <script src="js/systems/inventory.js?v=1788490583092"></script>
+  <script src="js/systems/merchant.js?v=1788490583092"></script>
+  <script src="js/systems/save.js?v=1788490583092"></script>
+  <script src="js/services/appwrite-client.js?v=1788490583092"></script>
+  <script src="js/systems/payments.js?v=1788490583092"></script>
+  <script src="js/systems/ad-manager.js?v=1788490583092"></script>
+  <script src="js/systems/loot.js?v=1788490583092"></script>
+  <script src="js/systems/audio.js?v=1788490583092"></script>
 
   <!-- ui -->
-  <script src="js/ui/hud.js?v=1788476322676"></script>
-  <script src="js/ui/screens.js?v=1788476322676"></script>
-  <script src="js/ui/shop.js?v=1788476322676"></script>
+  <script src="js/ui/hud.js?v=1788490583092"></script>
+  <script src="js/ui/screens.js?v=1788490583092"></script>
+  <script src="js/ui/shop.js?v=1788490583092"></script>
 
   <!-- core: input, world assembly, combat resolution, then the orchestrator -->
-  <script src="js/core/input.js?v=1788476322676"></script>
-  <script src="js/core/world-factory.js?v=1788476322676"></script>
-  <script src="js/core/combat.js?v=1788476322676"></script>
-  <script src="js/core/game.js?v=1788476322676"></script>
+  <script src="js/core/input.js?v=1788490583092"></script>
+  <script src="js/core/world-factory.js?v=1788490583092"></script>
+  <script src="js/core/combat.js?v=1788490583092"></script>
+  <script src="js/core/game.js?v=1788490583092"></script>
 
   <div id="cookie-banner" style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(20,18,16,0.95); color: #f1efe8; padding: 12px 16px; font: 13px sans-serif; z-index: 9999; display: flex; align-items: center; justify-content: center; gap: 16px; border-top: 1px solid rgba(232,228,216,0.2);">
     <span>Utilizziamo cookie di terze parti (Google Analytics) per analizzare il traffico. <a href="privacy.html" style="color: #e8c93c; text-decoration: underline;">Privacy policy</a></span>
@@ -216,81 +203,17 @@
   <script>
     (function() {
       const nameInput = document.getElementById('player-name');
-      const emailInput = document.getElementById('player-email');
-      const passwordInput = document.getElementById('player-password');
       const saved = (typeof SaveGame !== 'undefined' && SaveGame.getName) ? SaveGame.getName() : '';
       if (saved) nameInput.value = saved;
       const offlineBtn = document.getElementById('play-offline');
-      const onlineBtn = document.getElementById('play-online');
-      const registerBtn = document.getElementById('register-btn');
-      const authMessage = document.getElementById('auth-message');
 
       function getName() {
         return (nameInput.value || 'Nilo1221').trim().slice(0, 16);
       }
-      function getEmail() { return (emailInput.value || '').trim(); }
-      function getPassword() { return passwordInput.value || ''; }
-      function showAuthMessage(msg) { if (authMessage) authMessage.textContent = msg; }
 
-      async function tryOnline() {
-        const name = getName();
-        const email = getEmail();
-        const password = getPassword();
-        if (typeof CloudSave !== 'undefined' && CloudSave.enabled) {
-          if (CloudSave.loggedIn) {
-            window.startGame(name, true);
-            return;
-          }
-          if (!email || !password) { showAuthMessage('Inserisci email e password'); return; }
-          try {
-            showAuthMessage('Accesso in corso...');
-            await CloudSave.login(email, password);
-            const data = await CloudSave.load();
-            if (typeof window.applyCloudData === 'function') window.applyCloudData(data);
-            showAuthMessage('');
-            window.startGame(getName(), true);
-          } catch (e) {
-            showAuthMessage(e.message || 'Errore di accesso');
-          }
-        } else {
-          showAuthMessage('Cloud non configurato: gioca offline o compila js/config/appwrite.js');
-        }
-      }
-
-      async function tryRegister() {
-        const name = getName();
-        const email = getEmail();
-        const password = getPassword();
-        if (typeof CloudSave === 'undefined' || !CloudSave.enabled) { showAuthMessage('Cloud non configurato'); return; }
-        if (!email || !password) { showAuthMessage('Inserisci email e password'); return; }
-        try {
-          showAuthMessage('Registrazione in corso...');
-          await CloudSave.register(name, email, password);
-          const data = await CloudSave.load();
-          if (typeof window.applyCloudData === 'function') window.applyCloudData(data);
-          showAuthMessage('');
-          window.startGame(getName(), true);
-        } catch (e) {
-          showAuthMessage(e.message || 'Errore registrazione');
-        }
-      }
-
-      offlineBtn.addEventListener('click', () => {
-        window.startGame(getName(), false);
-      });
-      onlineBtn.addEventListener('click', tryOnline);
-      registerBtn.addEventListener('click', tryRegister);
-
-      const chatInput = document.getElementById('chat-input');
-      if (chatInput) {
-        chatInput.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') {
-            const text = chatInput.value.trim();
-            if (text && typeof window.sendChat === 'function') {
-              window.sendChat(text);
-            }
-            chatInput.value = '';
-          }
+      if (offlineBtn) {
+        offlineBtn.addEventListener('click', () => {
+          window.startGame(getName(), false);
         });
       }
     })();

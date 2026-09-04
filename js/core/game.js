@@ -11,26 +11,19 @@
 
   // --- DOM HUD ---
   const dom = {
+    hud: document.getElementById('hud'),
     hpBar: document.getElementById('hpBarInner'),
     hpText: document.getElementById('hpText'),
     xpBar: document.getElementById('xpBarInner'),
-    // NOTE: the original game read/wrote `xpText` in its DOM-sync step but
-    // never actually looked it up via getElementById, which threw a
-    // ReferenceError the moment that code ran. Fixed here; if your
-    // index.html uses a different id for the XP label, update this line.
-    xpText: document.getElementById('xpText'),
     lvlText: document.getElementById('lvlText'),
     goldText: document.getElementById('goldText'),
     premiumText: document.getElementById('premiumText'),
     honorText: document.getElementById('honorText'),
     manaBar: document.getElementById('manaBarInner'),
     manaText: document.getElementById('manaText'),
-    hungerBar: document.getElementById('hungerBarInner'),
-    hungerText: document.getElementById('hungerText'),
-    thirstBar: document.getElementById('thirstBarInner'),
-    thirstText: document.getElementById('thirstText'),
     chatLog: document.getElementById('chat-log'),
     chatInput: document.getElementById('chat-input'),
+    chatUi: document.getElementById('chat-ui'),
     nameInput: document.getElementById('player-name'),
     backgroundInput: document.getElementById('character-background'),
     backstoryIntro: document.getElementById('backstory-intro'),
@@ -59,7 +52,25 @@
   const player = new Player(PLAYER_SPAWN.x, PLAYER_SPAWN.y);
   Story.applyBackground(player, SaveGame.getBackground());
   Story.populateStartScreen(dom.backstoryIntro, dom.backgroundInput, dom.backstoryDetail);
-  const multiplayer = new Multiplayer();
+
+  const MultiplayerImpl = typeof Multiplayer !== 'undefined' ? Multiplayer : class NoopMultiplayer {
+    constructor() { this.id = null; this.players = new Map(); this.ws = null; this.connected = false; }
+    connect() {}
+    disconnect() {}
+    send() {}
+    sendChat() {}
+    sendPvpHit() {}
+    sendPvpKill() {}
+    sendEnemyDefeated() {}
+    sendOpenChest() {}
+    sendRegionEnter() {}
+    sendStashDeposit() {}
+    sendStashWithdraw() {}
+    sendStashList() {}
+    tick() {}
+    draw() {}
+  };
+  const multiplayer = new MultiplayerImpl();
 
   const { npcs, elder, merchant, weaponMaster, premiumVendor } = WorldFactory.createNpcs();
   if (elder) elder.dialogue = Story.getElderDialogue(0);
@@ -194,6 +205,14 @@
     }
 
     input.pollGamepad();
+
+    if (justPressed['enter'] && dom.chatInput && document.activeElement !== dom.chatInput) {
+      if (dom.chatUi) dom.chatUi.style.display = 'flex';
+      dom.chatInput.focus();
+      input.clearJustPressed();
+      return;
+    }
+
     dialogue.update();
 
     if (state.elder && state.questStage !== state.lastQuestStage) {
@@ -638,6 +657,25 @@
   };
 
   window.__gameDebug = { state, restartGame };
+
+  if (dom.chatUi) dom.chatUi.style.display = 'none';
+  if (dom.chatInput) {
+    dom.chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.stopPropagation();
+        const text = dom.chatInput.value.trim();
+        if (text && typeof window.sendChat === 'function') window.sendChat(text);
+        dom.chatInput.value = '';
+        if (dom.chatUi) dom.chatUi.style.display = 'none';
+        canvas.focus();
+      } else if (e.key === 'Escape') {
+        e.stopPropagation();
+        dom.chatInput.value = '';
+        if (dom.chatUi) dom.chatUi.style.display = 'none';
+        canvas.focus();
+      }
+    });
+  }
 
   canvas.focus();
   loop();
