@@ -612,4 +612,86 @@ function drawDecor(ctx, d) {
     ctx.fillRect(px + 18.7, py + 21, 1.2, 1.2);
     ctx.fillRect(px + 21, py + 21, 1.2, 1.2);
   }
+
+  // SHOP DECORATIONS
+  else if (d.type === 'anvil') {
+    // base
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(px + 9, py + 20, 14, 10);
+    // horn
+    ctx.beginPath();
+    ctx.moveTo(px + 9, py + 20);
+    ctx.lineTo(px + 6, py + 17);
+    ctx.lineTo(px + 10, py + 17);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(px + 23, py + 20);
+    ctx.lineTo(px + 26, py + 17);
+    ctx.lineTo(px + 22, py + 17);
+    ctx.closePath();
+    ctx.fill();
+    // top face
+    ctx.fillStyle = '#4a4a4a';
+    ctx.beginPath();
+    ctx.ellipse(px + 16, py + 18, 9, 3.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // shine
+    ctx.fillStyle = '#6a6a6a';
+    ctx.beginPath();
+    ctx.ellipse(px + 16, py + 17, 5, 1.8, 0, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (d.type === 'bookshelf') {
+    ctx.fillStyle = '#5a3a1a';
+    ctx.fillRect(px + 7, py + 8, 18, 24);
+    ctx.fillStyle = '#3a2010';
+    ctx.fillRect(px + 8, py + 15, 16, 2);
+    ctx.fillRect(px + 8, py + 23, 16, 2);
+    ctx.fillStyle = '#d8d4c8';
+    for (let i = 0; i < 4; i++) {
+      ctx.fillRect(px + 10 + i * 4, py + 11, 2, 3);
+      ctx.fillRect(px + 10 + i * 4, py + 18, 2, 3);
+    }
+  } else if (d.type === 'cauldron') {
+    // stand
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(px + 12, py + 24, 8, 4);
+    // pot
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath();
+    ctx.arc(px + 16, py + 19, 10, 0, Math.PI, false);
+    ctx.fill();
+    ctx.fillRect(px + 6, py + 14, 20, 6);
+    // brew
+    ctx.fillStyle = '#4a8a34';
+    ctx.beginPath();
+    ctx.ellipse(px + 16, py + 15, 8, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // bubbles
+    ctx.fillStyle = 'rgba(150,255,150,0.7)';
+    ctx.beginPath();
+    ctx.arc(px + 13, py + 13, 2.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(px + 19, py + 14, 1.6, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (d.type === 'herbs') {
+    // pot
+    ctx.fillStyle = '#6b4423';
+    ctx.beginPath();
+    ctx.moveTo(px + 10, py + 24);
+    ctx.lineTo(px + 22, py + 24);
+    ctx.lineTo(px + 20, py + 18);
+    ctx.lineTo(px + 12, py + 18);
+    ctx.closePath();
+    ctx.fill();
+    // leaves
+    ctx.fillStyle = '#3a8a34';
+    for (let i = 0; i < 4; i++) {
+      const ang = -0.8 + i * 0.55;
+      ctx.beginPath();
+      ctx.ellipse(px + 16 + Math.sin(ang) * 5, py + 15 + Math.cos(ang) * 3, 3, 1.5, ang, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
 }
