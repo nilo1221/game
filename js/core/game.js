@@ -520,7 +520,7 @@
   // Small debug hook (harmless in normal play) — lets you inspect live state
   // from the browser console with `__gameDebug.state`, or force a restart
   // with `__gameDebug.restartGame()`.
-  window.startGame = (name, online) => {
+  window.startGame = (name, online, room = '') => {
     name = String(name).trim().slice(0, 16);
     const savedName = SaveGame.getName();
     if (savedName && name !== savedName) {
@@ -551,9 +551,10 @@
 
     // If already connected with a different mode/name, reset.
     if (multiplayer.ws) multiplayer.disconnect();
-    if (online) multiplayer.connect(name);
+    if (online) multiplayer.connect(name, room);
 
     multiplayer.name = name;
+    multiplayer.room = room;
     state.gameState = 'playing';
     state.hasStarted = true;
     state.lobbyTriedConnect = false;

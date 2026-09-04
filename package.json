@@ -6,9 +6,7 @@
   "scripts": {
     "start": "npx partykit dev",
     "dev": "npx partykit dev",
-    "deploy": "npx partykit deploy",
-    "legacy": "node server.mjs",
-    "colyseus": "node server/colyseus-server.mjs"
+    "deploy": "npx partykit deploy"
   },
   "keywords": [
     "game",
@@ -21,7 +19,6 @@
   "license": "MIT",
   "dependencies": {
     "partykit": "^0.0.115",
-    "partysocket": "^1.3.0",
-    "ws": "^8.21.3"
+    "partysocket": "^1.3.0"
   }
 }

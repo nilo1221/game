@@ -2,6 +2,32 @@
 // Each ad is a plain outbound link. Impressions and clicks are tracked by
 // js/systems/ad-manager.js and stored locally (or sent to Supabase later).
 
+// Network configuration for real ads (ADV). Set provider to one of:
+// 'none' | 'adsense' | 'adsterra' | 'gamemonetize' | 'poki' | 'crazygames'.
+const AD_NETWORK = {
+  provider: 'none',
+
+  adsense: {
+    client: 'ca-pub-XXXXXXXXXXXXXXXX',
+    test: false,
+  },
+
+  adsterra: {
+    // Paste the Adsterra banner <script> here, or leave empty for direct-link only.
+    bannerScript: '',
+    // Direct Link URL used for the "Sponsor" button.
+    directLink: 'https://example.com?utm_source=shattered-vale',
+  },
+
+  gamemonetize: {
+    gameId: 'YOUR_GAME_ID',
+  },
+
+  poki: {
+    gameId: 'YOUR_GAME_ID',
+  },
+};
+
 const DIRECT_ADS = [
   {
     id: 'indiepartner',

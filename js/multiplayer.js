@@ -74,6 +74,7 @@ class Multiplayer {
     this.connected = false;
     this.sendTimer = 0;
     this.name = 'Player';
+    this.room = '';
     this.color = this._pickColor();
     this.onPvpHit = null;
     this.onPvpKill = null;
@@ -85,9 +86,10 @@ class Multiplayer {
     return colors[Math.floor(Math.random() * colors.length)];
   }
 
-  connect(name = 'Player') {
+  connect(name = 'Player', room = this.room || '') {
     if (this.ws) return;
     this.name = name;
+    this.room = room;
 
     const hasExplicitServer = typeof WS_SERVER !== 'undefined' && WS_SERVER;
     const host = window.location.host;
@@ -102,10 +104,15 @@ class Multiplayer {
 
     let serverUrl;
     if (hasExplicitServer) {
-      serverUrl = WS_SERVER;
+      // Convert https:// to wss:// if needed; ws:// can be passed directly.
+      serverUrl = WS_SERVER.replace(/\/$/, '').replace(/^https:\/\//, 'wss://');
     } else {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       serverUrl = `${protocol}//${host}`;
+    }
+
+    if (room) {
+      serverUrl = `${serverUrl}/parties/main/${room}`;
     }
 
     try {
