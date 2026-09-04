@@ -32,6 +32,9 @@
     chatLog: document.getElementById('chat-log'),
     chatInput: document.getElementById('chat-input'),
     nameInput: document.getElementById('player-name'),
+    backgroundInput: document.getElementById('character-background'),
+    backstoryIntro: document.getElementById('backstory-intro'),
+    backstoryDetail: document.getElementById('backstory-detail'),
   };
   const hud = Hud.bindDom(dom);
   hud.setVisible(false); // hidden until Play is pressed
@@ -54,12 +57,15 @@
   const inventory = new Inventory();
   const shop = new Shop();
   const player = new Player(PLAYER_SPAWN.x, PLAYER_SPAWN.y);
-  SaveGame.load(player);
+  Story.applyBackground(player, SaveGame.getBackground());
+  Story.populateStartScreen(dom.backstoryIntro, dom.backgroundInput, dom.backstoryDetail);
   const multiplayer = new Multiplayer();
 
-  const { npcs, elder, merchant, weaponMaster } = WorldFactory.createNpcs();
+  const { npcs, elder, merchant, weaponMaster, premiumVendor } = WorldFactory.createNpcs();
+  if (elder) elder.dialogue = Story.getElderDialogue(0);
   if (merchant) merchant.shop = new Merchant('Mercante Vagabondo', WANDERING_MERCHANT_STOCK, WANDERING_MERCHANT_CURRENCY);
   if (weaponMaster) weaponMaster.shop = new Merchant('Maestro d\'Armi', WEAPON_MASTER_STOCK, WEAPON_MASTER_CURRENCY);
+  if (premiumVendor) premiumVendor.shop = new Merchant('Mercante di Casse', PREMIUM_CHEST_STOCK, 'premium');
   const worldItems = WorldFactory.createWorldItems();
 
   // Shared game state, passed explicitly into Combat/Hud/Screens so none of
@@ -67,10 +73,11 @@
   // can't anyway — each lives in its own <script> file).
   const state = {
     map, camera, particles, dialogue, inventory, shop, player,
-    npcs, elder, merchant, weaponMaster, worldItems, multiplayer,
+    npcs, elder, merchant, weaponMaster, premiumVendor, worldItems, multiplayer,
     enemies: WorldFactory.createEnemies(),
     merchantGaveGift: false,
     questStage: 0, // 0 = not talked, 1 = quest given, 2 = sword found, 3 = boss defeated
+    lastQuestStage: -1,
     gameState: 'lobby', // 'lobby' | 'start' | 'howtoplay' | 'playing' | 'gameover'
     lobbyTriedConnect: false,
     hasStarted: false, // true once Play has been pressed at least once — flips the start-menu button to "Continue"
@@ -81,7 +88,11 @@
     continueButton: null,
     startButtons: {},
     howToBackButton: null,
+    regionsSent: new Set(),
+    profile: null,
   };
+
+  SaveGame.load(player, inventory, state);
 
   function restartGame() {
     // Preserve persistent currencies and name across restarts — this keeps
@@ -106,8 +117,11 @@
     player.honor = persist.honor;
     player.atk = PLAYER_BASE_STATS.atk;
     player.hasSword = false;
+    player.hasEpicSword = false;
+    player.hasCursedSword = false;
     player.hasLegendarySword = false;
     player.hasMoltenSword = false;
+    player.weaponBonus = 0;
     player.fireproof = false;
     player.defense = 0;
     player.speed = PLAYER_BASE_STATS.speed;
@@ -117,8 +131,11 @@
     player.invuln = 0;
     player.hunger = PLAYER_BASE_STATS.hunger;
     player.thirst = PLAYER_BASE_STATS.thirst;
-    // (mana/fireball cooldown intentionally carry over — matches the
-    // original restart behavior, which never reset them either.)
+    player.maxMana = PLAYER_BASE_STATS.maxMana;
+    player.mana = PLAYER_BASE_STATS.mana;
+    Story.applyBackground(player, SaveGame.getBackground());
+    // (fireball cooldown intentionally carries over — matches the
+    // original restart behavior.)
 
     inventory.reset();
     if (shop) shop.close();
@@ -129,8 +146,8 @@
     state.hasStarted = true;
     state.lobbyTriedConnect = false;
     state.merchantGaveGift = false;
-
-    WorldFactory.resetNpcsAndItems(npcs, worldItems);
+    state.regionsSent = new Set();
+    const worldItems = WorldFactory.createWorldItems();
     state.enemies = WorldFactory.createEnemies();
 
     state.toastMsg = null;
@@ -141,7 +158,28 @@
     const overlay = document.getElementById('start-overlay');
     if (overlay) overlay.style.display = 'none';
     hud.setVisible(true);
-    SaveGame.save(player);
+    SaveGame.save(player, inventory, state);
+  }
+
+  function checkRegionDiscovery() {
+    if (!multiplayer.connected) return;
+    const tx = Math.floor(player.centerX / TILE);
+    const ty = Math.floor(player.centerY / TILE);
+    const send = (region) => {
+      if (state.regionsSent.has(region)) return;
+      state.regionsSent.add(region);
+      multiplayer.sendRegionEnter(region);
+    };
+    if (ty <= map.oasisSouthEdge) {
+      if (map.isWorldTwoGateOpen && tx >= 28) send('oasis');
+      else if (tx < 28) send('vale');
+    } else if (ty <= map.jungleSouthEdge) {
+      if (map.isJungleGateOpen) send('jungle');
+    } else if (ty <= map.dungeonSouthEdge) {
+      if (map.isSkeletonGateOpen) send('crypt');
+    } else {
+      if (map.isLavaGateOpen) send('molten');
+    }
   }
 
   function update() {
@@ -157,6 +195,11 @@
 
     input.pollGamepad();
     dialogue.update();
+
+    if (state.elder && state.questStage !== state.lastQuestStage) {
+      state.elder.dialogue = Story.getElderDialogue(state.questStage);
+      state.lastQuestStage = state.questStage;
+    }
 
     if (state.gameState === 'lobby') {
       if (!multiplayer.ws && !state.lobbyTriedConnect) {
@@ -181,6 +224,8 @@
 
     if (state.gameState !== 'playing') return;
 
+    checkRegionDiscovery();
+
     if (dialogue.isOpen()) {
       if (justPressed[' '] || justPressed['e']) dialogue.advance();
     } else if (shop.open) {
@@ -194,7 +239,7 @@
       const overlay = document.getElementById('start-overlay');
       if (overlay) overlay.style.display = 'flex';
     } else {
-      player.update(keys, map, particles);
+      player.update(input, map, particles);
       player.fireballs.forEach((f) => f.update(state.enemies, particles));
       player.fireballs = player.fireballs.filter((f) => f.life > 0);
 
@@ -307,7 +352,7 @@
     draw();
     domTick++;
     if (domTick % 4 === 0) hud.sync(player);
-    if (domTick % 120 === 0) SaveGame.save(player);
+    if (domTick % 120 === 0) SaveGame.save(player, inventory, state);
     requestAnimationFrame(loop);
   }
 
@@ -381,6 +426,19 @@
           } else {
             Combat.toast(state, result.reason === 'insufficiente' ? `${shop.merchant.currencyName} insufficienti` : 'Oggetto esaurito');
           }
+        } else if (hit.action === 'sell') {
+          const result = shop.merchant.sell(hit.kind, player, inventory);
+          if (result.ok) {
+            Combat.toast(state, `Venduto ${getItemStats(hit.kind).name}: +${result.price} ${shop.merchant.currencyName}`);
+            AudioManager.play('buy');
+          } else {
+            Combat.toast(state, result.reason === 'non possiedi' ? 'Non possiedi questo oggetto' : 'Non acquistabile');
+          }
+        } else if (hit.action === 'ad') {
+          if (hit.ad) {
+            AdManager.openAd(hit.ad, 'premiumShop');
+            AudioManager.play('ui');
+          }
         } else if (hit.action === 'affiliate') {
           const aff = AFFILIATES.find((a) => a.id === hit.id);
           if (aff) {
@@ -435,7 +493,8 @@
   // into the local player object before the game begins.
   window.applyCloudData = (data) => {
     if (!data) return;
-    SaveGame.applyData(player, data);
+    SaveGame.applyData(player, data, inventory, state);
+    Story.applyBackground(player, SaveGame.getBackground());
     if (data.name && dom.nameInput) dom.nameInput.value = data.name;
   };
 
@@ -449,7 +508,7 @@
       if (player.gold >= RENAME_COST) {
         player.gold -= RENAME_COST;
         SaveGame.setName(name);
-        SaveGame.save(player);
+        SaveGame.save(player, inventory, state);
         Combat.toast(state, `Nome cambiato per ${RENAME_COST} oro`);
       } else {
         Combat.toast(state, `Cambio nome: ${RENAME_COST} oro richiesti`);
@@ -460,6 +519,17 @@
       SaveGame.setName(name);
     }
 
+    const bg = (dom.backgroundInput ? dom.backgroundInput.value : '') || 'exile';
+    SaveGame.setBackground(bg);
+    player.maxHp = PLAYER_BASE_STATS.maxHp;
+    player.hp = PLAYER_BASE_STATS.hp;
+    player.maxMana = PLAYER_BASE_STATS.maxMana;
+    player.mana = PLAYER_BASE_STATS.mana;
+    player.atk = PLAYER_BASE_STATS.atk;
+    player.speed = PLAYER_BASE_STATS.speed;
+    Story.applyBackground(player, bg);
+    SaveGame.save(player, inventory, state);
+
     // If already connected with a different mode/name, reset.
     if (multiplayer.ws) multiplayer.disconnect();
     if (online) multiplayer.connect(name);
@@ -468,6 +538,7 @@
     state.gameState = 'playing';
     state.hasStarted = true;
     state.lobbyTriedConnect = false;
+    state.regionsSent = new Set();
     hud.setVisible(true);
     AudioManager.resume();
     AudioManager.play('ui');
@@ -497,7 +568,64 @@
     dom.chatLog.scrollTop = dom.chatLog.scrollHeight;
   };
 
+  multiplayer.onReward = (reward) => Combat.applyServerReward(state, reward);
+  multiplayer.onDrop = (drop) => Combat.spawnServerDrop(state, drop);
+  multiplayer.onBossEvent = (ev) => Combat.applyServerBossEvent(state, ev.bossType, ev.x, ev.y);
+  multiplayer.onChestResult = (data) => Combat.applyServerChestResult(state, data);
+
+  multiplayer.onProfile = (profile) => { state.profile = profile; };
+  multiplayer.onAchievement = (msg) => {
+    player.gold += msg.rewardGold || 0;
+    player.gainXP(msg.rewardXp || 0, state.particles);
+    Combat.toast(state, `Achievement sbloccato: ${msg.title}`);
+  };
+  multiplayer.onRegionUnlocked = (msg) => {
+    player.gold += msg.rewardGold || 0;
+    player.gainXP(msg.rewardXp || 0, state.particles);
+    Combat.toast(state, `Regione scoperta: ${msg.title} (+${msg.rewardGold}g, +${msg.rewardXp}xp)`);
+  };
+  multiplayer.onStashResult = (data) => {
+    if (!data.ok) {
+      Combat.toast(state, data.reason || 'Errore stash');
+      return;
+    }
+    if (data.action === 'withdraw' && data.kind) {
+      inventory.add(data.kind, data.count || 1);
+      Combat.toast(state, `Ritirato dallo stash: ${data.kind} x${data.count || 1}`);
+    } else if (data.action === 'deposit') {
+      Combat.toast(state, 'Deposito nello stash completato');
+    }
+  };
+
   window.sendChat = (text) => {
+    text = String(text).trim();
+    if (!text) return;
+
+    if (text.toLowerCase().startsWith('/stash')) {
+      const parts = text.split(/\s+/);
+      const cmd = parts[1] ? parts[1].toLowerCase() : '';
+      if (cmd === 'deposit' && parts[2]) {
+        const kind = parts[2];
+        const count = parseInt(parts[3], 10) || 1;
+        if (!inventory.has(kind) || (inventory.items[kind] || 0) < count) {
+          Combat.toast(state, 'Non hai abbastanza oggetti');
+          return;
+        }
+        inventory.remove(kind, count);
+        multiplayer.sendStashDeposit(kind, count);
+      } else if (cmd === 'withdraw' && parts[2]) {
+        const kind = parts[2];
+        const count = parseInt(parts[3], 10) || 1;
+        multiplayer.sendStashWithdraw(kind, count);
+      } else if (cmd === 'list') {
+        multiplayer.sendStashList();
+        Combat.toast(state, 'Lista stash richiesta');
+      } else {
+        Combat.toast(state, 'Comandi: /stash deposit <kind> [count], /stash withdraw <kind> [count], /stash list');
+      }
+      return;
+    }
+
     if (!multiplayer.connected) return;
     multiplayer.sendChat(text);
     if (dom.chatLog) {

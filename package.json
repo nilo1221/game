@@ -4,8 +4,11 @@
   "description": "A top-down browser survival RPG built with vanilla JavaScript and HTML5 Canvas.",
   "type": "module",
   "scripts": {
-    "start": "node server.mjs",
-    "dev": "node server.mjs"
+    "start": "npx partykit dev",
+    "dev": "npx partykit dev",
+    "deploy": "npx partykit deploy",
+    "legacy": "node server.mjs",
+    "colyseus": "node server/colyseus-server.mjs"
   },
   "keywords": [
     "game",
@@ -17,6 +20,8 @@
   "author": "Nilo1221 (lorenzo rocchi)",
   "license": "MIT",
   "dependencies": {
+    "partykit": "^0.0.115",
+    "partysocket": "^1.3.0",
     "ws": "^8.21.3"
   }
 }

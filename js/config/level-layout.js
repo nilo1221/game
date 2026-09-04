@@ -33,6 +33,16 @@ const NPC_DEFS = [
     opts: { dir: 'down' },
   },
   {
+    id: 'premiumVendor',
+    x: 14 * TILE, y: 33 * TILE,
+    name: 'Mercante di Casse',
+    spriteKey: 'merchant',
+    dialogue: [
+      "Tesori sigillati in casse magiche. Porta gemme, apri, incrocia le dita.",
+    ],
+    opts: { dir: 'down' },
+  },
+  {
     id: 'weaponMaster',
     x: 18 * TILE, y: 41 * TILE,
     name: 'Maestro d\'Armi Tormund',

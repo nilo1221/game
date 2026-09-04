@@ -47,6 +47,8 @@ const RENAME_COST = 50;
 const WEAPON_ATTACK_BONUS = {
   none: 0,
   sword: 2,
+  swordEpic: 5,
+  swordCursed: -2,
   swordLegendary: 8,
   swordMolten: 16,
 };
@@ -62,15 +64,15 @@ const FIREBALL_STATS = {
 // Swift Boots (see config/item-effects.js) set the player's speed directly
 // rather than adding a bonus, so both values live here for symmetry.
 const BOOTS_SPEED = 1.6;
+const BOOTS_EPIC_SPEED = 1.9;
+const BOOTS_CURSED_SPEED = 1.0;
 
 // Honor gained when defeating another player in PvP.
 const HONOR_PER_KILL = 15;
 
 // WebSocket server endpoint used by the multiplayer client.
-// Leave empty to connect to the same host (for local dev with server.mjs).
-// For production, set this to your deployed backend, e.g.:
-// const WS_SERVER = 'wss://shattered-vale-ws.onrender.com';
-const WS_SERVER = '';
+// For local PartyKit dev you can temporarily use: http://localhost:1999
+const WS_SERVER = 'https://shattered-vale-mp.nilo1221.partykit.dev';
 
 // Molten Depths lava hazard: damage dealt when standing on a LAVA tile
 // without Fireproof Boots equipped. Reuses player.invuln as its cooldown
@@ -83,6 +85,17 @@ const KNOCKBACK_EVERY_NTH_ATTACK = 3;
 const KNOCKBACK_SPEED = 6;      // initial push speed, px/frame
 const KNOCKBACK_DURATION = 12;  // frames the push lasts
 const KNOCKBACK_DECAY = 0.85;   // multiplicative falloff applied each frame
+
+// --- Dash / aerial movement (top-down adapted) ---
+const DASH_STATS = {
+  speed: 5.2,      // px/frame while dashing
+  duration: 8,     // frames the dash lasts
+  cooldown: 45,    // frames before charges refill
+  invuln: 8,       // i-frames at the start of a dash
+  charges: 2,      // double dash
+  buffer: 10,      // frames a too-early input is remembered
+  dust: 'rgba(200,200,200,0.6)', // impact color on wall hit
+};
 
 // Gentle push-apart speed used to resolve an enemy that's ended up
 // overlapping the player (e.g. the player walked onto a stationary one) —

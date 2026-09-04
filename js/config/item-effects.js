@@ -49,6 +49,8 @@ const ITEM_PICKUP_EFFECTS = {
       ctx.inventory.add('swordLegendary', 1);
       ctx.player.hasSword = true;
       ctx.player.hasLegendarySword = true;
+      ctx.player.hasEpicSword = false;
+      ctx.player.hasCursedSword = false;
       ctx.player.hasMoltenSword = false;
     },
     toast: 'Equipaggiata la Spada Leggendaria! Attacco enormemente aumentato.',
@@ -75,6 +77,8 @@ const ITEM_PICKUP_EFFECTS = {
       ctx.inventory.add('swordMolten', 1);
       ctx.player.hasSword = true;
       ctx.player.hasLegendarySword = false;
+      ctx.player.hasEpicSword = false;
+      ctx.player.hasCursedSword = false;
       ctx.player.hasMoltenSword = true;
     },
     toast: 'Hai trovato la Lama Ignea! Attacco massivamente aumentato.',
@@ -106,28 +110,80 @@ const USABLE_POTIONS = {
   potionBlue: {
     use: (ctx) => ctx.inventory.usePotionBlue(ctx.player),
     onUsed: (ctx) => {
-      ctx.particles.floatText(ctx.player.centerX, ctx.player.y - 10, 'Mana ripristinato!', '#a878e0');
+      ctx.particles.floatText(ctx.player.centerX, ctx.player.y - 10, 'Mana ripristorato!', '#a878e0');
       ctx.toast('Bevuta una Pozione Blu — Mana completamente ripristinato!');
     },
   },
 };
+
+const ITEM_USE_EFFECTS = {
+  chestCommon:    { use: (ctx) => LootRoller.openChest('chestCommon', ctx.player, ctx.inventory, ctx.multiplayer) },
+  chestUncommon:  { use: (ctx) => LootRoller.openChest('chestUncommon', ctx.player, ctx.inventory, ctx.multiplayer) },
+  chestRare:      { use: (ctx) => LootRoller.openChest('chestRare', ctx.player, ctx.inventory, ctx.multiplayer) },
+  chestEpic:      { use: (ctx) => LootRoller.openChest('chestEpic', ctx.player, ctx.inventory, ctx.multiplayer) },
+  chestLegendary: { use: (ctx) => LootRoller.openChest('chestLegendary', ctx.player, ctx.inventory, ctx.multiplayer) },
+  chestCursed:    { use: (ctx) => LootRoller.openChest('chestCursed', ctx.player, ctx.inventory, ctx.multiplayer) },
+};
+
+function _weaponBonusFromAffix(player, inventory, kind) {
+  const full = getItemStats(kind, inventory.getAffixes(kind));
+  const base = getItemStats(kind);
+  return (full.atk || 0) - (base.atk || 0);
+}
+
+function _bootSpeedWithAffix(inventory, kind, baseSpeed) {
+  const full = getItemStats(kind, inventory.getAffixes(kind));
+  const base = getItemStats(kind);
+  const affixSpd = (full.spd || 0) - (base.spd || 0);
+  return baseSpeed + affixSpd;
+}
 
 const ITEM_EQUIP_EFFECTS = {
   sword: {
     apply: (ctx) => {
       ctx.inventory.equip('sword');
       ctx.player.hasSword = true;
+      ctx.player.hasEpicSword = false;
+      ctx.player.hasCursedSword = false;
       ctx.player.hasLegendarySword = false;
       ctx.player.hasMoltenSword = false;
+      ctx.player.weaponBonus = _weaponBonusFromAffix(ctx.player, ctx.inventory, 'sword');
     },
     toast: 'Spada di Ferro equipaggiata!',
+  },
+  swordEpic: {
+    apply: (ctx) => {
+      ctx.inventory.equip('swordEpic');
+      ctx.player.hasSword = true;
+      ctx.player.hasEpicSword = true;
+      ctx.player.hasCursedSword = false;
+      ctx.player.hasLegendarySword = false;
+      ctx.player.hasMoltenSword = false;
+      ctx.player.weaponBonus = _weaponBonusFromAffix(ctx.player, ctx.inventory, 'swordEpic');
+    },
+    toast: 'Spada Epica equipaggiata!',
+  },
+  swordCursed: {
+    apply: (ctx) => {
+      ctx.inventory.equip('swordCursed');
+      ctx.player.hasSword = true;
+      ctx.player.hasCursedSword = true;
+      ctx.player.hasEpicSword = false;
+      ctx.player.hasLegendarySword = false;
+      ctx.player.hasMoltenSword = false;
+      ctx.player.weaponBonus = _weaponBonusFromAffix(ctx.player, ctx.inventory, 'swordCursed');
+    },
+    toast: 'Spada Maledetta equipaggiata...',
   },
   swordLegendary: {
     apply: (ctx) => {
       ctx.inventory.equip('swordLegendary');
       ctx.player.hasSword = true;
       ctx.player.hasLegendarySword = true;
+      ctx.player.hasEpicSword = false;
+      ctx.player.hasCursedSword = false;
       ctx.player.hasMoltenSword = false;
+      ctx.player.weaponBonus = _weaponBonusFromAffix(ctx.player, ctx.inventory, 'swordLegendary');
     },
     toast: 'Spada Leggendaria equipaggiata!',
   },
@@ -135,24 +191,39 @@ const ITEM_EQUIP_EFFECTS = {
     apply: (ctx) => {
       ctx.inventory.equip('swordMolten');
       ctx.player.hasSword = true;
-      ctx.player.hasLegendarySword = false;
       ctx.player.hasMoltenSword = true;
+      ctx.player.hasEpicSword = false;
+      ctx.player.hasCursedSword = false;
+      ctx.player.hasLegendarySword = false;
+      ctx.player.weaponBonus = _weaponBonusFromAffix(ctx.player, ctx.inventory, 'swordMolten');
     },
     toast: 'Lama Ignea equipaggiata!',
   },
   armor: { apply: (ctx) => ctx.inventory.equip('armor'), toast: 'Armatura di Ferro equipaggiata!' },
+  armorEpic: { apply: (ctx) => ctx.inventory.equip('armorEpic'), toast: 'Armatura Epica equipaggiata!' },
+  armorCursed: { apply: (ctx) => ctx.inventory.equip('armorCursed'), toast: 'Armatura Maledetta equipaggiata...' },
   helmet: { apply: (ctx) => ctx.inventory.equip('helmet'), toast: "Elmo del Diavolo equipaggiato!" },
+  helmetEpic: { apply: (ctx) => ctx.inventory.equip('helmetEpic'), toast: 'Elmo Epico equipaggiato!' },
   armorJungle: { apply: (ctx) => ctx.inventory.equip('armorJungle'), toast: 'Armatura della Giungla equipaggiata!' },
   armorObsidian: { apply: (ctx) => ctx.inventory.equip('armorObsidian'), toast: 'Armatura di Ossidiana equipaggiata!' },
   boots: {
-    apply: (ctx) => { ctx.inventory.equip('boots'); ctx.player.speed = BOOTS_SPEED; ctx.player.fireproof = false; },
+    apply: (ctx) => { ctx.inventory.equip('boots'); ctx.player.speed = _bootSpeedWithAffix(ctx.inventory, 'boots', BOOTS_SPEED); ctx.player.fireproof = false; },
     toast: 'Stivali da Corsa equipaggiati!',
   },
+  bootsEpic: {
+    apply: (ctx) => { ctx.inventory.equip('bootsEpic'); ctx.player.speed = _bootSpeedWithAffix(ctx.inventory, 'bootsEpic', BOOTS_EPIC_SPEED); ctx.player.fireproof = false; },
+    toast: 'Stivali Epici equipaggiati!',
+  },
+  bootsCursed: {
+    apply: (ctx) => { ctx.inventory.equip('bootsCursed'); ctx.player.speed = _bootSpeedWithAffix(ctx.inventory, 'bootsCursed', BOOTS_CURSED_SPEED); ctx.player.fireproof = false; },
+    toast: 'Stivali Maledetti equipaggiati...',
+  },
   bootsFireproof: {
-    apply: (ctx) => { ctx.inventory.equip('bootsFireproof'); ctx.player.speed = BOOTS_SPEED; ctx.player.fireproof = true; },
+    apply: (ctx) => { ctx.inventory.equip('bootsFireproof'); ctx.player.speed = _bootSpeedWithAffix(ctx.inventory, 'bootsFireproof', BOOTS_SPEED); ctx.player.fireproof = true; },
     toast: 'Stivali Antifuoco equipaggiati!',
   },
   shieldBone: { apply: (ctx) => ctx.inventory.equip('shieldBone'), toast: 'Scudo d\'Osso equipaggiato!' },
+  shieldCursed: { apply: (ctx) => ctx.inventory.equip('shieldCursed'), toast: 'Scudo Maledetto equipaggiato...' },
   crownSkeleton: { apply: (ctx) => ctx.inventory.equip('crownSkeleton'), toast: 'Corona dello Scheletro equipaggiata!' },
 };
 
@@ -160,8 +231,11 @@ const ITEM_UNEQUIP_EFFECTS = {
   weapon: (ctx) => {
     ctx.inventory.unequip('weapon');
     ctx.player.hasSword = false;
+    ctx.player.hasEpicSword = false;
+    ctx.player.hasCursedSword = false;
     ctx.player.hasLegendarySword = false;
     ctx.player.hasMoltenSword = false;
+    ctx.player.weaponBonus = 0;
   },
   armor: (ctx) => ctx.inventory.unequip('armor'),
   helmet: (ctx) => ctx.inventory.unequip('helmet'),

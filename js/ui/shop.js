@@ -5,9 +5,9 @@
 function formatItemStats(kind) {
   const s = getItemStats(kind);
   const parts = [];
-  if (s.atk != null) parts.push(`ATT +${s.atk}`);
-  if (s.def != null) parts.push(`DEF +${s.def}`);
-  if (s.spd != null) parts.push(`VEL +${s.spd}`);
+  if (s.atk != null) parts.push(`ATT ${s.atk >= 0 ? '+' : ''}${s.atk}`);
+  if (s.def != null) parts.push(`DEF ${s.def >= 0 ? '+' : ''}${s.def}`);
+  if (s.spd != null) parts.push(`VEL ${s.spd >= 0 ? '+' : ''}${s.spd.toFixed(1)}`);
   if (s.extra) parts.push(s.extra);
   return parts.join(' • ');
 }
@@ -21,6 +21,8 @@ class Shop {
     this.buyCurrencyBtn = null;
     this.itemButtons = [];
     this.affiliateButtons = [];
+    this.adBtn = null;
+    this.adTracked = false;
   }
 
   openFor(merchant) {
@@ -29,6 +31,8 @@ class Shop {
     this.hovered = null;
     this.itemButtons = [];
     this.affiliateButtons = [];
+    this.adBtn = null;
+    this.adTracked = false;
     this.exitBtn = null;
     this.buyCurrencyBtn = null;
   }
@@ -39,35 +43,48 @@ class Shop {
     this.hovered = null;
     this.itemButtons = [];
     this.affiliateButtons = [];
+    this.adBtn = null;
+    this.adTracked = false;
     this.exitBtn = null;
     this.buyCurrencyBtn = null;
   }
 
   _layout(viewW, viewH) {
     const panelW = 560;
-    const panelH = 460 + (this.merchant ? AFFILIATES.length * 60 + 40 : 0);
+    const hasAd = !!(this.merchant && this.merchant.currency === 'premium' && AdManager.getAdForSlot('premiumShop'));
+    const adH = hasAd ? 54 : 0;
+    const panelH = 460 + adH + (this.merchant ? AFFILIATES.length * 60 + 40 : 0);
     const px = (viewW - panelW) / 2;
     const py = (viewH - panelH) / 2;
     this.itemButtons = [];
     this.affiliateButtons = [];
+    this.adBtn = null;
 
-    const startY = py + 70;
+    const startY = py + 70 + adH;
     const rowH = 52;
     const listX = px + 20;
     const listW = panelW - 40;
     const buyW = 80;
+    const sellW = 46;
     const buyH = 32;
+
+    const ad = hasAd ? AdManager.getAdForSlot('premiumShop') : null;
+    if (ad) {
+      this.adBtn = { x: listX, y: py + 52, w: listW, h: 46, ad };
+    }
 
     if (this.merchant) {
       this.merchant.getStock().forEach((item, i) => {
         const y = startY + i * rowH;
         const buyX = listX + listW - buyW;
+        const sellX = buyX - sellW - 6;
         this.itemButtons.push({
           kind: item.kind,
           x: buyX,
           y,
           w: buyW,
           h: buyH,
+          sellBtn: { x: sellX, y, w: sellW, h: buyH },
           itemX: listX,
           itemY: y,
           item,
@@ -104,8 +121,10 @@ class Shop {
     this.hovered = null;
     if (this._pointIn(mx, my, this.exitBtn)) this.hovered = 'exit';
     if (this.merchant && this.merchant.currency === 'premium' && this._pointIn(mx, my, this.buyCurrencyBtn)) this.hovered = 'buyCurrency';
+    if (this.adBtn && this._pointIn(mx, my, this.adBtn)) this.hovered = 'ad';
     for (const btn of this.itemButtons) {
       if (this._pointIn(mx, my, btn)) { this.hovered = btn.kind; break; }
+      if (this._pointIn(mx, my, btn.sellBtn)) { this.hovered = `sell:${btn.kind}`; break; }
     }
     for (const btn of this.affiliateButtons) {
       if (this._pointIn(mx, my, btn)) { this.hovered = `aff:${btn.id}`; break; }
@@ -116,8 +135,10 @@ class Shop {
     this._layout(viewW, viewH);
     if (this._pointIn(mx, my, this.exitBtn)) return { action: 'close' };
     if (this.merchant && this.merchant.currency === 'premium' && this._pointIn(mx, my, this.buyCurrencyBtn)) return { action: 'buyCurrency' };
+    if (this.adBtn && this._pointIn(mx, my, this.adBtn)) return { action: 'ad', ad: this.adBtn.ad };
     for (const btn of this.itemButtons) {
       if (this._pointIn(mx, my, btn)) return { action: 'buy', kind: btn.kind };
+      if (this._pointIn(mx, my, btn.sellBtn)) return { action: 'sell', kind: btn.kind };
     }
     for (const btn of this.affiliateButtons) {
       if (this._pointIn(mx, my, btn)) return { action: 'affiliate', id: btn.id };
@@ -171,6 +192,47 @@ class Shop {
       this._drawBtn(ctx, this.buyCurrencyBtn, 'Compra Gemme', this.hovered === 'buyCurrency');
     }
 
+    // direct ad banner (premium shop only)
+    if (this.adBtn) {
+      const ad = this.adBtn.ad;
+      const { x, y, w, h } = this.adBtn;
+      ctx.fillStyle = 'rgba(30,26,20,0.95)';
+      roundRect(ctx, x, y, w, h, 8);
+      ctx.fill();
+      ctx.strokeStyle = ad.color;
+      ctx.lineWidth = 2;
+      roundRect(ctx, x, y, w, h, 8);
+      ctx.stroke();
+
+      ctx.fillStyle = ad.color;
+      ctx.font = '10px sans-serif';
+      ctx.fillText(ad.label, x + 8, y + 13);
+
+      ctx.fillStyle = '#f1efe8';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.fillText(ad.name, x + 54, y + 20);
+      ctx.fillStyle = '#b0b0b0';
+      ctx.font = '11px sans-serif';
+      ctx.fillText(ad.description, x + 54, y + 36, w - 160);
+
+      ctx.fillStyle = ad.color;
+      ctx.beginPath();
+      ctx.arc(x + 22, y + h / 2, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText('ADV', x + 22, y + h / 2 + 4);
+      ctx.textAlign = 'left';
+
+      this._drawBtn(ctx, { x: x + w - 86, y: y + 10, w: 76, h: 26 }, 'Visita', this.hovered === 'ad');
+
+      if (!this.adTracked) {
+        AdManager.trackImpression(ad.id, 'premiumShop');
+        this.adTracked = true;
+      }
+    }
+
     if (!this.merchant) {
       ctx.restore();
       return;
@@ -183,13 +245,23 @@ class Shop {
       const item = btn.item;
       const stats = getItemStats(item.kind);
       const y = btn.itemY;
+      const owned = state.inventory.has(item.kind);
+      const inBackpack = state.inventory.inBackpack(item.kind);
 
       const icon = Sprites.icons[item.kind];
 
       // name
-      ctx.fillStyle = '#f1efe8';
+      ctx.fillStyle = getRarityColor(item.kind);
       ctx.font = 'bold 14px sans-serif';
       ctx.fillText(stats.name, btn.itemX + 40, y + 16);
+
+      // owned tag
+      if (owned) {
+        const nameW = ctx.measureText(stats.name).width;
+        ctx.fillStyle = '#5aa65c';
+        ctx.font = '10px sans-serif';
+        ctx.fillText('Posseduto', btn.itemX + 40 + nameW + 8, y + 16);
+      }
 
       // stats/description
       const extra = formatItemStats(item.kind);
@@ -214,6 +286,17 @@ class Shop {
       }
 
       this._drawBtn(ctx, { x: btn.x, y: y + 8, w: btn.w, h: btn.h }, 'Compra', this.hovered === btn.kind);
+
+      // sell button
+      if (inBackpack) {
+        const sellPrice = this.merchant.getSellPrice(item.kind);
+        ctx.fillStyle = '#5aa65c';
+        ctx.font = '12px sans-serif';
+        const sellText = `+${sellPrice}`;
+        const sellW = ctx.measureText(sellText).width;
+        ctx.fillText(sellText, btn.sellBtn.x - sellW - 6, y + 18);
+        this._drawBtn(ctx, btn.sellBtn, 'Vendi', this.hovered === `sell:${btn.kind}`);
+      }
     }
 
     // affiliate offers
@@ -247,11 +330,14 @@ class Shop {
     }
 
     // item detail preview on hover
-    const hoveredBtn = this.hovered
-      ? this.itemButtons.find((b) => b.kind === this.hovered)
+    const hoveredKind = (typeof this.hovered === 'string' && this.hovered.startsWith('sell:'))
+      ? this.hovered.slice(5)
+      : this.hovered;
+    const hoveredBtn = hoveredKind
+      ? this.itemButtons.find((b) => b.kind === hoveredKind)
       : null;
     if (hoveredBtn) {
-      const detail = getItemStats(hoveredBtn.item.kind);
+      const detail = getItemStats(hoveredBtn.item.kind, state.inventory.getAffixes(hoveredBtn.item.kind));
       const dx = px + panelW - 230;
       const dy = py + panelH - 120;
       const dw = 210;

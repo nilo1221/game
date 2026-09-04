@@ -95,20 +95,47 @@ const Combat = {
   },
 
   _onEnemyDefeated(state, en) {
-    const { player, particles } = state;
+    if (state.multiplayer && state.multiplayer.connected) {
+      state.multiplayer.sendEnemyDefeated(en.type, en.x, en.y);
+      return;
+    }
+
     const reward = getCombatReward(en.type);
-    player.gold += reward.gold;
+    this._applyReward(state, reward);
+
+    const bossEvent = BOSS_DEFEAT_EVENTS[en.type];
+    if (bossEvent) bossEvent(this._bossEventCtx(state, en));
+  },
+
+  _applyReward(state, reward) {
+    const { player, particles } = state;
+    player.gold += reward.gold || 0;
     AudioManager.play('coin');
 
-    const leveled = player.gainXP(reward.xp, particles);
+    const leveled = player.gainXP(reward.xp || 0, particles);
     if (leveled) {
       AudioManager.play('levelup');
       this.toast(state, 'Salito di livello! Ora livello ' + player.lvl);
       state.screenFlash = { color: '255,255,255', alpha: 0.3 };
     }
+  },
 
-    const bossEvent = BOSS_DEFEAT_EVENTS[en.type];
-    if (bossEvent) bossEvent(this._bossEventCtx(state, en));
+  applyServerReward(state, reward) {
+    this._applyReward(state, reward);
+    if (reward.isBoss) {
+      this.applyServerBossEvent(state, reward.bossType, reward.x, reward.y);
+    }
+  },
+
+  spawnServerDrop(state, drop) {
+    state.worldItems.push(new WorldItem(drop.x, drop.y, drop.kind));
+  },
+
+  applyServerBossEvent(state, type, x, y) {
+    const bossEvent = BOSS_DEFEAT_EVENTS[type];
+    if (!bossEvent) return;
+    const en = { type, x, y };
+    bossEvent(this._bossEventCtx(state, en));
   },
 
   // Small facade passed into config/item-effects.js's BOSS_DEFEAT_EVENTS
@@ -118,7 +145,10 @@ const Combat = {
   _bossEventCtx(state, en) {
     return {
       map: state.map,
-      dropItem: (dx, dy, kind) => state.worldItems.push(new WorldItem(en.x + dx, en.y + dy, kind)),
+      dropItem: (dx, dy, kind) => {
+        if (state.multiplayer && state.multiplayer.connected) return;
+        state.worldItems.push(new WorldItem(en.x + dx, en.y + dy, kind));
+      },
       advanceQuestTo: (stage) => { state.questStage = Math.max(state.questStage, stage); },
       toast: (msg) => this.toast(state, msg),
       setScreenFlash: (flash) => { state.screenFlash = flash; },
@@ -178,13 +208,28 @@ const Combat = {
     });
   },
 
-  // A click inside the open inventory panel: using a potion, equipping a
-  // backpack item, or unequipping whatever's worn in a gear slot.
+  // A click inside the open inventory panel: using a potion, opening a chest,
+  // equipping a backpack item, or unequipping whatever's worn in a gear slot.
   // `hit` is whatever Inventory.clickAt(...) returned.
   handleInventoryClick(state, hit) {
     const { player, inventory, particles } = state;
 
     if (hit.region === 'backpack') {
+      const chest = ITEM_USE_EFFECTS[hit.kind];
+      if (chest) {
+        const res = chest.use({ player, inventory, multiplayer: state.multiplayer });
+        if (res && res.ok) {
+          const rarityLabel = RARITY_TIERS[res.rarity] ? RARITY_TIERS[res.rarity].label : res.rarity;
+          const color = RARITY_TIERS[res.rarity] ? RARITY_TIERS[res.rarity].color : '#f1efe8';
+          const rgb = color.replace('#', '').match(/.{2}/g).map(v => parseInt(v, 16)).join(',');
+          this.toast(state, `Hai ottenuto [${rarityLabel}] ${res.name}`);
+          state.screenFlash = { color: rgb, alpha: 0.4 };
+          AudioManager.play('buy');
+        } else {
+          this.toast(state, (res && res.reason) || 'Impossibile aprire la cassa');
+        }
+        return;
+      }
       const potion = USABLE_POTIONS[hit.kind];
       if (potion) {
         const used = potion.use({ inventory, player });
@@ -206,9 +251,9 @@ const Combat = {
     }
   },
 
-  // Sums the defense value (see ARMOR_DEFENSE in config/item-stats.js) of
-  // everything currently in inventory.equipped and stores the total on
-  // player.defense. Recomputed from scratch rather than incrementally
+  // Sums the defense value (see ARMOR_DEFENSE in config/item-stats.js) plus
+  // any affixes of everything currently in inventory.equipped and stores the
+  // total on player.defense. Recomputed from scratch rather than incrementally
   // adjusted, so slot-swaps (equipping over an already-occupied slot) can
   // never drift out of sync with what's actually worn.
   recomputeDefense(state) {
@@ -216,9 +261,31 @@ const Combat = {
     let total = 0;
     for (const slotId in inventory.equipped) {
       const kind = inventory.equipped[slotId];
-      const stats = kind && ITEM_STATS[kind];
-      if (stats && stats.def) total += stats.def;
+      const affixes = kind && inventory.getAffixes(kind);
+      const stats = kind && getItemStats(kind, affixes);
+      if (stats && stats.def != null) total += stats.def;
     }
     player.defense = total;
+  },
+
+  applyServerChestResult(state, data) {
+    if (!data || !data.ok) {
+      this.toast(state, (data && data.reason) || 'Impossibile aprire la cassa');
+      return;
+    }
+    const { player, inventory } = state;
+    const roll = data.roll;
+    if (roll.kind === 'coin') {
+      player.gold += roll.value || 10;
+    } else {
+      inventory.add(roll.kind, 1, roll.affixes);
+    }
+    const name = getItemDisplayName(roll.kind, roll.affixes);
+    const rarityLabel = RARITY_TIERS[roll.rarity] ? RARITY_TIERS[roll.rarity].label : roll.rarity;
+    const color = RARITY_TIERS[roll.rarity] ? RARITY_TIERS[roll.rarity].color : '#f1efe8';
+    const rgb = color.replace('#', '').match(/.{2}/g).map(v => parseInt(v, 16)).join(',');
+    this.toast(state, `Hai ottenuto [${rarityLabel}] ${name}`);
+    state.screenFlash = { color: rgb, alpha: 0.4 };
+    AudioManager.play('buy');
   },
 };

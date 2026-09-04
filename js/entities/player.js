@@ -28,10 +28,13 @@ class Player {
     this.pvp = false;
 
     this.hasSword = false;
+    this.hasEpicSword = false;
+    this.hasCursedSword = false;
     this.hasLegendarySword = false;
     this.hasMoltenSword = false;
     this.fireproof = false; // true while Fireproof Boots are equipped — negates lava damage
     this.defense = 0; // sum of equipped armor/helmet/shield (see Combat.recomputeDefense)
+    this.weaponBonus = 0; // extra attack from weapon affixes (see Combat.handleInventoryClick)
     this.attacking = 0;
     this.attackCooldown = 0;
     this.attackCount = 0; // total swings landed — every KNOCKBACK_EVERY_NTH_ATTACK triggers a knockback (see Combat.handleAttack)
@@ -42,6 +45,15 @@ class Player {
     this.footstepTimer = 0;
     this.bob = 0;
     this.hitFlash = 0;
+
+    // dash / aerial state
+    this.dashActive = 0;
+    this.dashCooldown = 0;
+    this.dashCharges = DASH_STATS.charges;
+    this.dashBuffer = 0;
+    this.dashBufferDir = null;
+    this.dashDirX = 0;
+    this.dashDirY = 0;
 
     this.mana = PLAYER_BASE_STATS.mana;
     this.maxMana = PLAYER_BASE_STATS.maxMana;
@@ -66,13 +78,17 @@ class Player {
 
   // Total melee damage per swing, including the equipped weapon's bonus.
   get attackDamage() {
-    if (this.hasMoltenSword) return this.atk + WEAPON_ATTACK_BONUS.swordMolten;
-    if (this.hasLegendarySword) return this.atk + WEAPON_ATTACK_BONUS.swordLegendary;
-    if (this.hasSword) return this.atk + WEAPON_ATTACK_BONUS.sword;
-    return this.atk + WEAPON_ATTACK_BONUS.none;
+    let base = WEAPON_ATTACK_BONUS.none;
+    if (this.hasMoltenSword) base = WEAPON_ATTACK_BONUS.swordMolten;
+    else if (this.hasLegendarySword) base = WEAPON_ATTACK_BONUS.swordLegendary;
+    else if (this.hasEpicSword) base = WEAPON_ATTACK_BONUS.swordEpic;
+    else if (this.hasCursedSword) base = WEAPON_ATTACK_BONUS.swordCursed;
+    else if (this.hasSword) base = WEAPON_ATTACK_BONUS.sword;
+    return Math.max(1, this.atk + base + (this.weaponBonus || 0));
   }
 
   tryMove(dx, dy, map) {
+    const oldX = this.x, oldY = this.y;
     if (dx !== 0) {
       const nx = this.x + dx;
       const corners = [
@@ -97,38 +113,88 @@ class Player {
         this.y = ny;
       }
     }
+    return { x: this.x !== oldX, y: this.y !== oldY };
   }
 
-  update(keys, map, particles) {
-    let dx = 0, dy = 0;
-    if (keys['w'] || keys['arrowup']) {
-      dy = -this.speed;
-      this.dir = 'up';
-    } else if (keys['s'] || keys['arrowdown']) {
-      dy = this.speed;
-      this.dir = 'down';
-    }
-    if (keys['a'] || keys['arrowleft']) {
-      dx = -this.speed;
-      this.dir = 'left';
-    } else if (keys['d'] || keys['arrowright']) {
-      dx = this.speed;
-      this.dir = 'right';
-    }
+  update(input, map, particles) {
+    const keys = input.keys;
+    const just = input.justPressed || {};
+    const stick = input.axes || { x: 0, y: 0 };
 
-    this.moving = dx !== 0 || dy !== 0;
-    if (this.moving) {
-      // normalize diagonal speed
-      if (dx !== 0 && dy !== 0) {
-        dx *= 0.707;
-        dy *= 0.707;
+    if (this.dashActive > 0) {
+      // dashing — fast movement, i-frames and an afterimage
+      this.dashActive--;
+      const dashDx = this.dashDirX * DASH_STATS.speed;
+      const dashDy = this.dashDirY * DASH_STATS.speed;
+      const moved = this.tryMove(dashDx, dashDy, map);
+      this.moving = true;
+      if ((dashDx !== 0 && !moved.x) || (dashDy !== 0 && !moved.y)) {
+        if (particles) particles.burst(this.centerX, this.centerY, DASH_STATS.dust, 4);
       }
-      this.tryMove(dx, dy, map);
-      this.footstepTimer++;
-      if (this.footstepTimer > 14) {
-        this.footstepTimer = 0;
-        const tile = map.get(Math.floor(this.centerX / TILE), Math.floor((this.y + this.h) / TILE));
-        if (tile === TileType.GRASS) particles.sparkle(this.centerX, this.y + this.h, 'rgba(255,255,255,0.5)');
+    } else {
+      // dash resource management
+      if (this.dashCooldown > 0) {
+        this.dashCooldown--;
+        if (this.dashCooldown === 0) this.dashCharges = DASH_STATS.charges;
+      }
+      if (this.dashBuffer > 0) this.dashBuffer--;
+      if (this.dashBuffer > 0 && this.dashCharges > 0 && this.dashBufferDir) {
+        this.startDash(this.dashBufferDir.dx, this.dashBufferDir.dy);
+        this.dashBuffer = 0;
+        this.dashBufferDir = null;
+      }
+
+      let dx = 0, dy = 0;
+      const useStick = Math.abs(stick.x) > 0.1 || Math.abs(stick.y) > 0.1;
+      if (useStick) {
+        dx = stick.x * this.speed;
+        dy = stick.y * this.speed;
+      } else {
+        if (keys['w'] || keys['arrowup']) dy = -this.speed;
+        else if (keys['s'] || keys['arrowdown']) dy = this.speed;
+        if (keys['a'] || keys['arrowleft']) dx = -this.speed;
+        else if (keys['d'] || keys['arrowright']) dx = this.speed;
+        if (dx !== 0 && dy !== 0) {
+          dx *= 0.707;
+          dy *= 0.707;
+        }
+      }
+
+      // dash input (double dash: 2 charges)
+      if (just['shift']) {
+        const dirX = (dx || (this.dir === 'left' ? -1 : this.dir === 'right' ? 1 : 0));
+        const dirY = (dy || (this.dir === 'up' ? -1 : this.dir === 'down' ? 1 : 0));
+        if (this.dashCharges > 0) {
+          this.startDash(dirX, dirY);
+        } else if (this.dashCooldown > 0) {
+          this.dashBuffer = DASH_STATS.buffer;
+          this.dashBufferDir = { dx: dirX, dy: dirY };
+        }
+      }
+
+      this.moving = dx !== 0 || dy !== 0;
+      if (this.moving && !this.dashActive) {
+        if (Math.abs(dx) >= Math.abs(dy)) {
+          this.dir = dx >= 0 ? 'right' : 'left';
+        } else {
+          this.dir = dy >= 0 ? 'down' : 'up';
+        }
+      }
+
+      const moved = this.tryMove(dx, dy, map);
+      if (dx !== 0 && !moved.x) {
+        if (particles) particles.burst(this.centerX, this.centerY, DASH_STATS.dust, 3);
+      }
+      if (dy !== 0 && !moved.y) {
+        if (particles) particles.burst(this.centerX, this.centerY, DASH_STATS.dust, 3);
+      }
+      if (this.moving) {
+        this.footstepTimer++;
+        if (this.footstepTimer > 14) {
+          this.footstepTimer = 0;
+          const tile = map.get(Math.floor(this.centerX / TILE), Math.floor((this.y + this.h) / TILE));
+          if (tile === TileType.GRASS) particles.sparkle(this.centerX, this.y + this.h, 'rgba(255,255,255,0.5)');
+        }
       }
     }
 
@@ -147,6 +213,26 @@ class Player {
     this.bob = this.moving ? Math.sin(Date.now() / 90) * 1.5 : 0;
   }
 
+  startDash(dx, dy) {
+    if (this.dashActive > 0 || this.dashCharges <= 0) return;
+    this.dashCharges--;
+    this.dashActive = DASH_STATS.duration;
+    this.dashCooldown = DASH_STATS.cooldown;
+    this.invuln = DASH_STATS.invuln;
+    const len = Math.hypot(dx, dy);
+    if (len < 0.01) {
+      if (this.dir === 'up') { dx = 0; dy = -1; }
+      else if (this.dir === 'down') { dx = 0; dy = 1; }
+      else if (this.dir === 'left') { dx = -1; dy = 0; }
+      else { dx = 1; dy = 0; }
+    } else {
+      dx /= len;
+      dy /= len;
+    }
+    this.dashDirX = dx;
+    this.dashDirY = dy;
+  }
+
   attackHitbox() {
     const range = 24;
     let ax = this.x, ay = this.y;
@@ -158,6 +244,7 @@ class Player {
   }
 
   startAttack() {
+    if (this.dashActive > 0) return false;
     if (this.attackCooldown > 0) return false;
     this.attacking = 14;
     this.attackCooldown = 20;
@@ -196,6 +283,16 @@ class Player {
     const drawX = this.x - camX - (this.drawW - this.w) / 2;
     const drawY = this.y - camY - (this.drawH - this.h) + 4 + this.bob;
     const flash = this.invuln > 0 && Math.floor(this.invuln / 4) % 2 === 0;
+
+    // dash afterimage
+    if (this.dashActive > 0) {
+      const s = this.hasSword ? this.animSword : this.anim;
+      ctx.save();
+      ctx.globalAlpha = 0.3;
+      s.draw(ctx, drawX - this.dashDirX * 12, drawY - this.dashDirY * 12, this.dir, false);
+      ctx.restore();
+    }
+
     ctx.save();
     if (this.invuln > 0) ctx.globalAlpha = 0.55;
     sprite.draw(ctx, drawX, drawY, this.dir, flash);

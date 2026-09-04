@@ -20,7 +20,7 @@ const WorldFactory = {
     if (weaponMaster) {
       weaponMaster.shop = new Merchant('Maestro d\'Armi', WEAPON_MASTER_STOCK, WEAPON_MASTER_CURRENCY);
     }
-    return { npcs, elder: byId('elder'), merchant: byId('merchant'), weaponMaster };
+    return { npcs, elder: byId('elder'), merchant: byId('merchant'), weaponMaster, premiumVendor: byId('premiumVendor') };
   },
 
   createWorldItems() {

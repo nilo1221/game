@@ -315,6 +315,28 @@ function buildMoltenSwordIcon() {
   return c;
 }
 
+function buildChestIcon(color) {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  // chest body
+  ctx.fillStyle = '#4a3a2a';
+  roundRect(ctx, 3, 9, 18, 12, 3);
+  ctx.fill();
+  // lid
+  ctx.fillStyle = color;
+  roundRect(ctx, 2, 5, 20, 9, 3);
+  ctx.fill();
+  // lock
+  ctx.fillStyle = '#e8c93c';
+  ctx.fillRect(10, 11, 4, 4);
+  // bands
+  ctx.strokeStyle = '#2a2018';
+  ctx.lineWidth = 1;
+  roundRect(ctx, 3, 5, 18, 16, 3);
+  ctx.stroke();
+  return c;
+}
+
 function buildFireproofBootsIcon() {
   const c = makeCanvas(24, 24);
   const ctx = c.getContext('2d');

@@ -133,12 +133,13 @@ const Screens = {
     ctx.textAlign = 'left';
     ctx.font = '14px sans-serif';
     const lines = [
-      ['Muoviti', 'WASD o frecce direzionali'],
-      ['Attacca', 'Spazio'],
-      ['Interagisci / Parla', 'E'],
-      ['Inventario', 'I'],
-      ['Palla di fuoco', 'F'],
+      ['Muoviti', 'WASD, frecce, analogico sinistro o joystick touch'],
+      ['Attacca', 'Spazio / A gamepad / tasto spada touch'],
+      ['Interagisci / Parla', 'E / X gamepad / E touch'],
+      ['Inventario', 'I / Y gamepad'],
+      ['Palla di fuoco', 'F / RB gamepad / F touch'],
       ['Avanza dialogo', 'Spazio o E'],
+      ['Valute', 'Oro, Gemme e Onore in alto a destra'],
     ];
     let ly = py + 68;
     lines.forEach(([label, val]) => {

@@ -34,10 +34,19 @@ class Merchant {
     return { ok: true };
   }
 
-  // Future: sell from player to merchant.
   sell(kind, player, inventory) {
-    if (!inventory.items[kind]) return { ok: false, reason: 'non possiedi' };
-    // Buyback price is intentionally not handled yet — the market is buy-only for now.
-    return { ok: false, reason: 'non supportato' };
+    if (!inventory.items[kind] || inventory.items[kind] <= 0) return { ok: false, reason: 'non possiedi' };
+    const item = this.getItem(kind);
+    if (!item) return { ok: false, reason: 'non acquistabile' };
+    const price = Math.max(1, Math.floor(item.price * SELL_RATE));
+    inventory.remove(kind, 1);
+    player[this.currency] += price;
+    return { ok: true, price };
+  }
+
+  getSellPrice(kind) {
+    const item = this.getItem(kind);
+    if (!item) return 0;
+    return Math.max(1, Math.floor(item.price * SELL_RATE));
   }
 }

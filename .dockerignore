@@ -1,0 +1,11 @@
+node_modules
+.git
+.gitignore
+.github
+README.md
+screenshots
+.vercel
+.vscode
+.devin
+.windsurf
+*.log

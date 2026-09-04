@@ -12,6 +12,7 @@ function createInputState() {
   const allKnown = new Set();
   const keys = {};
   const justPressed = {};
+  const axes = { x: 0, y: 0 };
 
   function merge() {
     for (const k in keyboardKeys) allKnown.add(k);
@@ -39,12 +40,16 @@ function createInputState() {
   // 0=A/attack, 2=X/interact, 3=Y/inventory, 4=LB/camera, 5=RB/fireball,
   // 9=Start/escape, 12-15=DPad, axes 0-1=left analog.
   function pollGamepad() {
-    const mapped = ['w', 'a', 's', 'd', ' ', 'e', 'i', 'f', 'c', 'escape'];
+    const mapped = ['w', 'a', 's', 'd', ' ', 'e', 'i', 'f', 'c', 'escape', 'shift'];
     for (const k of mapped) gamepadKeys[k] = false;
+    axes.x = 0;
+    axes.y = 0;
 
     const pads = (navigator.getGamepads && navigator.getGamepads()) || [];
     for (const pad of pads) {
       if (!pad) continue;
+      axes.x = pad.axes[0] || 0;
+      axes.y = pad.axes[1] || 0;
       const t = 0.35;
       const up = pad.buttons[12]?.pressed || pad.axes[1] < -t;
       const down = pad.buttons[13]?.pressed || pad.axes[1] > t;
@@ -55,6 +60,7 @@ function createInputState() {
       if (left) gamepadKeys['a'] = true;
       if (right) gamepadKeys['d'] = true;
       if (pad.buttons[0]?.pressed) gamepadKeys[' '] = true;
+      if (pad.buttons[1]?.pressed) gamepadKeys['shift'] = true;
       if (pad.buttons[2]?.pressed) gamepadKeys['e'] = true;
       if (pad.buttons[3]?.pressed) gamepadKeys['i'] = true;
       if (pad.buttons[5]?.pressed) gamepadKeys['f'] = true;
@@ -94,15 +100,79 @@ function createInputState() {
     });
   }
 
+  function setupJoystick() {
+    const base = document.querySelector('.joystick-base');
+    const knob = document.querySelector('.joystick-knob');
+    if (!base || !knob) return;
+    const maxR = 42;
+    const dead = 0.1;
+    let active = false;
+
+    function set(dx, dy) {
+      const dist = Math.hypot(dx, dy);
+      if (dist > maxR) { dx = dx / dist * maxR; dy = dy / dist * maxR; }
+      knob.style.left = (42 + dx) + 'px';
+      knob.style.top = (42 + dy) + 'px';
+      const nx = dx / maxR;
+      const ny = dy / maxR;
+      axes.x = nx;
+      axes.y = ny;
+      touchKeys['w'] = ny < -dead;
+      touchKeys['a'] = nx < -dead;
+      touchKeys['s'] = ny > dead;
+      touchKeys['d'] = nx > dead;
+      merge();
+    }
+
+    function end() {
+      active = false;
+      base.classList.remove('active');
+      knob.style.left = '42px';
+      knob.style.top = '42px';
+      axes.x = 0;
+      axes.y = 0;
+      touchKeys['w'] = false;
+      touchKeys['a'] = false;
+      touchKeys['s'] = false;
+      touchKeys['d'] = false;
+      merge();
+    }
+
+    function getPoint(e) {
+      const t = e.changedTouches[0];
+      const rect = base.getBoundingClientRect();
+      return { x: t.clientX - rect.left - rect.width / 2, y: t.clientY - rect.top - rect.height / 2 };
+    }
+
+    base.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (navigator.vibrate) navigator.vibrate(15);
+      active = true;
+      base.classList.add('active');
+      const p = getPoint(e);
+      set(p.x, p.y);
+    }, { passive: false });
+    base.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!active) return;
+      const p = getPoint(e);
+      set(p.x, p.y);
+    }, { passive: false });
+    base.addEventListener('touchend', (e) => { e.preventDefault(); end(); });
+    base.addEventListener('touchcancel', (e) => { e.preventDefault(); end(); });
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupTouch);
+    document.addEventListener('DOMContentLoaded', () => { setupTouch(); setupJoystick(); });
   } else {
     setupTouch();
+    setupJoystick();
   }
 
   return {
     keys,
     justPressed,
+    axes,
     pollGamepad,
     clearJustPressed() {
       for (const k in keyboardJust) delete keyboardJust[k];

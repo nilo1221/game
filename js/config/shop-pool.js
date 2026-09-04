@@ -33,4 +33,4 @@ const RARITY_COLORS = {
   cursed:    '#c92222',
 };
 
-const WANDERING_MERCHANT_CURRENCY = 'premium';
+const WANDERING_MERCHANT_CURRENCY = 'gold';

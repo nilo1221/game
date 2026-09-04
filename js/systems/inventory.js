@@ -34,11 +34,11 @@ class WorldItem {
 // Equipment slot definitions: slotId -> { label, accepts(kind) }
 // accepts() decides which backpack item kinds are droppable into that slot.
 const EQUIP_SLOTS = [
-  { id: 'helmet', label: 'Elmo', accepts: k => k === 'helmet' || k === 'crownSkeleton' },
-  { id: 'weapon', label: 'Arma', accepts: k => k === 'sword' || k === 'weapon' || k === 'swordLegendary' || k === 'swordMolten' },
-  { id: 'armor',  label: 'Armatura',  accepts: k => k === 'armor' || k === 'armorJungle' || k === 'armorObsidian' },
-  { id: 'shield', label: 'Scudo', accepts: k => k === 'shield' || k === 'shieldBone' },
-  { id: 'boots',  label: 'Stivali',  accepts: k => k === 'boots' || k === 'bootsFireproof' },
+  { id: 'helmet', label: 'Elmo', accepts: k => k === 'helmet' || k === 'helmetEpic' || k === 'crownSkeleton' },
+  { id: 'weapon', label: 'Arma', accepts: k => k === 'sword' || k === 'weapon' || k === 'swordEpic' || k === 'swordCursed' || k === 'swordLegendary' || k === 'swordMolten' },
+  { id: 'armor',  label: 'Armatura',  accepts: k => k === 'armor' || k === 'armorEpic' || k === 'armorCursed' || k === 'armorJungle' || k === 'armorObsidian' },
+  { id: 'shield', label: 'Scudo', accepts: k => k === 'shield' || k === 'shieldBone' || k === 'shieldCursed' },
+  { id: 'boots',  label: 'Stivali',  accepts: k => k === 'boots' || k === 'bootsEpic' || k === 'bootsCursed' || k === 'bootsFireproof' },
 ];
 
 class Inventory {
@@ -50,14 +50,40 @@ class Inventory {
   // Back to a fresh, empty inventory — used at construction and on restart.
   reset() {
     this.items = {}; // kind -> count (backpack, non-equipped items)
+    this.affixes = {}; // kind -> {prefix, suffix} rolled from chests
     EQUIP_SLOTS.forEach(s => { this.equipped[s.id] = null; });
     this.open = false;
     this.hoveredKind = null;   // backpack kind currently hovered
     this.hoveredSlot = null;   // equip slotId currently hovered
   }
 
-  add(kind, count = 1) {
+  has(kind) {
+    return (this.items[kind] || 0) > 0 || Object.values(this.equipped).some(k => k === kind);
+  }
+
+  inBackpack(kind) {
+    return (this.items[kind] || 0) > 0;
+  }
+
+  add(kind, count = 1, affixes) {
     this.items[kind] = (this.items[kind] || 0) + count;
+    if (affixes && (affixes.prefix || affixes.suffix)) {
+      this.affixes[kind] = { prefix: affixes.prefix, suffix: affixes.suffix };
+    }
+  }
+
+  remove(kind, count = 1) {
+    if (!this.items[kind]) return 0;
+    this.items[kind] -= count;
+    if (this.items[kind] <= 0) {
+      delete this.items[kind];
+      if (!Object.values(this.equipped).some(k => k === kind)) delete this.affixes[kind];
+    }
+    return count;
+  }
+
+  getAffixes(kind) {
+    return this.affixes[kind] || null;
   }
   toggle() { this.open = !this.open; }
 
@@ -73,7 +99,9 @@ class Inventory {
     this.equipped[slot.id] = kind;
     this.items[kind] -= 1;
     if (this.items[kind] <= 0) delete this.items[kind];
-    if (prev) this.add(prev, 1);
+    if (prev) this.add(prev, 1, this.affixes[prev]);
+    // carry the affix with the equipped item
+    if (this.affixes[kind]) this.affixes[this.equipped[slot.id]] = this.affixes[kind];
     return true;
   }
 
@@ -82,7 +110,7 @@ class Inventory {
     const kind = this.equipped[slotId];
     if (!kind) return false;
     this.equipped[slotId] = null;
-    this.add(kind, 1);
+    this.add(kind, 1, this.affixes[kind]);
     return true;
   }
 
@@ -341,7 +369,7 @@ class Inventory {
     statRow('PS', `${player.hp}/${player.maxHp}`, '#e88a8a');
     const weaponKind = this.equipped.weapon;
     const weaponStats = weaponKind && getItemStats(weaponKind);
-    statRow('ATT', String(player.attackDamage), '#e8c93c');
+    statRow('ATT', String(Math.round(player.attackDamage)), '#e8c93c');
     statRow('DIF', String(player.defense), '#85b7eb');
     statRow('VEL', player.speed.toFixed(1), '#78e0a8');
     statRow('MANA', `${Math.floor(player.mana)}/${player.maxMana}`, '#a878e0');
@@ -365,28 +393,31 @@ class Inventory {
       return;
     }
 
-    const stats = getItemStats(hoveredKind);
+    const stats = getItemStats(hoveredKind, this.getAffixes(hoveredKind));
     ctx.fillStyle = '#f1efe8';
     ctx.font = 'bold 13px sans-serif';
     ctx.fillText(stats.name, sx, iy);
     iy += 20;
 
-    if (stats.atk) {
+    if (stats.atk != null) {
       ctx.fillStyle = '#e8c93c';
       ctx.font = '12px sans-serif';
-      ctx.fillText(`Attacco +${stats.atk}`, sx, iy);
+      const sign = stats.atk >= 0 ? '+' : '';
+      ctx.fillText(`Attacco ${sign}${stats.atk}`, sx, iy);
       iy += 17;
     }
-    if (stats.def) {
+    if (stats.def != null) {
       ctx.fillStyle = '#85b7eb';
       ctx.font = '12px sans-serif';
-      ctx.fillText(`Difesa +${stats.def}`, sx, iy);
+      const sign = stats.def >= 0 ? '+' : '';
+      ctx.fillText(`Difesa ${sign}${stats.def}`, sx, iy);
       iy += 17;
     }
-    if (stats.spd) {
+    if (stats.spd != null) {
       ctx.fillStyle = '#78e0a8';
       ctx.font = '12px sans-serif';
-      ctx.fillText(`Velocità +${stats.spd}`, sx, iy);
+      const sign = stats.spd >= 0 ? '+' : '';
+      ctx.fillText(`Velocità ${sign}${stats.spd.toFixed(1)}`, sx, iy);
       iy += 17;
     }
     if (stats.extra) {
@@ -395,7 +426,7 @@ class Inventory {
       const lines = wrapPlainText(ctx, stats.extra, 180);
       lines.forEach(line => { ctx.fillText(line, sx, iy); iy += 14; });
     }
-    if (!stats.atk && !stats.def && !stats.spd && !stats.extra) {
+    if (stats.atk == null && stats.def == null && stats.spd == null && !stats.extra) {
       ctx.fillStyle = 'rgba(232,228,216,0.4)';
       ctx.font = '11px sans-serif';
       ctx.fillText('Nessun effetto in combattimento.', sx, iy);
