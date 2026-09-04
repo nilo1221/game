@@ -523,7 +523,7 @@ img.gold-icon {
   font-family: monospace;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 760px), (pointer: coarse) {
   html, body {
     gap: 0;
     padding: 0;
@@ -576,6 +576,7 @@ img.gold-icon {
     max-width: none;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -674,8 +675,8 @@ img.gold-icon {
 
 #touch-controls .touch-actions {
   position: absolute;
-  bottom: max(24px, env(safe-area-inset-bottom));
-  right: max(24px, env(safe-area-inset-right));
+  bottom: max(36px, env(safe-area-inset-bottom));
+  right: max(20px, env(safe-area-inset-right));
   width: 150px;
   height: 180px;
   pointer-events: auto;
@@ -749,26 +750,38 @@ img.gold-icon {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 480px), (max-height: 480px) {
   #touch-controls .joystick-zone {
     width: 42%;
     height: 55%;
   }
 
   #touch-controls .touch-actions {
-    bottom: max(16px, env(safe-area-inset-bottom));
-    right: max(16px, env(safe-area-inset-right));
+    bottom: max(28px, env(safe-area-inset-bottom));
+    right: max(14px, env(safe-area-inset-right));
+    width: 120px;
+    height: 150px;
   }
 
   #touch-controls .touch-attack {
-    width: 64px;
-    height: 64px;
-    font-size: 26px;
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
   }
 
   #touch-controls .touch-btn {
-    width: 52px;
-    height: 52px;
-    font-size: 20px;
+    width: 48px;
+    height: 48px;
+    font-size: 19px;
+  }
+
+  #touch-controls .touch-eat {
+    right: 62px;
+    bottom: 74px;
+  }
+
+  #touch-controls .touch-talk {
+    right: 0;
+    bottom: 74px;
   }
 }
