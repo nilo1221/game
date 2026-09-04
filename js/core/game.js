@@ -7,7 +7,7 @@
 (function () {
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
-  const VIEW_W = canvas.width, VIEW_H = canvas.height;
+  let VIEW_W = canvas.width, VIEW_H = canvas.height;
 
   // --- DOM HUD ---
   const dom = {
@@ -45,6 +45,54 @@
   // the exact row breakdown).
   const map = new TileMap(109, 236);
   const camera = new Camera(VIEW_W, VIEW_H);
+
+  // Viewport dinamico stile "EXPAND" (vedi Phaser ScaleManager): quando il
+  // gioco è full-screen (mobile/touch) il canvas interno si allarga per
+  // riempire lo schermo invece di lasciare bande nere. La scala viene
+  // arrotondata all'intero quando possibile per pixel nitidi.
+  const VIEWPORT = { baseW: canvas.width, baseH: canvas.height, maxW: 1600, maxH: 1200 };
+  function resizeView() {
+    const wrap = document.getElementById('gameWrap');
+    if (!wrap) return;
+    const cs = getComputedStyle(wrap);
+    if (cs.position !== 'fixed') {
+      // Layout desktop classico: canvas alla risoluzione base, scala via CSS.
+      if (VIEW_W !== VIEWPORT.baseW || VIEW_H !== VIEWPORT.baseH) {
+        VIEW_W = VIEWPORT.baseW;
+        VIEW_H = VIEWPORT.baseH;
+        canvas.width = VIEW_W;
+        canvas.height = VIEW_H;
+        camera.viewW = VIEW_W;
+        camera.viewH = VIEW_H;
+      }
+      canvas.style.width = '';
+      canvas.style.height = '';
+      return;
+    }
+    const availW = wrap.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+    const availH = wrap.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+    if (availW < 100 || availH < 100) return;
+    let scale = Math.min(availW / VIEWPORT.baseW, availH / VIEWPORT.baseH);
+    if (scale >= 1) scale = Math.floor(scale); // scala intera = pixel perfetti
+    const w = clamp(Math.round(availW / scale), 320, VIEWPORT.maxW);
+    const h = clamp(Math.round(availH / scale), 240, VIEWPORT.maxH);
+    VIEW_W = w;
+    VIEW_H = h;
+    if (canvas.width !== w) canvas.width = w;
+    if (canvas.height !== h) canvas.height = h;
+    camera.viewW = w;
+    camera.viewH = h;
+    canvas.style.width = Math.round(w * scale) + 'px';
+    canvas.style.height = Math.round(h * scale) + 'px';
+  }
+  let resizeViewTimer = null;
+  function queueResizeView(delay) {
+    clearTimeout(resizeViewTimer);
+    resizeViewTimer = setTimeout(resizeView, delay);
+  }
+  window.addEventListener('resize', () => queueResizeView(120));
+  window.addEventListener('orientationchange', () => queueResizeView(250));
+  resizeView();
   const particles = new ParticleSystem();
   const dialogue = new DialogueSystem();
   const inventory = new Inventory();
@@ -555,6 +603,17 @@
 
     multiplayer.name = name;
     multiplayer.room = room;
+    const roomBadge = document.getElementById('room-badge');
+    if (roomBadge) {
+      if (online && room) {
+        roomBadge.dataset.code = room;
+        roomBadge.textContent = '\ud83d\udd11 Stanza: ' + room;
+        roomBadge.hidden = false;
+      } else {
+        roomBadge.dataset.code = '';
+        roomBadge.hidden = true;
+      }
+    }
     state.gameState = 'playing';
     state.hasStarted = true;
     state.lobbyTriedConnect = false;

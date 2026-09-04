@@ -312,9 +312,25 @@ img.gold-icon {
   pointer-events: auto;
 }
 
+#room-badge {
+  position: fixed;
+  top: calc(58px + env(safe-area-inset-top));
+  left: max(10px, env(safe-area-inset-left));
+  padding: 4px 12px;
+  font: 700 12px "Segoe UI", sans-serif;
+  color: #e8c93c;
+  background: rgba(15, 13, 11, 0.72);
+  border: 1px solid rgba(232, 201, 60, 0.45);
+  border-radius: 999px;
+  z-index: 860;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 #chat-log {
   position: fixed;
-  top: calc(64px + env(safe-area-inset-top));
+  top: calc(92px + env(safe-area-inset-top));
   left: max(12px, env(safe-area-inset-left));
   width: min(300px, 55vw);
   max-height: 132px;
@@ -611,8 +627,11 @@ img.gold-icon {
   #gameWrap {
     align-items: flex-start;
   }
+  #room-badge {
+    top: calc(50px + env(safe-area-inset-top));
+  }
   #chat-log {
-    top: calc(52px + env(safe-area-inset-top));
+    top: calc(82px + env(safe-area-inset-top));
     max-height: 96px;
   }
 }
