@@ -3,6 +3,8 @@
 // tilemap-builder.js and per-tile drawing lives in tilemap-renderer.js; this
 // file is the (much smaller) glue between them.
 
+const CHUNK_TILES = 32;
+
 class TileMap {
   constructor(cols, rows) {
     this.cols = cols;
@@ -57,7 +59,6 @@ class TileMap {
 
     buildWorld(this);
 
-    this._offscreen = null;
     this._bakeStatic();
   }
 
@@ -108,24 +109,61 @@ class TileMap {
   // BAKE STATIC LAYER
   // =========================
   _bakeStatic() {
-    const off = makeCanvas(this.cols * TILE, this.rows * TILE);
-    const ctx = off.getContext('2d');
+    this._chunks = [];
+    const chunkCols = Math.ceil(this.cols / CHUNK_TILES);
+    const chunkRows = Math.ceil(this.rows / CHUNK_TILES);
 
-    for (let y = 0; y < this.rows; y++) {
-      for (let x = 0; x < this.cols; x++) {
-        drawGroundTile(ctx, this, x, y);
+    const decorByChunk = Array.from({ length: chunkRows }, () =>
+      Array.from({ length: chunkCols }, () => [])
+    );
+    for (const d of this.decor) {
+      const cx = Math.min(chunkCols - 1, Math.floor(d.x / CHUNK_TILES));
+      const cy = Math.min(chunkRows - 1, Math.floor(d.y / CHUNK_TILES));
+      decorByChunk[cy][cx].push(d);
+    }
+
+    for (let cy = 0; cy < chunkRows; cy++) {
+      for (let cx = 0; cx < chunkCols; cx++) {
+        const tileX = cx * CHUNK_TILES;
+        const tileY = cy * CHUNK_TILES;
+        const tileW = Math.min(CHUNK_TILES, this.cols - tileX);
+        const tileH = Math.min(CHUNK_TILES, this.rows - tileY);
+        const w = tileW * TILE;
+        const h = tileH * TILE;
+        const off = makeCanvas(w, h);
+        const ctx = off.getContext('2d');
+
+        ctx.save();
+        ctx.translate(-tileX * TILE, -tileY * TILE);
+        for (let y = tileY; y < tileY + tileH; y++) {
+          for (let x = tileX; x < tileX + tileW; x++) {
+            drawGroundTile(ctx, this, x, y);
+          }
+        }
+        for (const d of decorByChunk[cy][cx]) {
+          drawDecor(ctx, d);
+        }
+        ctx.restore();
+
+        this._chunks.push({ x: tileX * TILE, y: tileY * TILE, w, h, canvas: off });
       }
     }
-    this.decor.forEach((d) => drawDecor(ctx, d));
-
-    this._offscreen = off;
   }
 
   // =========================
   // DRAW STATIC WORLD
   // =========================
   drawGround(ctx, camX, camY, viewW, viewH) {
-    ctx.drawImage(this._offscreen, camX, camY, viewW, viewH, 0, 0, viewW, viewH);
+    const viewR = camX + viewW;
+    const viewB = camY + viewH;
+    for (const chunk of this._chunks) {
+      const x = Math.max(camX, chunk.x);
+      const y = Math.max(camY, chunk.y);
+      const w = Math.min(viewR, chunk.x + chunk.w) - x;
+      const h = Math.min(viewB, chunk.y + chunk.h) - y;
+      if (w <= 0 || h <= 0) continue;
+      ctx.drawImage(chunk.canvas, x - chunk.x, y - chunk.y, w, h, x - camX, y - camY, w, h);
+    }
   }
 
   // =========================
