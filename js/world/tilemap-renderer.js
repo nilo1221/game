@@ -693,5 +693,29 @@ function drawDecor(ctx, d) {
       ctx.ellipse(px + 16 + Math.sin(ang) * 5, py + 15 + Math.cos(ang) * 3, 3, 1.5, ang, 0, Math.PI * 2);
       ctx.fill();
     }
+  } else if (d.type === 'fountain') {
+    // basin
+    ctx.fillStyle = '#5a5a5a';
+    ctx.beginPath();
+    ctx.ellipse(px + 16, py + 26, 13, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // water
+    ctx.fillStyle = 'rgba(60, 140, 200, 0.6)';
+    ctx.beginPath();
+    ctx.ellipse(px + 16, py + 25, 10, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // pedestal
+    ctx.fillStyle = '#7a7a7a';
+    ctx.fillRect(px + 13, py + 12, 6, 12);
+    // top bowl
+    ctx.fillStyle = '#9a9a9a';
+    ctx.beginPath();
+    ctx.arc(px + 16, py + 12, 5, 0, Math.PI * 2);
+    ctx.fill();
+    // spout
+    ctx.fillStyle = 'rgba(120, 200, 255, 0.7)';
+    ctx.beginPath();
+    ctx.arc(px + 16, py + 10, 2.2, 0, Math.PI * 2);
+    ctx.fill();
   }
 }

@@ -484,6 +484,9 @@ function buildMoltenDepths(map) {
     }
   });
 
+  // Central square fountain
+  map.decor.push({ x: 13, y: 35, type: 'fountain' });
+
   // Shop scenery for the village merchants
   map.decor.push({ x: 18, y: 34, type: 'anvil' });
   map.decor.push({ x: 19, y: 34, type: 'brazier' });
