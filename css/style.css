@@ -573,8 +573,8 @@ img.gold-icon {
     width: 100%;
     max-width: none;
     margin: 0;
-    padding: 6px 10px;
-    gap: 6px;
+    padding: 4px 8px;
+    gap: 4px;
     border: none;
     border-bottom: 2px solid #4a3d2c;
     border-radius: 0 0 10px 10px;
@@ -582,24 +582,24 @@ img.gold-icon {
     z-index: 500;
   }
   .hud-right {
-    gap: 8px;
+    gap: 6px;
   }
   .bar-row .bar-track {
-    width: 85px;
-    height: 8px;
+    width: 70px;
+    height: 6px;
   }
   #hud .stat-text {
-    font-size: 10px;
-    min-width: 44px;
+    font-size: 13px;
+    min-width: 52px;
   }
   #hud .stat-icon,
   #hud .gold-icon {
-    width: 14px;
-    height: 14px;
-    font-size: 13px;
+    width: 16px;
+    height: 16px;
+    font-size: 14px;
   }
   #hud .stat-label {
-    font-size: 11px;
+    font-size: 12px;
   }
   #xpGroup .bar-track {
     width: 60px;

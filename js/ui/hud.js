@@ -176,14 +176,15 @@ const Hud = {
     const boss = this._getActiveBoss(state, viewW, viewH);
     if (!boss) return;
 
+    const isMobile = viewW < 760;
     const name = BOSS_NAMES[boss.type] || 'Boss';
     const pct = clamp(boss.hp / boss.maxHp, 0, 1);
     const low = pct <= 0.25;
 
     const barW = Math.min(340, viewW - 80);
-    const barH = 16;
+    const barH = isMobile ? 12 : 16;
     const x = (viewW - barW) / 2;
-    const nameY = 22;
+    const nameY = isMobile ? 18 : 22;
     const barY = nameY + 10;
 
     ctx.save();
@@ -196,7 +197,7 @@ const Hud = {
       : boss.type === 'trollChieftain' ? '#8fae5a'
       : boss.isDevil ? '#f4a13c' : '#e8975a';
 
-    ctx.font = 'bold 22px sans-serif';
+    ctx.font = `bold ${isMobile ? 18 : 22}px sans-serif`;
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
     ctx.fillText(name, viewW / 2 + 2, nameY + 2);
     ctx.fillStyle = bannerColor;
@@ -229,40 +230,44 @@ const Hud = {
     ctx.restore();
   },
 
-  drawToast(ctx, state, viewW) {
+  drawToast(ctx, state, viewW, viewH) {
     if (!state.toastMsg) return;
     ctx.save();
-    const w = ctx.measureText(state.toastMsg).width + 40;
+    ctx.font = '13px sans-serif';
+    const maxW = Math.max(80, viewW - 80);
+    const w = Math.min(ctx.measureText(state.toastMsg).width + 28, maxW);
     const x = (viewW - w) / 2;
+    const y = viewH - 44;
     ctx.globalAlpha = clamp(state.toastTimer / 30, 0, 1);
     ctx.fillStyle = 'rgba(10,12,8,0.85)';
-    roundRect(ctx, x, 16, w, 32, 8);
+    roundRect(ctx, x, y, w, 26, 20);
     ctx.fill();
     ctx.strokeStyle = 'rgba(232,201,60,0.5)';
     ctx.lineWidth = 1;
-    roundRect(ctx, x, 16, w, 32, 8);
+    roundRect(ctx, x, y, w, 26, 20);
     ctx.stroke();
     ctx.fillStyle = '#f1efe8';
-    ctx.font = '13px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(state.toastMsg, viewW / 2, 37);
+    ctx.fillText(state.toastMsg, viewW / 2, y + 17);
     ctx.textAlign = 'left';
     ctx.restore();
   },
 
-  drawQuestTracker(ctx, state, viewH) {
+  drawQuestTracker(ctx, state, viewW, viewH) {
     if (!(state.questStage > 0 && state.questStage < 3)) return;
+    const isMobile = viewW < 760;
     const label = state.questStage === 1
       ? 'Missione: trova la spada di ferro vicino allo stagno'
       : 'Missione: sconfiggi il re goblin nella radura della foresta';
     ctx.save();
     ctx.fillStyle = 'rgba(10,12,8,0.7)';
     const w = ctx.measureText(label).width + 24;
-    roundRect(ctx, 12, viewH - 40, w, 26, 6);
+    const y = isMobile ? viewH - 70 : viewH - 40;
+    roundRect(ctx, 12, y, w, 26, 6);
     ctx.fill();
     ctx.fillStyle = '#e8c93c';
     ctx.font = '12px sans-serif';
-    ctx.fillText(label, 24, viewH - 22);
+    ctx.fillText(label, 24, y + 18);
     ctx.restore();
   },
 
@@ -279,7 +284,7 @@ const Hud = {
   // panels — see the ordering note there).
   draw(ctx, state, viewW, viewH) {
     this.drawBossBanner(ctx, state, viewW, viewH);
-    this.drawToast(ctx, state, viewW);
-    this.drawQuestTracker(ctx, state, viewH);
+    this.drawToast(ctx, state, viewW, viewH);
+    this.drawQuestTracker(ctx, state, viewW, viewH);
   },
 };
