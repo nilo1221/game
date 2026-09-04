@@ -81,9 +81,10 @@ function createInputState() {
     if (!wrap) return;
     wrap.querySelectorAll('[data-key]').forEach((el) => {
       const code = el.dataset.key === 'space' ? ' ' : el.dataset.key;
+      const hold = el.dataset.hold === 'true';
       const start = (e) => {
         e.preventDefault();
-        if (!touchKeys[code]) touchJust[code] = true;
+        if (!touchKeys[code] && !hold) touchJust[code] = true;
         touchKeys[code] = true;
         el.classList.add('active');
         merge();
