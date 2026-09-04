@@ -62,11 +62,19 @@ const Screens = {
   },
 
   // Draws the start menu and stores the button rects on state.startButtons.
-  drawStart(ctx, state, viewW, viewH) {
+  // viewW/viewH are the screen (UI) dimensions; worldW/worldH are the world
+  // dimensions used by the camera. worldScale/dpr let us render the map
+  // background at the correct zoom level while keeping the UI crisp.
+  drawStart(ctx, state, viewW, viewH, worldW, worldH, worldScale, dpr) {
     ctx.save();
     const off = state.camera.getOffset();
     const camX = Math.round(off.x), camY = Math.round(off.y);
-    state.map.drawGround(ctx, camX, camY, viewW, viewH);
+    // map background in world coordinates
+    ctx.save();
+    ctx.setTransform(dpr * worldScale, 0, 0, dpr * worldScale, 0, 0);
+    state.map.drawGround(ctx, camX, camY, worldW, worldH);
+    ctx.restore();
+    // UI overlay in screen coordinates
     ctx.fillStyle = 'rgba(8,10,7,0.72)';
     ctx.fillRect(0, 0, viewW, viewH);
 

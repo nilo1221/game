@@ -41,39 +41,98 @@
   // Layout
   // -------------------------------------------------------------------
   Inventory.prototype._layout = function (canvasW, canvasH) {
-    const panelW = 900;
-    const panelH = 460;
+    const isMobile = canvasW < 760;
+
+    if (!isMobile) {
+      // Desktop: three-column cinematic layout (unchanged)
+      const panelW = 900;
+      const panelH = 460;
+      const panelX = (canvasW - panelW) / 2;
+      const panelY = (canvasH - panelH) / 2;
+
+      const margin = 48;
+      const colGap = 40;
+      const startY = panelY + 83;
+
+      const equipSize = 64;
+      const equipGap = 6;
+      const equipX = panelX + margin;
+      const equipY = startY;
+
+      const equipSlots = SLOTS.map((s, i) => ({
+        id: s.id,
+        label: s.label,
+        ix: equipX,
+        iy: equipY + i * (equipSize + equipGap),
+        size: equipSize,
+      }));
+
+      const cell = 56;
+      const cellGap = 8;
+      const cols = 7;
+      const rows = 5;
+      const bpX = equipX + equipSize + colGap;
+      const bpY = startY;
+      const kinds = Object.keys(this.items);
+
+      const backpackItems = [];
+      for (let i = 0; i < cols * rows; i++) {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        backpackItems.push({
+          kind: kinds[i] || null,
+          ix: bpX + col * (cell + cellGap),
+          iy: bpY + row * (cell + cellGap),
+          size: cell,
+        });
+      }
+
+      const bpWidth = cols * cell + (cols - 1) * cellGap;
+      const detailW = 220;
+      const detailX = bpX + bpWidth + colGap;
+      const detailY = startY;
+
+      return {
+        panelX, panelY, panelW, panelH,
+        equipSlots, backpackItems,
+        detailX, detailY, detailW, detailH: 340,
+      };
+    }
+
+    // Mobile: vertical layout that fits narrow screens.
+    const margin = 12;
+    const panelW = Math.max(300, canvasW - 24);
+    const panelH = Math.max(360, canvasH - 40);
     const panelX = (canvasW - panelW) / 2;
     const panelY = (canvasH - panelH) / 2;
+    const startY = panelY + 66;
 
-    // balanced three-column layout with equal margins
-    const margin = 48;
-    const colGap = 40;
-    const startY = panelY + 83; // vertically center the whole block
-
-    const equipSize = 64;
     const equipGap = 6;
+    const equipSize = Math.min(48, Math.floor((panelW - 2 * margin - 4 * equipGap) / 5));
     const equipX = panelX + margin;
     const equipY = startY;
 
     const equipSlots = SLOTS.map((s, i) => ({
       id: s.id,
       label: s.label,
-      ix: equipX,
-      iy: equipY + i * (equipSize + equipGap),
+      ix: equipX + i * (equipSize + equipGap),
+      iy: equipY,
       size: equipSize,
     }));
 
-    const cell = 56;
-    const cellGap = 8;
-    const cols = 7;
-    const rows = 5;
-    const bpX = equipX + equipSize + colGap;
-    const bpY = startY;
-    const kinds = Object.keys(this.items);
+    const cellGap = 6;
+    const cols = 5;
+    const cell = Math.min(36, Math.floor((panelW - 2 * margin - (cols - 1) * cellGap) / cols));
+    const bpX = equipX;
+    const bpY = equipY + equipSize + 24;
 
+    // fit as many backpack rows as possible while leaving room for the detail card
+    const maxDetailH = 120;
+    const available = panelH - (bpY - panelY) - 30 - maxDetailH - 20;
+    const maxRows = Math.max(2, Math.floor((available + cellGap) / (cell + cellGap)));
+    const kinds = Object.keys(this.items);
     const backpackItems = [];
-    for (let i = 0; i < cols * rows; i++) {
+    for (let i = 0; i < cols * maxRows; i++) {
       const col = i % cols;
       const row = Math.floor(i / cols);
       backpackItems.push({
@@ -84,15 +143,16 @@
       });
     }
 
-    const bpWidth = cols * cell + (cols - 1) * cellGap;
-    const detailW = 220;
-    const detailX = bpX + bpWidth + colGap;
-    const detailY = startY;
+    const bpHeight = maxRows * cell + (maxRows - 1) * cellGap;
+    const detailX = panelX + margin;
+    const detailY = bpY + bpHeight + 16;
+    const detailW = panelW - 2 * margin;
+    const detailH = Math.max(100, panelY + panelH - detailY - 20);
 
     return {
       panelX, panelY, panelW, panelH,
       equipSlots, backpackItems,
-      detailX, detailY, detailW,
+      detailX, detailY, detailW, detailH,
     };
   };
 
@@ -289,15 +349,15 @@
   // Detail card
   // -------------------------------------------------------------------
   Inventory.prototype._drawDetailCard = function (ctx, layout, player) {
-    const { detailX, detailY, detailW } = layout;
+    const { detailX, detailY, detailW, detailH = 340 } = layout;
 
     // card background
     ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    roundRect(ctx, detailX, detailY, detailW, 340, 10);
+    roundRect(ctx, detailX, detailY, detailW, detailH, 10);
     ctx.fill();
     ctx.strokeStyle = 'rgba(232,228,216,0.10)';
     ctx.lineWidth = 1;
-    roundRect(ctx, detailX, detailY, detailW, 340, 10);
+    roundRect(ctx, detailX, detailY, detailW, detailH, 10);
     ctx.stroke();
 
     const kind = this.hoveredKind || (this.hoveredSlot ? this.equipped[this.hoveredSlot] : null);
@@ -306,8 +366,8 @@
       ctx.fillStyle = 'rgba(232,228,216,0.40)';
       ctx.font = '12px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('Passa il mouse su un oggetto', detailX + detailW / 2, detailY + 40);
-      ctx.fillText('per vedere i dettagli.', detailX + detailW / 2, detailY + 56);
+      ctx.fillText('Passa il mouse su un oggetto', detailX + detailW / 2, detailY + detailH / 2 - 8);
+      ctx.fillText('per vedere i dettagli.', detailX + detailW / 2, detailY + detailH / 2 + 10);
       ctx.textAlign = 'left';
       return;
     }
@@ -317,13 +377,20 @@
     const color = rarityColor(kind);
     const rarityLabel = rarityLabelFor(kind);
 
-    // large icon
-    const icon = Sprites.icons[kind];
-    if (icon) {
-      ctx.save();
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(icon, detailX + (detailW - 80) / 2, detailY + 20, 80, 80);
-      ctx.restore();
+    const compact = detailH < 240;
+    const iconSize = compact ? 0 : Math.min(80, detailH - 130, detailW - 20);
+
+    // large icon (hidden on very small detail cards)
+    let ty = detailY + 16;
+    if (!compact) {
+      const icon = Sprites.icons[kind];
+      if (icon) {
+        ctx.save();
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(icon, detailX + (detailW - iconSize) / 2, detailY + 16, iconSize, iconSize);
+        ctx.restore();
+      }
+      ty += iconSize + 16;
     }
 
     // rarity label
@@ -331,8 +398,9 @@
       ctx.fillStyle = color;
       ctx.font = 'bold 11px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(rarityLabel.toUpperCase(), detailX + detailW / 2, detailY + 118);
+      ctx.fillText(rarityLabel.toUpperCase(), detailX + detailW / 2, ty);
       ctx.textAlign = 'left';
+      ty += compact ? 14 : 18;
     }
 
     // item name
@@ -340,15 +408,14 @@
     ctx.font = 'bold 13px sans-serif';
     ctx.textAlign = 'center';
     const nameLines = wrapPlainText(ctx, stats.name, detailW - 20);
-    let ty = detailY + 140;
     nameLines.forEach((line) => {
       ctx.fillText(line, detailX + detailW / 2, ty);
-      ty += 17;
+      ty += compact ? 14 : 17;
     });
     ctx.textAlign = 'left';
 
     // stats
-    ty += 10;
+    ty += compact ? 6 : 10;
     ctx.font = '12px sans-serif';
 
     function statLine(label, value, sign, c) {
@@ -359,7 +426,7 @@
       ctx.textAlign = 'right';
       ctx.fillText((sign || '') + value, detailX + detailW - 16, ty);
       ctx.textAlign = 'left';
-      ty += 18;
+      ty += compact ? 15 : 18;
     }
 
     statLine('ATT', stats.atk, stats.atk >= 0 ? '+' : '', '#e8c93c');
@@ -367,13 +434,13 @@
     statLine('VEL', stats.spd ? stats.spd.toFixed(1) : null, stats.spd >= 0 ? '+' : '', '#78e0a8');
 
     if (stats.extra) {
-      ty += 8;
+      ty += compact ? 4 : 8;
       ctx.fillStyle = 'rgba(232,228,216,0.75)';
       ctx.font = 'italic 11px sans-serif';
       const lines = wrapPlainText(ctx, stats.extra, detailW - 28);
       lines.forEach((line) => {
         ctx.fillText(line, detailX + 14, ty);
-        ty += 15;
+        ty += compact ? 13 : 15;
       });
     }
   };

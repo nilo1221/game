@@ -50,10 +50,12 @@ class Shop {
   }
 
   _layout(viewW, viewH) {
-    const panelW = 560;
+    const isMobile = viewW < 760;
     const hasAd = !!(this.merchant && this.merchant.currency === 'premium' && AdManager.getAdForSlot('premiumShop'));
     const adH = hasAd ? 54 : 0;
-    const panelH = 460 + adH + (this.merchant ? AFFILIATES.length * 60 + 40 : 0);
+    const baseH = 460 + adH + (this.merchant ? AFFILIATES.length * 60 + 40 : 0);
+    const panelW = isMobile ? Math.min(560, Math.max(300, viewW - 40)) : 560;
+    const panelH = isMobile ? Math.min(baseH, viewH - 40) : baseH;
     const px = (viewW - panelW) / 2;
     const py = (viewH - panelH) / 2;
     this.itemButtons = [];
@@ -61,16 +63,16 @@ class Shop {
     this.adBtn = null;
 
     const startY = py + 70 + adH;
-    const rowH = 52;
+    const rowH = isMobile ? 42 : 52;
     const listX = px + 20;
     const listW = panelW - 40;
-    const buyW = 80;
-    const sellW = 46;
-    const buyH = 32;
+    const buyW = isMobile ? 50 : 80;
+    const sellW = isMobile ? 32 : 46;
+    const buyH = isMobile ? 26 : 32;
 
     const ad = hasAd ? AdManager.getAdForSlot('premiumShop') : null;
     if (ad) {
-      this.adBtn = { x: listX, y: py + 52, w: listW, h: 46, ad };
+      this.adBtn = { x: listX, y: py + 52, w: listW, h: isMobile ? 36 : 46, ad };
     }
 
     if (this.merchant) {
@@ -250,10 +252,13 @@ class Shop {
 
       const icon = Sprites.icons[item.kind];
 
-      // name
+      // name (clipped to avoid overlapping buttons on narrow screens)
       ctx.fillStyle = getRarityColor(item.kind);
       ctx.font = 'bold 14px sans-serif';
-      ctx.fillText(stats.name, btn.itemX + 40, y + 16);
+      const priceText = `${item.price} ${cName} (x${item.qty})`;
+      const priceW = ctx.measureText(priceText).width;
+      const nameMax = Math.max(40, btn.sellBtn ? btn.sellBtn.x - 6 : btn.x) - (btn.itemX + 40) - 6;
+      ctx.fillText(stats.name, btn.itemX + 40, y + 16, nameMax);
 
       // owned tag
       if (owned) {
@@ -268,14 +273,12 @@ class Shop {
       if (extra) {
         ctx.fillStyle = '#b0b0b0';
         ctx.font = '11px sans-serif';
-        ctx.fillText(extra, btn.itemX + 40, y + 32);
+        ctx.fillText(extra, btn.itemX + 40, y + 32, nameMax);
       }
 
       // price / qty
       ctx.fillStyle = '#e8c93c';
       ctx.font = '12px sans-serif';
-      const priceText = `${item.price} ${cName} (x${item.qty})`;
-      const priceW = ctx.measureText(priceText).width;
       ctx.fillText(priceText, btn.x - priceW - 12, y + 18);
 
       // icon 32x32 with crisp scaling
@@ -338,10 +341,10 @@ class Shop {
       : null;
     if (hoveredBtn) {
       const detail = getItemStats(hoveredBtn.item.kind, state.inventory.getAffixes(hoveredBtn.item.kind));
-      const dx = px + panelW - 230;
-      const dy = py + panelH - 120;
-      const dw = 210;
+      const dw = Math.min(210, panelW - 20);
       const dh = 100;
+      const dx = Math.max(px + 10, px + panelW - dw - 10);
+      const dy = Math.max(py + 10, py + panelH - dh - 10);
 
       ctx.fillStyle = 'rgba(30, 26, 20, 0.98)';
       roundRect(ctx, dx, dy, dw, dh, 8);

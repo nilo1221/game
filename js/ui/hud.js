@@ -83,7 +83,7 @@ const Hud = {
       }
     });
     if (engaged) return engaged;
-    if (nearest && nearestDist < Math.max(viewW, viewH) * 0.2) return nearest;
+    if (nearest && nearestDist < Math.max(state.camera.viewW, state.camera.viewH) * 0.2) return nearest;
     return null;
   },
 

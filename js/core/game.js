@@ -46,15 +46,14 @@
   const map = new TileMap(109, 236);
   const camera = new Camera(VIEW_W, VIEW_H);
 
-  // Viewport responsive DPR-aware in modalità EXPAND: il canvas logico
-  // si allarga per riempire il contenitore senza bande nere. Su schermi
-  // piccoli la telecamera mostra più mappa; su desktop il gioco non
-  // viene ingrandito oltre la risoluzione base.
-  const BASE_W = 960;
-  const BASE_H = 600;
-  const MAX_W = 2400;
-  const MAX_H = 1800;
-  let renderScale = 1;
+  // Viewport responsive DPR-aware: separa le coordinate "mondo" (usate dalla
+  // camera e per disegnare tile/entità) dalle coordinate "schermo" (usate
+  // dall'HUD e dai pannelli). In questo modo il mondo può essere zoomato
+  // per mostrare più mappa su telefono senza rendere troppo piccola l'UI.
+  const WORLD_TARGET_H = 800;
+  let worldScale = 1;
+  let worldRenderScale = 1;
+  let uiRenderScale = 1;
 
   function resizeView() {
     const wrap = document.getElementById('gameWrap');
@@ -69,19 +68,22 @@
     const cssH = Math.max(240, wrap.clientHeight - padTop - padBottom);
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-    const scale = Math.min(1, cssW / BASE_W, cssH / BASE_H);
-    const w = Math.max(320, Math.min(Math.floor(cssW / scale), MAX_W));
-    const h = Math.max(240, Math.min(Math.floor(cssH / scale), MAX_H));
+    // worldScale: quanti pixel CSS corrispondono a 1 unità di gioco.
+    // 1 = 1:1 (tile 16px sullo schermo), 0.75 = tile ~12px, mostra più mappa.
+    worldScale = Math.min(1, Math.max(0.5, cssH / WORLD_TARGET_H));
+    const worldW = Math.floor(cssW / worldScale);
+    const worldH = Math.floor(cssH / worldScale);
 
-    VIEW_W = w;
-    VIEW_H = h;
-    canvas.width = Math.floor(w * dpr);
-    canvas.height = Math.floor(h * dpr);
+    VIEW_W = cssW;
+    VIEW_H = cssH;
+    canvas.width = Math.floor(cssW * dpr);
+    canvas.height = Math.floor(cssH * dpr);
     canvas.style.width = cssW + 'px';
     canvas.style.height = cssH + 'px';
-    camera.viewW = w;
-    camera.viewH = h;
-    renderScale = dpr;
+    camera.viewW = worldW;
+    camera.viewH = worldH;
+    worldRenderScale = dpr * worldScale;
+    uiRenderScale = dpr;
   }
   let resizeViewTimer = null;
   function queueResizeView(delay) {
@@ -350,14 +352,15 @@
   }
 
   function draw() {
-    ctx.setTransform(renderScale, 0, 0, renderScale, 0, 0);
-
+    // --- Start / how-to screens (full UI layer) ---
     if (state.gameState !== 'playing' && state.gameState !== 'lobby') {
-      Screens.drawStart(ctx, state, VIEW_W, VIEW_H);
+      ctx.setTransform(uiRenderScale, 0, 0, uiRenderScale, 0, 0);
+      Screens.drawStart(ctx, state, VIEW_W, VIEW_H, camera.viewW, camera.viewH, worldScale, uiRenderScale);
       return;
     }
     if (state.gameState === 'howtoplay') {
-      Screens.drawStart(ctx, state, VIEW_W, VIEW_H);
+      ctx.setTransform(uiRenderScale, 0, 0, uiRenderScale, 0, 0);
+      Screens.drawStart(ctx, state, VIEW_W, VIEW_H, camera.viewW, camera.viewH, worldScale, uiRenderScale);
       Screens.drawHowToPlay(ctx, state, VIEW_W, VIEW_H);
       return;
     }
@@ -366,9 +369,11 @@
     const off = camera.getOffset();
     const camX = Math.round(off.x), camY = Math.round(off.y);
 
-    ctx.clearRect(0, 0, VIEW_W, VIEW_H);
-    map.drawGround(ctx, camX, camY, VIEW_W, VIEW_H);
-    map.drawAnimated(ctx, camX, camY, VIEW_W, VIEW_H, t);
+    // --- World layer ---
+    ctx.setTransform(worldRenderScale, 0, 0, worldRenderScale, 0, 0);
+    ctx.clearRect(0, 0, camera.viewW, camera.viewH);
+    map.drawGround(ctx, camX, camY, camera.viewW, camera.viewH);
+    map.drawAnimated(ctx, camX, camY, camera.viewW, camera.viewH, t);
 
     // Depth-sorted draw: items, NPCs, enemies, player, and fireballs all
     // sorted by y (feet position) so nearer things draw over farther ones.
@@ -393,10 +398,13 @@
       ctx.strokeStyle = 'rgba(241,239,232,0.6)';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(VIEW_W / 2, VIEW_H / 2, 6, 0, Math.PI * 2);
+      ctx.arc(camera.viewW / 2, camera.viewH / 2, 6, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
     }
+
+    // --- UI layer ---
+    ctx.setTransform(uiRenderScale, 0, 0, uiRenderScale, 0, 0);
 
     Hud.drawVignette(ctx, VIEW_W, VIEW_H);
 
