@@ -693,6 +693,48 @@ function drawDecor(ctx, d) {
       ctx.ellipse(px + 16 + Math.sin(ang) * 5, py + 15 + Math.cos(ang) * 3, 3, 1.5, ang, 0, Math.PI * 2);
       ctx.fill();
     }
+  } else if (d.type === 'merlon') {
+    // crenellations along top of wall
+    ctx.fillStyle = '#6a6a6a';
+    for (let i = 0; i < 4; i++) {
+      ctx.fillRect(px + 4 + i * 7, py + 2, 4, 7);
+    }
+    // base shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.fillRect(px + 4, py + 9, 24, 3);
+  } else if (d.type === 'tower') {
+    // tower body
+    ctx.fillStyle = '#5a5a5a';
+    ctx.fillRect(px + 4, py + 6, 24, 24);
+    ctx.fillStyle = '#6b6b6b';
+    ctx.fillRect(px + 7, py + 9, 18, 18);
+    // roof
+    ctx.fillStyle = '#7a3a2a';
+    ctx.beginPath();
+    ctx.moveTo(px + 4, py + 8);
+    ctx.lineTo(px + 16, py - 2);
+    ctx.lineTo(px + 28, py + 8);
+    ctx.closePath();
+    ctx.fill();
+    // door
+    ctx.fillStyle = '#2a1a10';
+    ctx.beginPath();
+    ctx.arc(px + 16, py + 28, 5, Math.PI, 0);
+    ctx.fill();
+    // flag on top
+    ctx.strokeStyle = '#8a3a3a';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(px + 16, py - 2);
+    ctx.lineTo(px + 16, py - 10);
+    ctx.stroke();
+    ctx.fillStyle = '#c94a4a';
+    ctx.beginPath();
+    ctx.moveTo(px + 16, py - 10);
+    ctx.lineTo(px + 24, py - 7);
+    ctx.lineTo(px + 16, py - 4);
+    ctx.closePath();
+    ctx.fill();
   } else if (d.type === 'fountain') {
     // basin
     ctx.fillStyle = '#5a5a5a';

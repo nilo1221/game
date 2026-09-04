@@ -95,6 +95,11 @@ function buildWorld(map) {
       map.set(20, y, TileType.WALL);
     }
   }
+  // Corner towers (2x2 bastions)
+  for (let y = 31; y < 33; y++) {
+    for (let x = 5; x < 7; x++) map.set(x, y, TileType.WALL);
+    for (let x = 20; x < 22; x++) map.set(x, y, TileType.WALL);
+  }
   // Path to the weapon master through the east gate
   for (let y = 35; y < 42; y++) {
     map.set(20, y, TileType.PATH);
@@ -496,6 +501,13 @@ function buildMoltenDepths(map) {
 
   // Central square fountain
   map.decor.push({ x: 13, y: 35, type: 'fountain' });
+
+  // Castle towers and crenellations
+  map.decor.push({ x: 5, y: 31, type: 'tower' });
+  map.decor.push({ x: 20, y: 31, type: 'tower' });
+  for (let x = 7; x < 20; x++) {
+    if (x !== 13) map.decor.push({ x, y: 32, type: 'merlon' });
+  }
 
   // Shop scenery for the village merchants
   map.decor.push({ x: 18, y: 34, type: 'anvil' });
