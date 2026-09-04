@@ -71,7 +71,7 @@ class DialogueSystem {
 
 
         // --- calculate text height dynamically ---
-        ctx.font = '14px sans-serif';
+        ctx.font = '16px Cinzel, serif';
 
         const textLines = this._wrapText(
             ctx,
@@ -79,11 +79,11 @@ class DialogueSystem {
             margin + 20,
             0,
             boxW - 40,
-            20,
+            24,
             true
         );
 
-        const textHeight = Math.max(textLines.length * 20, 20);
+        const textHeight = Math.max(textLines.length * 24, 24);
 
         const boxH = Math.max(
             92,
@@ -109,7 +109,7 @@ class DialogueSystem {
 
 
         // name tag
-        ctx.font = 'bold 13px sans-serif';
+        ctx.font = 'bold 14px Cinzel, serif';
 
         const nameWidth = ctx.measureText(this.active.name).width + 28;
 
@@ -126,6 +126,8 @@ class DialogueSystem {
 
         ctx.fillStyle = '#2c2418';
         ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0,0,0,0.4)';
+        ctx.shadowBlur = 2;
 
         ctx.fillText(
             this.active.name,
@@ -137,16 +139,18 @@ class DialogueSystem {
 
         // text
         ctx.fillStyle = '#f1efe8';
-        ctx.font = '14px sans-serif';
+        ctx.font = '16px Cinzel, serif';
         ctx.textBaseline = 'alphabetic';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 3;
 
         this._wrapText(
             ctx,
             shown,
             margin + 20,
-            boxY + 28,
+            boxY + 30,
             boxW - 40,
-            20
+            24
         );
 
 
@@ -155,7 +159,7 @@ class DialogueSystem {
         if (Math.floor(this.charIndex) >= line.length) {
 
             ctx.fillStyle = 'rgba(232,228,216,0.6)';
-            ctx.font = '11px sans-serif';
+            ctx.font = '12px Cinzel, serif';
 
             const bounce = Math.sin(Date.now() / 200) * 2;
 
