@@ -24,6 +24,19 @@ const WEAPON_MASTER_STOCK = [
 ];
 const WEAPON_MASTER_CURRENCY = 'honor';
 
+const BLACKSMITH_STOCK = [
+  { kind: 'sword',  price: 45, qty: 1 },
+  { kind: 'armor',  price: 55, qty: 1 },
+  { kind: 'shield', price: 28, qty: 1 },
+  { kind: 'helmet', price: 22, qty: 1 },
+  { kind: 'boots',  price: 32, qty: 1 },
+];
+
+const ALCHEMIST_STOCK = [
+  { kind: 'potionRed', price: 8, qty: 10 },
+  { kind: 'potionBlue', price: 16, qty: 5 },
+];
+
 // Shared tier colors for future UI expansions.
 const RARITY_COLORS = {
   common:    '#b0b0b0',
@@ -34,3 +47,5 @@ const RARITY_COLORS = {
 };
 
 const WANDERING_MERCHANT_CURRENCY = 'gold';
+const BLACKSMITH_CURRENCY = 'gold';
+const ALCHEMIST_CURRENCY = 'gold';

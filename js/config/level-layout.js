@@ -58,6 +58,30 @@ const NPC_DEFS = [
     ],
     opts: { dir: 'down' },
   },
+  {
+    id: 'blacksmith',
+    x: 12 * TILE, y: 33 * TILE,
+    name: 'Grom il Fabbro',
+    spriteKey: 'merchant',
+    dialogue: [
+      "Fiamme e acciaio, benvenuto alla forgia.",
+      "Spade, armature e protezioni di buon ferro.",
+      "Guarda il banco e dimmi cosa ti serve.",
+    ],
+    opts: { dir: 'down' },
+  },
+  {
+    id: 'alchemist',
+    x: 8 * TILE, y: 33 * TILE,
+    name: 'Lys l\'Alchimista',
+    spriteKey: 'merchant',
+    dialogue: [
+      "Erbe, polveri e pozioni. Ho ciò che non trovi altrove.",
+      "Il mio laboratorio bolle, ma i risultati valgono l\'attesa.",
+      "Comprane qualcuna. La Valle è crudele con chi non ha cure.",
+    ],
+    opts: { dir: 'down' },
+  },
 ];
 
 const WORLD_ITEM_PLACEMENTS = [

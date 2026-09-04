@@ -20,7 +20,15 @@ const WorldFactory = {
     if (weaponMaster) {
       weaponMaster.shop = new Merchant('Maestro d\'Armi', WEAPON_MASTER_STOCK, WEAPON_MASTER_CURRENCY);
     }
-    return { npcs, elder: byId('elder'), merchant: byId('merchant'), weaponMaster, premiumVendor: byId('premiumVendor') };
+    const blacksmith = byId('blacksmith');
+    if (blacksmith) {
+      blacksmith.shop = new Merchant('Grom il Fabbro', BLACKSMITH_STOCK, BLACKSMITH_CURRENCY);
+    }
+    const alchemist = byId('alchemist');
+    if (alchemist) {
+      alchemist.shop = new Merchant('Lys l\'Alchimista', ALCHEMIST_STOCK, ALCHEMIST_CURRENCY);
+    }
+    return { npcs, elder: byId('elder'), merchant: byId('merchant'), weaponMaster, premiumVendor: byId('premiumVendor'), blacksmith, alchemist };
   },
 
   createWorldItems() {
