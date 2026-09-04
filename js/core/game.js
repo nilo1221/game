@@ -46,44 +46,39 @@
   const map = new TileMap(109, 236);
   const camera = new Camera(VIEW_W, VIEW_H);
 
-  // Viewport dinamico stile "EXPAND" (vedi Phaser ScaleManager): quando il
-  // gioco è full-screen (mobile/touch) il canvas interno si allarga per
-  // riempire lo schermo invece di lasciare bande nere. La scala viene
-  // arrotondata all'intero quando possibile per pixel nitidi.
-  const VIEWPORT = { baseW: canvas.width, baseH: canvas.height, maxW: 2400, maxH: 1800 };
+  // Viewport responsive DPR-aware: mantiene l'aspect 16:10 del gioco,
+  // adatta il canvas al contenitore (letterbox con bande nere se serve)
+  // e usa devicePixelRatio per pixel nitidi.
+  const BASE_W = 960;
+  const BASE_H = 600;
+  let renderScale = 1;
+
   function resizeView() {
     const wrap = document.getElementById('gameWrap');
     if (!wrap) return;
     const cs = getComputedStyle(wrap);
-    if (cs.position !== 'fixed') {
-      // Layout desktop classico: canvas alla risoluzione base, scala via CSS.
-      if (VIEW_W !== VIEWPORT.baseW || VIEW_H !== VIEWPORT.baseH) {
-        VIEW_W = VIEWPORT.baseW;
-        VIEW_H = VIEWPORT.baseH;
-        canvas.width = VIEW_W;
-        canvas.height = VIEW_H;
-        camera.viewW = VIEW_W;
-        camera.viewH = VIEW_H;
-      }
-      canvas.style.width = '';
-      canvas.style.height = '';
-      return;
-    }
-    const availW = wrap.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
-    const availH = wrap.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
-    if (availW < 100 || availH < 100) return;
-    let scale = Math.min(availW / VIEWPORT.baseW, availH / VIEWPORT.baseH);
-    if (scale >= 1) scale = Math.floor(scale); // scala intera = pixel perfetti
-    const w = clamp(Math.round(availW / scale), 320, VIEWPORT.maxW);
-    const h = clamp(Math.round(availH / scale), 240, VIEWPORT.maxH);
+    const padLeft = parseFloat(cs.paddingLeft) || 0;
+    const padRight = parseFloat(cs.paddingRight) || 0;
+    const padTop = parseFloat(cs.paddingTop) || 0;
+    const padBottom = parseFloat(cs.paddingBottom) || 0;
+
+    const availW = Math.max(320, wrap.clientWidth - padLeft - padRight);
+    const availH = Math.max(240, wrap.clientHeight - padTop - padBottom);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    const scale = Math.min(availW / BASE_W, availH / BASE_H);
+    const w = Math.max(320, Math.min(Math.floor(BASE_W * scale), 2400));
+    const h = Math.max(240, Math.min(Math.floor(BASE_H * scale), 1800));
+
     VIEW_W = w;
     VIEW_H = h;
-    if (canvas.width !== w) canvas.width = w;
-    if (canvas.height !== h) canvas.height = h;
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
     camera.viewW = w;
     camera.viewH = h;
-    canvas.style.width = Math.round(w * scale) + 'px';
-    canvas.style.height = Math.round(h * scale) + 'px';
+    renderScale = dpr;
   }
   let resizeViewTimer = null;
   function queueResizeView(delay) {
@@ -352,6 +347,8 @@
   }
 
   function draw() {
+    ctx.setTransform(renderScale, 0, 0, renderScale, 0, 0);
+
     if (state.gameState !== 'playing' && state.gameState !== 'lobby') {
       Screens.drawStart(ctx, state, VIEW_W, VIEW_H);
       return;
@@ -427,8 +424,8 @@
   canvas.tabIndex = 0;
   canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
-    const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const my = (e.clientY - rect.top) * (canvas.height / rect.height);
+    const mx = (e.clientX - rect.left) * (VIEW_W / rect.width);
+    const my = (e.clientY - rect.top) * (VIEW_H / rect.height);
 
     if (state.gameState === 'playing' && inventory.open) {
       inventory.updateHover(mx, my, VIEW_W, VIEW_H);
@@ -464,8 +461,8 @@
     canvas.focus();
 
     const rect = canvas.getBoundingClientRect();
-    const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const my = (e.clientY - rect.top) * (canvas.height / rect.height);
+    const mx = (e.clientX - rect.left) * (VIEW_W / rect.width);
+    const my = (e.clientY - rect.top) * (VIEW_H / rect.height);
 
     if (state.gameState === 'playing' && inventory.open) {
       const hit = inventory.clickAt(mx, my, VIEW_W, VIEW_H);
