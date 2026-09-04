@@ -48,7 +48,7 @@ const NPC_DEFS = [
   },
   {
     id: 'weaponMaster',
-    x: 18 * TILE, y: 41 * TILE,
+    x: 20 * TILE, y: 41 * TILE,
     name: 'Maestro d\'Armi Tormund',
     spriteKey: 'player',
     dialogue: [

@@ -85,9 +85,19 @@ function buildWorld(map) {
       map.set(x, y, TileType.PATH);
     }
   }
-  // Path to the weapon master
-  for (let y = 37; y < 42; y++) {
-    map.set(18, y, TileType.PATH);
+  // Castle walls around the square (open on the south side)
+  for (let x = 6; x <= 20; x++) {
+    if (x !== 13) map.set(x, 32, TileType.WALL);
+  }
+  for (let y = 33; y < 38; y++) {
+    if (y !== 35) {
+      map.set(6, y, TileType.WALL);
+      map.set(20, y, TileType.WALL);
+    }
+  }
+  // Path to the weapon master through the east gate
+  for (let y = 35; y < 42; y++) {
+    map.set(20, y, TileType.PATH);
   }
 
   // =========================
@@ -489,7 +499,7 @@ function buildMoltenDepths(map) {
 
   // Shop scenery for the village merchants
   map.decor.push({ x: 18, y: 34, type: 'anvil' });
-  map.decor.push({ x: 19, y: 34, type: 'brazier' });
+  map.decor.push({ x: 17, y: 34, type: 'brazier' });
   map.decor.push({ x: 7, y: 35, type: 'bookshelf' });
   map.decor.push({ x: 8, y: 34, type: 'cauldron' });
   map.decor.push({ x: 7, y: 34, type: 'herbs' });
