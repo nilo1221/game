@@ -35,50 +35,50 @@ class NPC {
   _drawTalkBubble(ctx, camX, camY) {
     ctx.save();
 
-    const text = 'Parla con me';
-    const floatY = Math.sin(Date.now() / 350) * 4;
+    const text = 'E';
+    const floatY = Math.sin(Date.now() / 350) * 3;
 
-    ctx.font = 'bold 12px sans-serif';
-    const padding = 12;
+    ctx.font = 'bold 13px sans-serif';
+    const padding = 10;
     const bubbleW = ctx.measureText(text).width + padding * 2;
-    const bubbleH = 26;
+    const bubbleH = 22;
 
     const npcX = this.x - camX + this.w / 2;
     const npcY = this.y - camY;
 
     const bx = npcX - bubbleW / 2;
-    const by = npcY - 42 + floatY;
+    const by = npcY - 30 + floatY;
 
     // shadow
     ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    roundRect(ctx, bx + 2, by + 3, bubbleW, bubbleH, 10);
+    roundRect(ctx, bx + 1, by + 2, bubbleW, bubbleH, 8);
     ctx.fill();
 
-    // white bubble
-    ctx.fillStyle = '#ffffff';
-    roundRect(ctx, bx, by, bubbleW, bubbleH, 10);
+    // dark prompt bubble
+    ctx.fillStyle = 'rgba(30,30,30,0.85)';
+    roundRect(ctx, bx, by, bubbleW, bubbleH, 8);
     ctx.fill();
 
     // border
-    ctx.strokeStyle = '#d6d0c4';
+    ctx.strokeStyle = 'rgba(232,228,216,0.6)';
     ctx.lineWidth = 1;
-    roundRect(ctx, bx, by, bubbleW, bubbleH, 10);
+    roundRect(ctx, bx, by, bubbleW, bubbleH, 8);
     ctx.stroke();
 
     // pointer
     ctx.beginPath();
-    ctx.moveTo(npcX - 7, by + bubbleH);
-    ctx.lineTo(npcX, by + bubbleH + 7);
-    ctx.lineTo(npcX + 7, by + bubbleH);
+    ctx.moveTo(npcX - 5, by + bubbleH);
+    ctx.lineTo(npcX, by + bubbleH + 5);
+    ctx.lineTo(npcX + 5, by + bubbleH);
     ctx.closePath();
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = 'rgba(30,30,30,0.85)';
     ctx.fill();
 
     // text
-    ctx.fillStyle = '#222222';
+    ctx.fillStyle = '#e8c93c';
     ctx.textAlign = 'center';
-    ctx.font = 'bold 12px sans-serif';
-    ctx.fillText(text, npcX, by + 17);
+    ctx.font = 'bold 13px sans-serif';
+    ctx.fillText(text, npcX, by + 15);
 
     ctx.restore();
   }
