@@ -590,10 +590,12 @@ img.gold-icon {
     display: flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
+    padding-top: calc(46px + env(safe-area-inset-top));
     border: none;
     border-radius: 0;
     box-shadow: none;
-    background: #0a0f0a;
+    background: #000;
   }
   #game {
     width: auto;
@@ -601,6 +603,17 @@ img.gold-icon {
     max-width: 100%;
     max-height: 100%;
     image-rendering: pixelated;
+  }
+}
+
+/* Portrait: canvas ancorato subito sotto l'HUD, fascia bassa libera per i controlli */
+@media (orientation: portrait) and (pointer: coarse), (orientation: portrait) and (max-width: 760px) {
+  #gameWrap {
+    align-items: flex-start;
+  }
+  #chat-log {
+    top: calc(52px + env(safe-area-inset-top));
+    max-height: 96px;
   }
 }
 
