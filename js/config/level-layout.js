@@ -60,7 +60,7 @@ const NPC_DEFS = [
   },
   {
     id: 'blacksmith',
-    x: 12 * TILE, y: 33 * TILE,
+    x: 20 * TILE, y: 33 * TILE,
     name: 'Grom il Fabbro',
     spriteKey: 'merchant',
     dialogue: [
@@ -72,7 +72,7 @@ const NPC_DEFS = [
   },
   {
     id: 'alchemist',
-    x: 8 * TILE, y: 33 * TILE,
+    x: 6 * TILE, y: 33 * TILE,
     name: 'Lys l\'Alchimista',
     spriteKey: 'merchant',
     dialogue: [
