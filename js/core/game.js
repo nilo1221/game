@@ -504,13 +504,23 @@
 
     if (state.gameState === 'playing' && inventory.open) {
       const hit = inventory.clickAt(mx, my, VIEW_W, VIEW_H);
-      if (hit) Combat.handleInventoryClick(state, hit);
+      if (hit) {
+        Combat.handleInventoryClick(state, hit);
+      } else {
+        // Su touch non c'è Esc: un tap fuori dal pannello chiude lo zaino.
+        const l = inventory._layout(VIEW_W, VIEW_H);
+        if (mx < l.x || mx > l.x + l.w || my < l.y || my > l.y + l.h) inventory.toggle();
+      }
       return;
     }
 
     if (state.gameState === 'playing' && shop.open) {
       const hit = shop.clickAt(mx, my, VIEW_W, VIEW_H);
-      if (hit) {
+      if (!hit) {
+        // Tap fuori dal pannello chiude il negozio (utile su touch).
+        const l = shop._layout(VIEW_W, VIEW_H);
+        if (mx < l.px || mx > l.px + l.panelW || my < l.py || my > l.py + l.panelH) shop.close();
+      } else {
         if (hit.action === 'close') {
           shop.close();
         } else if (hit.action === 'buyCurrency') {

@@ -340,7 +340,10 @@ class Inventory {
 
     ctx.fillStyle = 'rgba(232,228,216,0.4)';
     ctx.font = '11px sans-serif';
-    ctx.fillText('[Esc per chiudere] · clicca un oggetto dello zaino per usarlo/equipaggiarlo', x + 18, y + h - 14);
+    const hint = canvasW < 760
+      ? 'Tocca fuori per chiudere · tocca un oggetto per usarlo/equipaggiarlo'
+      : '[Esc per chiudere] · clicca un oggetto dello zaino per usarlo/equipaggiarlo';
+    ctx.fillText(hint, x + 18, y + h - 14);
     ctx.restore();
   }
 
