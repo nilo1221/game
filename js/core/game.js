@@ -437,6 +437,7 @@
     if (state.gameState === 'gameover' || state.gameState === 'victory') Screens.drawEnd(ctx, state, VIEW_W, VIEW_H);
   }
 
+  const touchControlsEl = document.getElementById('touch-controls');
   let domTick = 0;
   function loop() {
     update();
@@ -444,6 +445,13 @@
     domTick++;
     if (domTick % 4 === 0) hud.sync(player);
     if (domTick % 120 === 0) SaveGame.save(player, inventory, state);
+    // I controlli touch stanno sopra il canvas (z-index 600) e intercettano
+    // i tap: li nascondiamo quando una schermata/pannello canvas è aperto,
+    // altrimenti i bottoni (game over, inventario, negozio) non si cliccano.
+    if (touchControlsEl) {
+      const uiOpen = state.gameState !== 'playing' || inventory.open || (shop && shop.open);
+      touchControlsEl.style.display = uiOpen ? 'none' : '';
+    }
     requestAnimationFrame(loop);
   }
 
