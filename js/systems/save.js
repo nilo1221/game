@@ -17,6 +17,18 @@ const SaveGame = {
     if (player) {
       data.x = player.x;
       data.y = player.y;
+      // progressione personaggio: senza questi il reload riparte da livello 1
+      data.lvl = player.lvl;
+      data.xp = player.xp;
+      data.xpNext = player.xpNext;
+      data.hp = player.hp;
+      data.maxHp = player.maxHp;
+      data.atk = player.atk;
+      data.mana = player.mana;
+      data.maxMana = player.maxMana;
+      data.hunger = player.hunger;
+      data.thirst = player.thirst;
+      data.speed = player.speed;
     }
     if (inventory) {
       data.inventory = {
@@ -49,10 +61,22 @@ const SaveGame = {
     if (typeof data.background === 'string' && data.background) this.setBackground(data.background);
     if (typeof data.x === 'number') player.x = data.x;
     if (typeof data.y === 'number') player.y = data.y;
+    if (typeof data.lvl === 'number') player.lvl = data.lvl;
+    if (typeof data.xp === 'number') player.xp = data.xp;
+    if (typeof data.xpNext === 'number') player.xpNext = data.xpNext;
+    if (typeof data.hp === 'number') player.hp = data.hp;
+    if (typeof data.maxHp === 'number') player.maxHp = data.maxHp;
+    if (typeof data.atk === 'number') player.atk = data.atk;
+    if (typeof data.mana === 'number') player.mana = data.mana;
+    if (typeof data.maxMana === 'number') player.maxMana = data.maxMana;
+    if (typeof data.hunger === 'number') player.hunger = data.hunger;
+    if (typeof data.thirst === 'number') player.thirst = data.thirst;
+    if (typeof data.speed === 'number') player.speed = data.speed;
     if (inventory && data.inventory) {
       Object.assign(inventory.items, data.inventory.items || {});
       Object.assign(inventory.equipped, data.inventory.equipped || {});
       Object.assign(inventory.affixes, data.inventory.affixes || {});
+      this._recomputeEquipment(player, inventory);
     }
     if (state) {
       if (typeof data.questStage === 'number') state.questStage = data.questStage;
@@ -65,6 +89,55 @@ const SaveGame = {
         if (data.map.isLavaGateOpen) map.openLavaGate();
         if (data.map.isPitGateOpen) map.openPitGate();
       }
+    }
+  },
+
+  // Re-derives everything the equipped gear implies (weapon flags, weapon
+  // affix bonus, boot speed, fireproof, defense) so a loaded save behaves
+  // exactly as if the items had just been equipped.
+  _recomputeEquipment(player, inventory) {
+    const eq = inventory.equipped || {};
+
+    const weapon = eq.weapon || null;
+    player.hasSword = !!weapon;
+    player.hasEpicSword = weapon === 'swordEpic';
+    player.hasCursedSword = weapon === 'swordCursed';
+    player.hasLegendarySword = weapon === 'swordLegendary';
+    player.hasMoltenSword = weapon === 'swordMolten';
+    player.weaponBonus = (weapon && typeof _weaponBonusFromAffix === 'function')
+      ? _weaponBonusFromAffix(player, inventory, weapon)
+      : 0;
+
+    const boots = eq.boots || null;
+    player.fireproof = boots === 'bootsFireproof';
+    if (boots && typeof _bootSpeedWithAffix === 'function') {
+      const base = boots === 'bootsEpic' ? BOOTS_EPIC_SPEED
+        : boots === 'bootsCursed' ? BOOTS_CURSED_SPEED
+        : BOOTS_SPEED;
+      player.speed = _bootSpeedWithAffix(inventory, boots, base);
+    }
+
+    if (typeof getItemStats === 'function') {
+      let def = 0;
+      for (const slotId in eq) {
+        const kind = eq[slotId];
+        const stats = kind && getItemStats(kind, inventory.getAffixes(kind));
+        if (stats && stats.def != null) def += stats.def;
+      }
+      player.defense = def;
+    }
+  },
+
+  // True only if a real run was saved before (savedAt is written by
+  // save()/addPremium, not by setName/setBackground stubs).
+  hasSave() {
+    try {
+      const raw = localStorage.getItem(this.KEY);
+      if (!raw) return false;
+      const data = JSON.parse(raw);
+      return !!(data && (typeof data.savedAt === 'number' || typeof data.lvl === 'number' || data.inventory));
+    } catch (e) {
+      return false;
     }
   },
 

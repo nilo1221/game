@@ -583,7 +583,8 @@
   window.applyCloudData = (data) => {
     if (!data) return;
     SaveGame.applyData(player, data, inventory, state);
-    Story.applyBackground(player, SaveGame.getBackground());
+    // Niente applyBackground qui: i dati cloud salvano le statistiche già
+    // comprensive del bonus, riapplicarlo lo conterebbe due volte.
     if (data.name && dom.nameInput) dom.nameInput.value = data.name;
   };
 
@@ -592,6 +593,9 @@
   // with `__gameDebug.restartGame()`.
   window.startGame = (name, online, room = '') => {
     name = String(name).trim().slice(0, 16);
+    // Se esiste già un salvataggio, il giocatore è di ritorno: non resettare
+    // le statistiche caricate da SaveGame.load (livello, hp, inventario...).
+    const hadSave = SaveGame.hasSave();
     const savedName = SaveGame.getName();
     if (savedName && name !== savedName) {
       if (player.gold >= RENAME_COST) {
@@ -610,13 +614,16 @@
 
     const bg = (dom.backgroundInput ? dom.backgroundInput.value : '') || 'exile';
     SaveGame.setBackground(bg);
-    player.maxHp = PLAYER_BASE_STATS.maxHp;
-    player.hp = PLAYER_BASE_STATS.hp;
-    player.maxMana = PLAYER_BASE_STATS.maxMana;
-    player.mana = PLAYER_BASE_STATS.mana;
-    player.atk = PLAYER_BASE_STATS.atk;
-    player.speed = PLAYER_BASE_STATS.speed;
-    Story.applyBackground(player, bg);
+    if (!hadSave) {
+      // Nuova partita: statistiche base + bonus del background scelto.
+      player.maxHp = PLAYER_BASE_STATS.maxHp;
+      player.hp = PLAYER_BASE_STATS.hp;
+      player.maxMana = PLAYER_BASE_STATS.maxMana;
+      player.mana = PLAYER_BASE_STATS.mana;
+      player.atk = PLAYER_BASE_STATS.atk;
+      player.speed = PLAYER_BASE_STATS.speed;
+      Story.applyBackground(player, bg);
+    }
     SaveGame.save(player, inventory, state);
 
     // If already connected with a different mode/name, reset.
