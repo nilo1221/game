@@ -503,7 +503,7 @@
         if (hit.action === 'close') {
           shop.close();
         } else if (hit.action === 'buyCurrency') {
-          Combat.toast(state, 'Le gemme si guadagnano in gioco: boss, casse e ricompense affiliato');
+          Combat.toast(state, 'Gemme: boss 1-5, casse 1-5, link affiliato +5/giorno, cartellone +1/giorno');
           AudioManager.play('ui');
         } else if (hit.action === 'buy') {
           const result = shop.merchant.buy(hit.kind, player, inventory);

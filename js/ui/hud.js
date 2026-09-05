@@ -235,20 +235,35 @@ const Hud = {
     ctx.save();
     ctx.font = '13px sans-serif';
     const maxW = Math.max(80, viewW - 80);
-    const w = Math.min(ctx.measureText(state.toastMsg).width + 28, maxW);
+    // wrap del messaggio su più righe se troppo lungo
+    const words = String(state.toastMsg).split(' ');
+    const lines = [];
+    let line = '';
+    for (const word of words) {
+      const test = line ? line + ' ' + word : word;
+      if (line && ctx.measureText(test).width > maxW - 28) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    const w = Math.min(Math.max(...lines.map((l) => ctx.measureText(l).width)) + 28, maxW);
+    const h = 12 + lines.length * 16;
     const x = (viewW - w) / 2;
-    const y = viewH - 44;
+    const y = viewH - 30 - h;
     ctx.globalAlpha = clamp(state.toastTimer / 30, 0, 1);
     ctx.fillStyle = 'rgba(10,12,8,0.85)';
-    roundRect(ctx, x, y, w, 26, 20);
+    roundRect(ctx, x, y, w, h, 12);
     ctx.fill();
     ctx.strokeStyle = 'rgba(232,201,60,0.5)';
     ctx.lineWidth = 1;
-    roundRect(ctx, x, y, w, 26, 20);
+    roundRect(ctx, x, y, w, h, 12);
     ctx.stroke();
     ctx.fillStyle = '#f1efe8';
     ctx.textAlign = 'center';
-    ctx.fillText(state.toastMsg, viewW / 2, y + 17);
+    lines.forEach((l, i) => ctx.fillText(l, viewW / 2, y + 18 + i * 16));
     ctx.textAlign = 'left';
     ctx.restore();
   },
