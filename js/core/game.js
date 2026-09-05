@@ -369,7 +369,10 @@
 
   function draw() {
     // --- Start / how-to screens (full UI layer) ---
-    if (state.gameState !== 'playing' && state.gameState !== 'lobby') {
+    // Solo 'start' e 'howtoplay': 'gameover'/'victory' devono arrivare in
+    // fondo dove drawEnd disegna i bottoni Riprova/Continua, altrimenti
+    // state.restartButton resta null e i tap non fanno nulla.
+    if (state.gameState === 'start') {
       ctx.setTransform(uiRenderScale, 0, 0, uiRenderScale, 0, 0);
       Screens.drawStart(ctx, state, VIEW_W, VIEW_H, camera.viewW, camera.viewH, worldScale, uiRenderScale);
       return;
