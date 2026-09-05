@@ -24,8 +24,8 @@ RewardCampBanner.prototype.watchDailyAd = function () {
       this.lastWatched = now;
       this._save();
       const reward = AD_REWARDS_CONFIG.PLACEMENTS.CAMP_BANNER.rewards;
-      console.log(`[ADV] Quest completata! +${reward.gold} oro, +${reward.demonicShard} frammento`);
-      // In futuro: player.gold += reward.gold; inventory.add('demonicShard', reward.demonicShard);
+      console.log(`[ADV] Quest completata! +${reward.gold} oro, +${reward.premium} gemma`);
+      if (typeof this.onReward === 'function') this.onReward(reward);
     },
     () => {
       console.warn('[ADV] Video non completato. Nessuna ricompensa.');

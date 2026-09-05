@@ -191,7 +191,7 @@ class Shop {
     ctx.fillText(`${cName}: ${cAmount}`, px + 20, py + 32);
 
     if (this.merchant && this.merchant.currency === 'premium') {
-      this._drawBtn(ctx, this.buyCurrencyBtn, 'Compra Gemme', this.hovered === 'buyCurrency');
+      this._drawBtn(ctx, this.buyCurrencyBtn, 'Info Gemme', this.hovered === 'buyCurrency');
     }
 
     // direct ad banner (premium shop only)

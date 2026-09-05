@@ -110,6 +110,10 @@ const Combat = {
   _applyReward(state, reward) {
     const { player, particles } = state;
     player.gold += reward.gold || 0;
+    if (reward.premium) {
+      player.premium += reward.premium;
+      this.toast(state, `+${reward.premium} Gemme`);
+    }
     AudioManager.play('coin');
 
     const leveled = player.gainXP(reward.xp || 0, particles);

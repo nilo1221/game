@@ -147,6 +147,8 @@ const LootRoller = {
 
     if (roll.kind === 'coin') {
       player.gold += roll.value || 10;
+    } else if (roll.kind === 'gem') {
+      player.premium += roll.value || 1;
     } else {
       inventory.add(roll.kind, 1, roll.affixes);
     }

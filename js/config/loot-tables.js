@@ -42,6 +42,7 @@ const LOOT_TABLES = {
       { kind: 'potionRed', rarity: 'common', weight: 4 },
       { kind: 'potionBlue', rarity: 'common', weight: 2 },
       { kind: 'coin', rarity: 'common', weight: 5, value: 10 },
+      { kind: 'gem', rarity: 'uncommon', weight: 1, value: 1 },
       { kind: 'sword', rarity: 'uncommon', weight: 1 },
       { kind: 'armor', rarity: 'uncommon', weight: 1 },
       { kind: 'helmet', rarity: 'uncommon', weight: 1 },
@@ -54,6 +55,7 @@ const LOOT_TABLES = {
       { kind: 'potionRed', rarity: 'uncommon', weight: 3 },
       { kind: 'potionBlue', rarity: 'uncommon', weight: 2 },
       { kind: 'coin', rarity: 'uncommon', weight: 3, value: 25 },
+      { kind: 'gem', rarity: 'rare', weight: 1, value: 1 },
       { kind: 'sword', rarity: 'uncommon', weight: 2 },
       { kind: 'armor', rarity: 'uncommon', weight: 2 },
       { kind: 'helmet', rarity: 'uncommon', weight: 2 },
@@ -67,6 +69,7 @@ const LOOT_TABLES = {
     entries: [
       { kind: 'potionBlue', rarity: 'rare', weight: 3 },
       { kind: 'coin', rarity: 'rare', weight: 3, value: 60 },
+      { kind: 'gem', rarity: 'epic', weight: 1, value: 2 },
       { kind: 'swordEpic', rarity: 'rare', weight: 3 },
       { kind: 'armorEpic', rarity: 'rare', weight: 3 },
       { kind: 'helmetEpic', rarity: 'rare', weight: 2 },
@@ -77,6 +80,7 @@ const LOOT_TABLES = {
   epicChest: {
     entries: [
       { kind: 'coin', rarity: 'epic', weight: 3, value: 150 },
+      { kind: 'gem', rarity: 'legendary', weight: 1, value: 3 },
       { kind: 'swordEpic', rarity: 'epic', weight: 4 },
       { kind: 'armorEpic', rarity: 'epic', weight: 4 },
       { kind: 'helmetEpic', rarity: 'epic', weight: 3 },
@@ -88,6 +92,7 @@ const LOOT_TABLES = {
   legendaryChest: {
     entries: [
       { kind: 'coin', rarity: 'legendary', weight: 2, value: 400 },
+      { kind: 'gem', rarity: 'legendary', weight: 1, value: 5 },
       { kind: 'swordMolten', rarity: 'legendary', weight: 3 },
       { kind: 'armorObsidian', rarity: 'legendary', weight: 2 },
       { kind: 'bootsFireproof', rarity: 'legendary', weight: 2 },
@@ -101,6 +106,7 @@ const LOOT_TABLES = {
       { kind: 'shieldCursed', rarity: 'cursed', weight: 2 },
       { kind: 'bootsCursed', rarity: 'cursed', weight: 2 },
       { kind: 'coin', rarity: 'cursed', weight: 3, value: 30 },
+      { kind: 'gem', rarity: 'cursed', weight: 1, value: 2 },
     ],
   },
 };

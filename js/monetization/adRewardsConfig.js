@@ -9,7 +9,7 @@ const AD_REWARDS_CONFIG = {
     // 1. Cartellone Camp — quest giornaliera (1 video/giorno)
     CAMP_BANNER: {
       cooldown: 86400, // 24 ore
-      rewards: { gold: 500, demonicShard: 1 }
+      rewards: { gold: 500, premium: 1 }
     },
 
     // 2. Resurrezione game over

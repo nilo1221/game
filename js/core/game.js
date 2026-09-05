@@ -220,6 +220,22 @@
     SaveGame.save(player, inventory, state);
   }
 
+  // +5 gemme per click su link affiliato/ADV, una volta al giorno.
+  function claimAffiliateGemReward() {
+    const key = 'sv_affiliate_gem';
+    const now = Date.now();
+    const last = parseInt(localStorage.getItem(key) || '0', 10);
+    if (now - last < 86400000) {
+      Combat.toast(state, 'Ricompensa affiliato già riscattata oggi');
+      return;
+    }
+    localStorage.setItem(key, String(now));
+    player.premium += 5;
+    SaveGame.save(player, inventory, state);
+    Combat.toast(state, '+5 Gemme per aver visitato il sito affiliato');
+    AudioManager.play('buy');
+  }
+
   function checkRegionDiscovery() {
     if (!multiplayer.connected) return;
     const tx = Math.floor(player.centerX / TILE);
@@ -487,12 +503,8 @@
         if (hit.action === 'close') {
           shop.close();
         } else if (hit.action === 'buyCurrency') {
-          Payments.purchase('small', () => {
-            const gems = Payments.PACKS.small.gems;
-            player.premium += gems;
-            Combat.toast(state, `+${gems} Gemme acquistate`);
-            AudioManager.play('buy');
-          });
+          Combat.toast(state, 'Le gemme si guadagnano in gioco: boss, casse e ricompense affiliato');
+          AudioManager.play('ui');
         } else if (hit.action === 'buy') {
           const result = shop.merchant.buy(hit.kind, player, inventory);
           if (result.ok) {
@@ -512,12 +524,14 @@
         } else if (hit.action === 'ad') {
           if (hit.ad) {
             AdManager.openAd(hit.ad, 'premiumShop');
+            claimAffiliateGemReward();
             AudioManager.play('ui');
           }
         } else if (hit.action === 'affiliate') {
           const aff = AFFILIATES.find((a) => a.id === hit.id);
           if (aff) {
             window.open(aff.url, '_blank', 'noopener,noreferrer');
+            claimAffiliateGemReward();
             AudioManager.play('ui');
           }
         }

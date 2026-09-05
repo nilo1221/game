@@ -10,13 +10,9 @@ const Payments = {
   },
 
   purchase(packId, onSuccess) {
-    const pack = this.PACKS[packId] || this.PACKS.small;
-
-    // TODO: send packId to a backend, open a real Stripe/PayPal checkout,
-    // and call onSuccess only after the payment is verified server-side.
-    // For now this is a client-side mock to keep the UI testable.
-    // Do not pass the amount through the callback — the caller already knows
-    // what it asked to buy; any real verification must come from the server.
-    if (typeof onSuccess === 'function') onSuccess();
+    // Pagamenti reali disabilitati: le gemme si guadagnano in gioco
+    // (boss, casse, ricompense affiliato/ADV). Non chiamare onSuccess,
+    // altrimenti si regalerebbero gemme gratis.
+    console.warn('[Payments] Acquisti disabilitati: le gemme si guadagnano in gioco.');
   },
 };

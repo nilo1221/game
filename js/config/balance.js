@@ -138,13 +138,13 @@ const DEFAULT_AGGRO_RANGE = 150;
 // XP/gold granted for defeating each enemy type. `gold` may be a fixed
 // number or a `[min, max]` range rolled with randRange(...)|0.
 const COMBAT_REWARDS = {
-  pitDevil:       { xp: 3500, gold: 3000 },
-  skeletonKing:   { xp: 2200, gold: 1800 },
-  trollChieftain: { xp: 1400, gold: 1200 },
-  devilBoss:      { xp: 900, gold: 700 },
-  goblinBoss:     { xp: 500, gold: 400 },
-  orcBoss:        { xp: 550, gold: 450 },
-  witchBoss:      { xp: 600, gold: 500 },
+  pitDevil:       { xp: 3500, gold: 3000, premium: 5 },
+  skeletonKing:   { xp: 2200, gold: 1800, premium: 3 },
+  trollChieftain: { xp: 1400, gold: 1200, premium: 2 },
+  devilBoss:      { xp: 900, gold: 700, premium: 2 },
+  goblinBoss:     { xp: 500, gold: 400, premium: 1 },
+  orcBoss:        { xp: 550, gold: 450, premium: 1 },
+  witchBoss:      { xp: 600, gold: 500, premium: 1 },
 
   troll:          { xp: 120, gold: [25, 40] },
   orcRaider:      { xp: 90, gold: [18, 30] },
@@ -159,10 +159,11 @@ const COMBAT_REWARDS = {
 const DEFAULT_COMBAT_REWARD = {
   xp: 25,
   gold: [4, 8],
+  premium: 0,
 };
 
 function getCombatReward(enemyType) {
   const r = COMBAT_REWARDS[enemyType] || DEFAULT_COMBAT_REWARD;
   const gold = Array.isArray(r.gold) ? (randRange(r.gold[0], r.gold[1]) | 0) : r.gold;
-  return { xp: r.xp, gold };
+  return { xp: r.xp, gold, premium: r.premium || 0 };
 }
